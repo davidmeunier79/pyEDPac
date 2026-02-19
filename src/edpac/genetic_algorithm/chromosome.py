@@ -1,0 +1,110 @@
+"""
+Chromosome.py - Représentation du chromosome (génome)
+
+Un chromosome code pour les connexions du réseau (projections, poids)
+"""
+
+import numpy as np
+from typing import List, Tuple
+from copy import deepcopy
+from ..config.ga_config import ChromosomeConfig
+
+class Chromosome:
+    """
+    Chromosome = Génome = Suite de gènes
+    
+    Représente la topologie et les paramètres du réseau neuronal
+    """
+    
+    def __init__(self, config: ChromosomeConfig = None, genes: np.ndarray = None):
+        """
+        Créer un chromosome
+        
+        Args:
+            config: Configuration du chromosome
+            genes: Tableau de gènes (si None, généré aléatoirement)
+        """
+        self.config = config or ChromosomeConfig()
+        
+        if genes is not None:
+            self.genes = np.array(genes, dtype=np.float32)
+        else:
+            # Générer aléatoirement
+            self.genes = self._initialize_random_genes()
+        
+        # Valider la taille
+        assert len(self.genes) == self.config.NB_GENES_EACH_CHROMOSOME, \
+            f"Chromosome size mismatch: {len(self.genes)} != {self.config.NB_GENES_EACH_CHROMOSOME}"
+    
+    def _initialize_random_genes(self) -> np.ndarray:
+        """Générer des gènes aléatoires"""
+        return np.random.uniform(
+            self.config.MIN_GENE_VALUE,
+            self.config.MAX_GENE_VALUE,
+            size=self.config.NB_GENES_EACH_CHROMOSOME
+        ).astype(np.float32)
+    
+    def get_genes(self) -> np.ndarray:
+        """Retourner les gènes"""
+        return self.genes.copy()
+    
+    def set_genes(self, genes: np.ndarray):
+        """Définir les gènes"""
+        genes = np.array(genes, dtype=np.float32)
+        genes = np.clip(genes, self.config.MIN_GENE_VALUE, self.config.MAX_GENE_VALUE)
+        assert len(genes) == self.config.NB_GENES_EACH_CHROMOSOME
+        self.genes = genes
+    
+    def get_projection(self, projection_idx: int) -> Tuple[int, int, float]:
+        """
+        Extraire une projection (gène codant une connexion)
+        
+        Une projection = 3 gènes:
+        - Pre-assembly index
+        - Post-assembly index
+        - Weight
+        
+        Args:
+            projection_idx: Index de la projection (0 à NB_PROJECTIONS-1)
+            
+        Returns:
+            (pre_assembly, post_assembly, weight)
+        """
+        start_idx = projection_idx * self.config.NB_GENES_EACH_PROJECTION
+        
+        # Décoder les gènes
+        genes_slice = self.genes[start_idx:start_idx + 3]
+        
+        # Première gène: pre-assembly (entier)
+        pre_idx = int(genes_slice[0] * 25) % 25  # Exemple: 25 assemblies max
+        
+        # Deuxième gène: post-assembly (entier)
+        post_idx = int(genes_slice[1] * 25) % 25
+        
+        # Troisième gène: poids (continu)
+        weight = genes_slice[2]
+        
+        return pre_idx, post_idx, weight
+    
+    def set_projection(self, projection_idx: int, pre_idx: int, post_idx: int, weight: float):
+        """
+        Modifier une projection
+        
+        Args:
+            projection_idx: Index de la projection
+            pre_idx: Index pré-assemblée
+            post_idx: Index post-assemblée
+            weight: Poids de la connexion
+        """
+        start_idx = projection_idx * self.config.NB_GENES_EACH_PROJECTION
+        
+        self.genes[start_idx] = pre_idx / 25.0
+        self.genes[start_idx + 1] = post_idx / 25.0
+        self.genes[start_idx + 2] = np.clip(weight, 0.0, 1.0)
+    
+    def clone(self) -> 'Chromosome':
+        """Cloner le chromosome"""
+        return Chromosome(self.config, self.genes.copy())
+    
+    def __repr__(self):
+        return f"Chromosome(genes_len={len(self.genes)}, avg={self.genes.mean():.3f})"

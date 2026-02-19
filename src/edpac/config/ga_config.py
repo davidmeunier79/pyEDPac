@@ -1,0 +1,114 @@
+"""
+GAConfig.py - Configuration pour Algorithme Génétique
+
+Remplace DefineGA.h
+"""
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import List
+
+class SelectionMode(Enum):
+    """Mode de sélection"""
+    TOURNAMENT = "tournament"
+    ROULETTE_WHEEL = "roulette_wheel"
+    RANK = "rank"
+
+class MutationMode(Enum):
+    """Type de mutation"""
+    GAUSSIAN = "gaussian"
+    UNIFORM = "uniform"
+    BIASED = "biased"
+
+@dataclass
+class ChromosomeConfig:
+    """Configuration du chromosome"""
+    # Encodage par projections
+    PROJECTION_ENCODING: bool = True
+    DISTRIBUTED_PROJECTION: bool = True
+    
+    # Nombre de gènes
+    NB_PROJECTIONS_EACH_CHROMOSOME: int = 120  # Nombre de projections
+    NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
+    NB_GENES_EACH_CHROMOSOME: int = 360        # Total = 120 * 3
+    
+    # Validation
+    MIN_GENE_VALUE: float = 0.0
+    MAX_GENE_VALUE: float = 1.0
+
+@dataclass
+class PopulationConfig:
+    """Configuration de la population"""
+    # Taille population
+    POPULATION_SIZE: int = 100
+    ELITE_SIZE: int = 10         # Meilleurs individus conservés
+    
+    # Génération
+    NB_GENERATIONS: int = 50
+    
+    # Remplacement
+    #REPLACEMENT_RATE: float = 0.8  # 80% de la population remplacée
+
+@dataclass
+class SelectionConfig:
+    """Configuration de sélection"""
+    # Mode
+    SELECTION_MODE: SelectionMode = SelectionMode.TOURNAMENT
+    
+    # Tournoi
+    TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
+    TOURNAMENT_SELECTION_PRESSURE: float = 2.0
+    
+    # Roulette
+    ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus
+
+@dataclass
+class CrossoverConfig:
+    """Configuration de crossover"""
+    # Taux
+    CROSSOVER_RATE: float = 0.8    # 80% des offspring viennent de crossover
+    CROSSOVER_POINTS: int = 1      # One-point crossover
+    
+    # Uniform crossover
+    UNIFORM_CROSSOVER: bool = False
+    UNIFORM_CROSSOVER_RATIO: float = 0.5
+
+@dataclass
+class MutationConfig:
+    """Configuration de mutation"""
+    # Taux
+    MUTATION_RATE: float = 0.01    # 1% de mutation par gène
+    MUTATION_MODE: MutationMode = MutationMode.GAUSSIAN
+    
+    # Gaussienne
+    GAUSSIAN_SIGMA: float = 0.1    # Écart-type
+    
+    # Uniform
+    UNIFORM_MAGNITUDE: float = 0.2  # Ampleur du changement
+    
+    # Adaptative mutation
+    ADAPTIVE_MUTATION: bool = False
+    MUTATION_RATE_MIN: float = 0.001
+    MUTATION_RATE_MAX: float = 0.1
+
+@dataclass
+class GAConfig:
+    """Configuration globale GA"""
+    chromosome_config: ChromosomeConfig = field(default_factory=ChromosomeConfig)
+    population_config: PopulationConfig = field(default_factory=PopulationConfig)
+    selection_config: SelectionConfig = field(default_factory=SelectionConfig)
+    crossover_config: CrossoverConfig = field(default_factory=CrossoverConfig)
+    mutation_config: MutationConfig = field(default_factory=MutationConfig)
+    
+    # Général
+    SEED: int = 42
+    VERBOSE: bool = False
+    SAVE_STATS: bool = True
+    
+    def validate(self):
+        """Valider la configuration"""
+        assert self.population_config.POPULATION_SIZE > 0
+        assert self.population_config.ELITE_SIZE < self.population_config.POPULATION_SIZE
+        assert 0 < self.selection_config.TOURNAMENT_SIZE < self.population_config.POPULATION_SIZE
+        assert 0 <= self.crossover_config.CROSSOVER_RATE <= 1.0
+        assert 0 <= self.mutation_config.MUTATION_RATE <= 1.0
