@@ -19,6 +19,13 @@ class AssemblyNature(Enum):
     HIDDEN = "hidden"
 
 @dataclass
+class EventManagerConfig:
+    """Configuration du gestionnaire d'événements"""
+    DELAY_STEP: int = 5
+    MAX_DELAY: float = 7.07  # 1.414 * SQRT_NB_ASSEMBLIES
+    PSP_EVENT_PACKAGE_SIZE: int = 10000
+
+@dataclass
 class NetworkConfig:
     """Configuration du réseau"""
     # Projection mode

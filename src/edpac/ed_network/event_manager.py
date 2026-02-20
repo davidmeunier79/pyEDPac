@@ -27,7 +27,13 @@ class PSPEvent:
         self.time = time
         self.synapse = synapse
         self.weight = weight
-        self.post_neuron = synapse.post_node  # Neurone cible
+
+        # ✅ FIX: Gérer le cas synapse=None pour les inputs injectés
+        if synapse is not None:
+            self.post_neuron = synapse.post_node
+        else:
+            self.post_neuron = None  # Sera défini après création
+
     
     def __lt__(self, other):
         """Comparaison pour heap - ordonne par temps"""
@@ -40,8 +46,10 @@ class PSPEvent:
         return self.time == other.time and self.synapse == other.synapse
     
     def __repr__(self):
-        return f"PSPEvent(t={self.time}, S{self.synapse.index}, w={self.weight:.4f})"
-
+        if self.synapse:
+            return f"PSPEvent(t={self.time}, S{self.synapse.index}, w={self.weight:.4f})"
+        else:
+            return f"PSPEvent(t={self.time}, external_input, w={self.weight:.4f})"
 
 class SpikeEvent:
     """Événement spike (action potential)"""
@@ -214,17 +222,18 @@ class EventManager:
         weight = event.weight
         
         # Appliquer l'impact du PSP au neurone post-synaptique
-        if hasattr(post_neuron, 'compute_psp_impact'):
+        if post_neuron is not None and hasattr(post_neuron, 'compute_psp_impact'):
             post_neuron.compute_psp_impact(time, weight)
-        
+
         # Si le neurone génère un spike, le programmer
-        if hasattr(post_neuron, 'last_time_of_firing') and post_neuron.last_time_of_firing == time:
+        if post_neuron is not None and hasattr(post_neuron, 'last_time_of_firing')\
+                and post_neuron.last_time_of_firing == time:
             self.schedule_spike(time, post_neuron)
-        
+
         # Mise à jour STDP pour synapses post-synaptiques
-        if hasattr(synapse, 'update_last_time_of_post_spike'):
+        if synapse is not None and hasattr(synapse, 'update_last_time_of_post_spike'):
             synapse.update_last_time_of_post_spike(time)
-    
+
     def run_until(self, target_time: int) -> int:
         """
         Exécuter la simulation jusqu'à un temps donné

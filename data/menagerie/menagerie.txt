@@ -1,0 +1,69 @@
+taille : 21
+nbrePac : 1
+donkey		ane		1	1
+bison		bison		2	0
+duck		canard		3	1
+deer		cerf		4	1
+cat		chat		5	0
+cat_n2		chat2		5	0
+horse		cheval		6	1
+horse_n2	cheval2		6	1
+horse_n3	cheval3		6	1
+goat		chevre		7	1
+owl		chouette	9	1
+dog		chien		8	-1
+crocodile	croco		11	-1
+squirrel	ecureuil	12	-1
+elephant	elephant	13	0
+elephant_n2	elephant2	13	0
+elephant_n3	elephant3	13	0
+elephant_n4	elephant4	13	0
+wall		mur		16	0
+pacman1		pacman1		14	1
+pacman2		pacman2		15	-1
+
+faucon		faucon
+flamand		flamand
+fleur		fleur
+gazelle		gazelle
+gazelle2	gazelle2
+grenouille	grenouille
+guepard		guepard
+hippo		hippo
+kangourou	kangourou
+kangourou2	kangourou2
+kangourou3	kangourou3
+lapin		lapin
+lapin2		lapin2
+lapin3		lapin3
+lezard		lezard
+oie		oie
+oiseau		oiseau
+oiseau2		oiseau2
+oiseau3		oiseau3
+oiseau4		oiseau4
+otarie		otarie
+ours		ours
+papillon	papillon
+papillon2	papillon2
+pelican		pelican
+pingouin	pingouin
+poisson		poisson
+requin		requin
+rhino2		rhino2
+serpent1	serpent1
+serpent2	serpent2
+serpent3	serpent3
+serpent4	serpent4
+serpent5	serpent5
+serpent6	serpent6
+serpent7	serpent7
+singe		singe
+souris		souris
+taureau		taureau
+test		test
+tigre		tigre
+tmp.txt		tmp.txt
+tortue		tortue
+vache		vache
+zebre		zebre

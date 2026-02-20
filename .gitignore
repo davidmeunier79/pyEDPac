@@ -1,2 +1,3 @@
 *.pyc
 examples/ga_results_demo/*
+data/*
