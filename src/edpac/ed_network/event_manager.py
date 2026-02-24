@@ -9,6 +9,7 @@ from typing import List, Dict, Set, Optional
 import heapq
 import numpy as np
 
+
 from ..config.network_config import EventManagerConfig
 from ..physiology.dynamic_synapse import DynamicSynapse
 
@@ -47,7 +48,7 @@ class PSPEvent:
     
     def __repr__(self):
         if self.synapse:
-            return f"PSPEvent(t={self.time}, S{self.synapse.index}, w={self.weight:.4f})"
+            return f"PSPEvent(t={self.time}, S-{self.synapse.id}, w={self.weight:.4f})"
         else:
             return f"PSPEvent(t={self.time}, external_input, w={self.weight:.4f})"
 
@@ -72,7 +73,7 @@ class SpikeEvent:
         return id(self) < id(other)
     
     def __repr__(self):
-        return f"SpikeEvent(t={self.time}, N{self.neuron.index})"
+        return f"SpikeEvent(t={self.time}, N-{self.neuron.id})"
 
 
 class EventManager:
@@ -106,7 +107,15 @@ class EventManager:
         self.events_per_neuron: Dict[int, List] = defaultdict(list)
         
         self.is_empty = True
-    
+
+    def get_events(self):
+
+        return self.event_queue
+
+    def get_nb_events(self):
+
+        return len(self.event_queue)
+
     def reset(self, start_time: int = 0):
         """Réinitialiser le gestionnaire"""
         self.event_queue.clear()
@@ -148,6 +157,7 @@ class EventManager:
         """
         # Calcul du temps d'arrivée = spike_time + délai
         psp_time = spike_time + synapse.get_delay()
+        #print("spike_time: ", spike_time, " -> psp_time: ", psp_time)
         
         if psp_time < self.current_time:
             raise ValueError(f"PSP event in past (t={psp_time} < current={self.current_time})")
@@ -169,6 +179,7 @@ class EventManager:
         Returns:
             Liste des événements traités, ou None si queue vide
         """
+
         if not self.event_queue:
             self.is_empty = True
             return None
@@ -177,13 +188,18 @@ class EventManager:
         next_event = self.event_queue[0]
         self.current_time = next_event.time
         
+        #print("time: ",self.current_time)
+
         # Traiter tous les événements à ce temps
         events_at_current_time = []
         
         while self.event_queue and self.event_queue[0].time == self.current_time:
+            #print("event queue:", len(self.event_queue))
+
             event = heapq.heappop(self.event_queue)
             events_at_current_time.append(event)
-            
+            #print(event)
+
             if isinstance(event, SpikeEvent):
                 self._process_spike_event(event)
             elif isinstance(event, PSPEvent):
@@ -192,7 +208,8 @@ class EventManager:
         # Vérifier si queue vide
         if not self.event_queue:
             self.is_empty = True
-        
+        #print( events_at_current_time)
+
         return events_at_current_time
     
     def _process_spike_event(self, event: SpikeEvent):
@@ -202,17 +219,14 @@ class EventManager:
         
         # Le neurone a émis un spike
         # Mettre à jour les synapses sortantes
-        if hasattr(neuron, 'last_time_of_firing'):
-            neuron.last_time_of_firing = time
+        neuron.last_time_of_firing = time
         
         # Pour chaque synapse sortante, programmer le PSP arrivant
-        if hasattr(neuron, 'synapses_out'):
-            for synapse in neuron.synapses_out:
-                self.schedule_psp(synapse, time)
+        for synapse in neuron.outgoing_links:
+            self.schedule_psp(synapse, time)
                 
-                # Mise à jour STDP pour synapses pré-synaptiques
-                if hasattr(synapse, 'update_last_time_of_pre_spike'):
-                    synapse.update_last_time_of_pre_spike(time)
+            # Mise à jour STDP pour synapses pré-synaptiques
+            synapse.update_last_time_of_pre_spike(time)
     
     def _process_psp_event(self, event: PSPEvent):
         """Traiter un événement PSP"""
@@ -224,15 +238,15 @@ class EventManager:
         # Appliquer l'impact du PSP au neurone post-synaptique
         if post_neuron is not None and hasattr(post_neuron, 'compute_psp_impact'):
             post_neuron.compute_psp_impact(time, weight)
-
-        # Si le neurone génère un spike, le programmer
-        if post_neuron is not None and hasattr(post_neuron, 'last_time_of_firing')\
-                and post_neuron.last_time_of_firing == time:
-            self.schedule_spike(time, post_neuron)
-
-        # Mise à jour STDP pour synapses post-synaptiques
-        if synapse is not None and hasattr(synapse, 'update_last_time_of_post_spike'):
-            synapse.update_last_time_of_post_spike(time)
+        #
+        # # Si le neurone génère un spike, le programmer
+        # if post_neuron is not None and hasattr(post_neuron, 'last_time_of_firing')\
+        #         and post_neuron.last_time_of_firing == time:
+        #     self.schedule_spike(time, post_neuron)
+        #
+        # # Mise à jour STDP pour synapses post-synaptiques
+        # if synapse is not None and hasattr(synapse, 'update_last_time_of_post_spike'):
+        #     synapse.update_last_time_of_post_spike(time)
 
     def run_until(self, target_time: int) -> int:
         """
@@ -246,7 +260,12 @@ class EventManager:
         """
         event_count = 0
         
+        print("init time: ", self.current_time)
+
         while not self.is_empty and self.current_time < target_time:
+
+            print("time: ", self.current_time)
+
             events = self.run_one_step()
             if events:
                 event_count += len(events)

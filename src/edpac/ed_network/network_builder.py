@@ -5,6 +5,8 @@ NetworkBuilder.py - Constructeur pour créer des réseaux facilement
 import numpy as np
 from ..ed_network.network import Network
 from ..ed_network.assembly import Assembly
+
+from ..config.constants import *
 from ..config.network_config import NetworkConfig, AssemblyNature, ProjectionNature
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 
@@ -94,23 +96,80 @@ def create_simple_pacman_network() -> Network:
     
     builder = NetworkBuilder()
     
-    # Inputs: 4 directions + vision
-    builder.add_input_assembly("vision", 20)
-    builder.add_input_assembly("state", 4)
-    
+    # Inputs: VISIO
+    for i in range(NB_INPUT_ASSEMBLIES):
+        print(f"Building visio {i}")
+
+        builder.add_input_assembly(f"vision_{i}", VISIO_SQRT_NB_NEURONS*VISIO_SQRT_NB_NEURONS)
+
     # Hidden layers
-    builder.add_hidden_assembly("hidden1", 50)
-    builder.add_hidden_assembly("hidden2", 50)
-    
-    # Outputs: 4 directions (haut, bas, gauche, droite)
-    builder.add_output_assembly("actions", 4)
-    
+    for i in range(NB_ASSEMBLIES):
+        print(f"Building hidden {i}")
+        builder.add_hidden_assembly(f"hidden_{i}", NB_NEURONS_EACH_ASSEMBLY)
+
+#     #builder.add_input_assembly("state", 4)
+#
+#     #builder.add_hidden_assembly("hidden2", 50)
+#
+#     # Outputs: 4 directions (haut, bas, gauche, droite)
+
+    for i in range(NB_OUTPUT_ASSEMBLIES):
+        print(f"Building motor {i}")
+        builder.add_output_assembly(f"motor_{i}", MOTOR_SQRT_NB_NEURONS*MOTOR_SQRT_NB_NEURONS)
+
     # Connexions
-    (builder
-     .connect("vision", "hidden1", connection_ratio=1.0, weight=0.3)
-     .connect("state", "hidden1", connection_ratio=1.0, weight=0.5)
-     .connect("hidden1", "hidden2", connection_ratio=0.8, weight=0.4)
-     .connect("hidden2", "actions", connection_ratio=1.0, weight=0.6)
-     .connect("hidden1", "actions", connection_ratio=0.5, weight=0.2))
-    
+    builder.connect("vision_0", "hidden_1", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.EXCITATORY)
+    builder.connect("hidden_1", "motor_0", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.EXCITATORY)
+
+
+    builder.connect("hidden_1", "hidden_1", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.INHIBITORY)
+
+#      .connect("vision", "hidden1", connection_ratio=1.0, weight=0.3)
+#      .connect("state", "hidden1", connection_ratio=1.0, weight=0.5)
+#      .connect("hidden1", "hidden2", connection_ratio=0.8, weight=0.4)
+#      .connect("hidden2", "actions", connection_ratio=1.0, weight=0.6)
+#      .connect("hidden1", "actions", connection_ratio=0.5, weight=0.2))
+#
+    return builder.build()
+
+
+def create_simple_network() -> Network:
+    """Créer un réseau simple"""
+
+    builder = NetworkBuilder()
+
+    # Inputs: VISIO
+    for i in range(1):
+        print(f"Building visio {i}")
+
+        builder.add_input_assembly(f"vision_{i}", VISIO_SQRT_NB_NEURONS*VISIO_SQRT_NB_NEURONS)
+
+    # Hidden layers
+    for i in range(1):
+        print(f"Building hidden {i}")
+        builder.add_hidden_assembly(f"hidden_{i}", NB_NEURONS_EACH_ASSEMBLY)
+
+#     #builder.add_input_assembly("state", 4)
+#
+#     #builder.add_hidden_assembly("hidden2", 50)
+#
+#     # Outputs: 4 directions (haut, bas, gauche, droite)
+
+    for i in range(1):
+        print(f"Building motor {i}")
+        builder.add_output_assembly(f"motor_{i}", MOTOR_SQRT_NB_NEURONS*MOTOR_SQRT_NB_NEURONS)
+
+    # Connexions
+    builder.connect("vision_0", "hidden_0", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.EXCITATORY)
+    builder.connect("hidden_0", "motor_0", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.EXCITATORY)
+
+
+    builder.connect("hidden_0", "hidden_0", connection_ratio=0.01, weight=0.3, nature = ProjectionNature.INHIBITORY)
+
+#      .connect("vision", "hidden1", connection_ratio=1.0, weight=0.3)
+#      .connect("state", "hidden1", connection_ratio=1.0, weight=0.5)
+#      .connect("hidden1", "hidden2", connection_ratio=0.8, weight=0.4)
+#      .connect("hidden2", "actions", connection_ratio=1.0, weight=0.6)
+#      .connect("hidden1", "actions", connection_ratio=0.5, weight=0.2))
+#
     return builder.build()

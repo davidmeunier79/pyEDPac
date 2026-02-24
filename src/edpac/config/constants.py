@@ -9,10 +9,15 @@ Toutes les constantes globales du projet
 # Tous les potentiels sont en millivolts
 
 # Pacman parameters (from DefineZoo.h concept)
-PACMAN_NB_OUTPUTS = 4  # 4 directions
+NB_MOTOR_PATTERNS = 4
+
+NB_VISIO_INPUTS = 5
+#NB_AUDIO_INPUTS = 2
 
 # Input/Output assemblies
-NB_INPUT_ASSEMBLIES = PACMAN_NB_OUTPUTS
+NB_INPUT_ASSEMBLIES = NB_VISIO_INPUTS # + NB_AUDIO_INPUTS
+
+NB_OUTPUT_ASSEMBLIES = NB_MOTOR_PATTERNS  # Number of motor patterns
 
 # Network topology
 SQRT_NB_ASSEMBLIES = 5
@@ -24,7 +29,10 @@ NB_NEURONS_EACH_ASSEMBLY = SQRT_NB_NEURONS * SQRT_NB_NEURONS
 NB_HIDDEN_NEURONS = NB_NEURONS_EACH_ASSEMBLY * NB_ASSEMBLIES
 
 # Other parameters
-NB_OUTPUT_ASSEMBLIES = 4  # Number of motor patterns
-NB_VISIO_INPUTS = 4
-NB_AUDIO_INPUTS = 1
-NB_MOTOR_PATTERNS = 4
+MOTOR_SQRT_NB_NEURONS=10
+VISIO_SQRT_NB_NEURONS=10
+
+# for visio
+GAP_INPUT_ASSEMBLY = 20 # gap in visu between assemblies
+GAP_HIDDEN_ASSEMBLY = 5
+GAP_OUTPUT_ASSEMBLY = 5

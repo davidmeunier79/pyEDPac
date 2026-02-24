@@ -9,7 +9,7 @@ class Node:
     
     def __init__(self):
         """Initialiser un nœud"""
-        self.index = Node._node_count
+        self.id = Node._node_count
         Node._node_count += 1
         self.outgoing_links = []  # Liens sortants (post-synaptiques)
         self.incoming_links = []  # Liens entrants (pré-synaptiques)
@@ -28,4 +28,4 @@ class Node:
         Node._node_count = 0
     
     def __repr__(self):
-        return f"Node({self.index})"
+        return f"Node({self.id})"

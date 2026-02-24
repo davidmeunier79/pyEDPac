@@ -23,7 +23,7 @@ class SynapseConfig:
     TOPOLOGICAL_DELAY: bool = True   # Délai basé topologie
     
     # STDP (Spike-Timing-Dependent Plasticity)
-    ONLINE_LEARNING: bool = True
+    ONLINE_LEARNING: bool = False
     EXCIT_ALPHA: float = 0.01    # Coefficient apprentissage excitateur
     INHIB_ALPHA: float = 0.01    # Coefficient apprentissage inhibiteur
     EXCIT_MULTIPLICATIVE: bool = True

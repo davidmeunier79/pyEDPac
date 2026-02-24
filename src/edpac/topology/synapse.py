@@ -19,9 +19,9 @@ class Synapse(Link):
         
         # Enregistrer auprès des neurones
         if pre_neuron is not None:
-            pre_neuron.add_synapse_out(self)
+            pre_neuron.add_outgoing_link(self)
         if post_neuron is not None:
-            post_neuron.add_synapse_in(self)
+            post_neuron.add_incoming_link(self)
     
     def compute_psp_emission(self, time_of_emission: int):
         """

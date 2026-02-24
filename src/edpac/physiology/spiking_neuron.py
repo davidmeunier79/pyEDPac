@@ -56,14 +56,14 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         time_elapsed = current_time - self.last_time_of_psp_impact
         
         # Décroissance du potentiel (simplifié)
-        decay_factor = np.exp(-time_elapsed / 50.0)  # Tau = 50ms
+        decay_factor = np.exp(-time_elapsed / self.math_tools.MEMBRANE_TIME_CONSTANT)  # Tau = 50ms
         self.membrane_potential *= decay_factor
         
         # Limiter aux bornes
         self.membrane_potential = max(
             self.config.HYPER_POLARISATION_POTENTIAL,
-            min(self.membrane_potential, 1.0)
-        )
+            self.membrane_potential)
+
         
         return self.membrane_potential
     
@@ -107,7 +107,11 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         current_threshold = self.update_threshold_potential(time_of_impact)
         
         # Ajouter l'impact du PSP
+        #print("membrane_potential before PSP:", self.membrane_potential, current_threshold )
+
         self.membrane_potential += weight_of_impact
+        #print("membrane_potential after PSP:", self.membrane_potential, current_threshold )
+
         self.last_time_of_psp_impact = time_of_impact
         
         # Vérifier si spike
@@ -124,11 +128,11 @@ class SpikingNeuron(Neuron, NeuronMathTools):
             return True
         
         return False
-    
+
     def compute_psp_impact(self, time_of_impact: int, weight_of_impact: float):
         """Traiter l'impact d'un PSP"""
-        self.compute_spike_emission(time_of_impact, weight_of_impact)
-    
+        raise NotImplementedError("Subclasses must implement compute_psp_impact")
+
     def get_last_time_of_firing(self) -> int:
         """Retourner le temps du dernier spike"""
         return self.last_time_of_firing

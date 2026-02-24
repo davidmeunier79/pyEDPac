@@ -15,7 +15,7 @@ class Link:
             pre_node: Nœud pré-synaptique (source)
             post_node: Nœud post-synaptique (cible)
         """
-        self.index = Link._link_count
+        self.id = Link._link_count
         Link._link_count += 1
         
         self.pre_node = pre_node      # Nœud source
@@ -33,4 +33,4 @@ class Link:
         Link._link_count = 0
     
     def __repr__(self):
-        return f"Link({self.index}: {self.pre_node.index} -> {self.post_node.index})"
+        return f"Link({self.id}: {self.pre_node.id} -> {self.post_node.id})"

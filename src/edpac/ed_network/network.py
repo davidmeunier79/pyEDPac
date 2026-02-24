@@ -6,8 +6,13 @@ Gère les assemblées et les connexions
 
 import numpy as np
 from typing import List, Dict, Optional, Tuple
+
+from itertools import product
+import random
+
 from ..ed_network.assembly import Assembly
-from ..physiology.spiking_neuron import SpikingNeuron
+from ..ed_network.ed_neuron import EDNeuron  # ✅ UTILISER EDNeuron
+from ..ed_network.ed_synapse import EDSynapse  # ✅ UTILISER EDSynapse
 from ..physiology.dynamic_synapse import DynamicSynapse
 from ..ed_network.event_manager import EventManager
 from ..config.physiology_config import NeuronConfig, SynapseConfig
@@ -33,6 +38,10 @@ class Network:
         """
         self.config = config or NetworkConfig()
         
+        # ✅ Créer et définir le EventManager pour toutes les synapses
+        self.event_manager = EventManager()
+        EDSynapse.set_event_manager(self.event_manager)
+
         # Assemblées par type
         self.input_assemblies: List[Assembly] = []
         self.hidden_assemblies: List[Assembly] = []
@@ -40,9 +49,6 @@ class Network:
         
         # Toutes les synapses
         self.all_synapses: List[DynamicSynapse] = []
-        
-        # Event manager
-        self.event_manager = EventManager()
         
         # Statistiques
         self.total_spikes = 0
@@ -97,24 +103,30 @@ class Network:
             distance = pre_assembly.get_distance_to(post_assembly)
             topological_delay = max(0, int(distance * 5))  # 5ms par unité
         
-        synapses_created = []
-        
         # Sélectionner les connexions
         nb_pre = pre_assembly.get_nb_neurons()
         nb_post = post_assembly.get_nb_neurons()
-        
-        if connection_ratio >= 1.0:
-            # All-to-all
-            pre_indices = range(nb_pre)
-            post_indices = range(nb_post)
-        else:
-            # Random subset
-            nb_connections = max(1, int(nb_pre * nb_post * connection_ratio))
-            pre_indices = np.random.choice(nb_pre, size=nb_connections)
-            post_indices = np.random.choice(nb_post, size=nb_connections)
-        
+#
+#         if connection_ratio >= 1.0:
+#             # All-to-all
+#             pre_indices = pre_assembly.get_neuron_ids()
+#             post_indices = post_assembly.get_neuron_ids()
+#         else:
+#             # Random subset
+#             nb_connections = max(1, int(nb_pre * nb_post * connection_ratio))
+#             pre_indices = np.random.choice(nb_pre, size=nb_connections)
+#             post_indices = np.random.choice(nb_post, size=nb_connections)
+        #TODO
+        # only all-to-all so far
+        pre_indices = pre_assembly.get_neuron_ids()
+        post_indices = post_assembly.get_neuron_ids()
+
         # Créer les synapses
-        for pre_idx, post_idx in zip(pre_indices, post_indices):
+        for pre_idx, post_idx in product(pre_indices, post_indices):
+
+            if random.random() < connection_ratio:
+                continue
+
             pre_neuron = pre_assembly.get_neuron(pre_idx)
             post_neuron = post_assembly.get_neuron(post_idx)
             
@@ -122,25 +134,26 @@ class Network:
             if nature == ProjectionNature.INHIBITORY:
                 # Poids inhibiteur généralement plus faible
                 syn_config = SynapseConfig(
-                    WEIGHT=synapse_config.WEIGHT * 0.5,
+                    WEIGHT=- synapse_config.WEIGHT,
                     DELAY=synapse_config.INHIBITORY_DELAY
                 )
             else:
                 syn_config = synapse_config
             
-            synapse = DynamicSynapse(pre_neuron, post_neuron, syn_config)
+            synapse = EDSynapse(pre_neuron, post_neuron, syn_config)
             
             # Ajouter délai topologique
             if topological_delay > 0:
                 synapse.delay += topological_delay
             
-            synapses_created.append(synapse)
-            self.all_synapses.append(synapse)
+            #synapses_created.append(synapse)
+            pre_neuron.add_outgoing_link(synapse)
+            post_neuron.add_incoming_link(synapse)
             
             # Enregistrer dans les assemblées
-            pre_assembly.add_outgoing_synapse(synapse)
+            #pre_assembly.add_outgoing_synapse(synapse)
         
-        return synapses_created
+        #return synapses_created
     
     def inject_input(self, assembly_idx: int, time: int, pattern: np.ndarray):
         """
@@ -163,7 +176,8 @@ class Network:
         for neuron_idx, activation in enumerate(pattern):
             if np.random.rand() < activation:
                 neuron = assembly.get_neuron(neuron_idx)
-                self.event_manager.inject_input(neuron, time, weight=activation)
+                neuron.emit_spike(time)
+                #self.event_manager.inject_input(neuron, time, weight=activation)
     
     def simulate(self, duration: int) -> Dict:
         """

@@ -76,6 +76,23 @@ class BaseVisualizer(pg.PlotWidget):
         QtWidgets.QApplication.processEvents()
 
 
+    def draw_enclosure(self, x, y, w, h):
+        """Draws the fixed size rectangle (The Zoo walls)"""
+        rect = QtWidgets.QGraphicsRectItem(x, y, w, h)
+        rect.setPen(pg.mkPen('k', width=2))
+        self.addItem(rect)
+
+    def closeEvent(self, event):
+        """This handles the 'X' button click."""
+        print("Window closing, terminating process...")
+
+        # If you have a simulation thread, stop it here!
+        # self.my_thread.quit()
+
+        # Force the application to quit
+        QtWidgets.QApplication.instance().quit()
+        event.accept()
+
 class PatternVisualizer(BaseVisualizer):
     def draw_pattern_in_rect(self, xbm_path, rect_x, rect_y, rect_w, rect_h):
         """
@@ -103,7 +120,6 @@ class PatternVisualizer(BaseVisualizer):
             brush='k'
         )
 
-
 class ZooVisualizer(BaseVisualizer):
     def __init__(self):
         super().__init__(title="EDPac Zoo")
@@ -130,8 +146,184 @@ class ZooVisualizer(BaseVisualizer):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def draw_enclosure(self, x, y, w, h):
-        """Draws the fixed size rectangle (The Zoo walls)"""
-        rect = QtWidgets.QGraphicsRectItem(x, y, w, h)
-        rect.setPen(pg.mkPen('k', width=2))
-        self.addItem(rect)
+
+from edpac.ed_network.network import Network # Assuming your repo structure
+from edpac.config.constants import *
+from math import sqrt
+
+class NetworkVisualizer(BaseVisualizer):
+    def __init__(self):
+        super().__init__(title="pyEDPac Network")
+        # Performance: Use one ScatterPlotItem for all neurons
+        #self.neuron_scatter = pg.ScatterPlotItem(pxMode=True)
+        #self.addItem(self.neuron_scatter)
+
+#         if not QtWidgets.QApplication.instance():
+#             self.app = QtWidgets.QApplication([])
+#         else:
+#             self.app = QtWidgets.QApplication.instance()
+#
+#         super().__init__()
+#         self.setBackground('w')
+#         self.setWindowTitle(title)
+#
+#
+#         # Store lines (synapses)
+#         self.synapses = []
+#
+#         # Mapping to store neuron positions for synapse drawing
+#         self.neuron_positions = {} # {neuron_id: (x, y)}
+
+    def draw_assembly(self, assembly, x_offset, y_offset ):
+
+        for i, neuron_id in enumerate(assembly.get_neuron_ids()):
+
+            sqrt_num_neurons = sqrt(assembly.get_nb_neurons())
+
+            x =  x_offset + i%sqrt_num_neurons # Slight jitter for visibility
+            y =  y_offset + (i // sqrt_num_neurons)
+            self.neuron_positions[neuron_id] = (x, y)
+
+    def display_network(self, network: Network):
+        """Processes the Network object and lays it out in columns."""
+        #self.clear()
+        self.neuron_positions = {}
+
+        # Define column X-coordinates
+
+        cols = {'input': 0,
+                'hidden': VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY,
+                "output": VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY)
+                }
+
+        # 1. Calculate positions for every neuron in every assembly
+        # input
+        x_base = cols['input']
+
+        print("Draw input_assemblies")
+        for a, assembly in enumerate(network.input_assemblies):
+            print(f"Assembly {a}")
+            # Determine column based on assembly name or attribute
+            # Adjust this logic if you have a specific 'type' attribute
+
+            # Layout neurons vertically within the assembly
+            sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
+
+
+            y_offset = a * (sqrt_num_neurons + GAP_INPUT_ASSEMBLY)
+            print("y_offset:", y_offset)
+
+            self.draw_assembly(assembly, x_base, y_offset )
+
+            #print(self.neuron_positions)
+
+        # hidden
+        print("Draw hidden_assemblies")
+        x_base = cols['hidden']
+
+        for a, assembly in enumerate(network.hidden_assemblies):
+
+            print(f"Assembly {a}")
+            sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
+
+            x_a = a % SQRT_NB_ASSEMBLIES
+            y_a = a // SQRT_NB_ASSEMBLIES
+
+            x_offset = x_base + x_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
+            y_offset = y_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
+
+            print("x_offset:", x_offset)
+            print("y_offset:", y_offset)
+
+            self.draw_assembly(assembly, x_offset, y_offset )
+
+        # output
+        x_base = cols['output']
+
+        print("Draw output_assemblies")
+        for a, assembly in enumerate(network.output_assemblies):
+
+            print(f"Assembly {a}")
+            sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
+
+            y_offset = a * (sqrt_num_neurons + GAP_OUTPUT_ASSEMBLY)
+            print("y_offset:", y_offset)
+
+            self.draw_assembly(assembly, x_base, y_offset )
+
+
+        # 3. Draw Neurons (Points)
+        all_pos = list(self.neuron_positions.values())
+
+        print("Draw Neurons")
+        self.scatter_item.addPoints(
+            pos=all_pos,
+            #size=100,
+            #brush=pg.mkBrush(50, 150, 255, 200),
+            pen=pg.mkPen('k', width=0.5))
+
+        # 2. Draw Synapses (Lines)
+        # We iterate through connections.
+        # Note: adjust this depending on how you store synapses in your Network class
+
+        print("Draw input Synapses")
+        for assembly in network.input_assemblies:
+            if assembly.get_nb_neurons() == 0:
+                continue
+
+            for neuron in assembly.get_neurons():
+
+                # Assuming neuron has a list of outgoing synapses
+
+                if len(neuron.outgoing_links):
+                    start_pos = self.neuron_positions[neuron.id]
+                    #print("start_pos = ", start_pos)
+
+                    print("Neuron ", neuron.id)
+                    for syn in neuron.outgoing_links:
+                        end_neuron_id = syn.post_node.id
+
+                        if end_neuron_id in self.neuron_positions:
+                            end_pos = self.neuron_positions[end_neuron_id]
+                            self.draw_synapse(start_pos, end_pos, syn.weight)
+
+        print("Draw internal Synapses")
+        for assembly in network.hidden_assemblies:
+
+            print("Assembly ", assembly.id)
+            for neuron in assembly.get_neurons():
+
+
+                # Assuming neuron has a list of outgoing synapses
+                if len(neuron.outgoing_links):
+
+                    print("Neuron ", neuron.id)
+                    start_pos = self.neuron_positions[neuron.id]
+                    #print("start_pos = ", start_pos)
+
+                    for syn in neuron.outgoing_links:
+                        end_neuron_id = syn.post_node.id
+
+                        if end_neuron_id in self.neuron_positions:
+                            end_pos = self.neuron_positions[end_neuron_id]
+                            self.draw_synapse(start_pos, end_pos, syn.weight)
+
+        print("Finished drawing ")
+
+    def draw_synapse(self, start, end, weight):
+        # Scale line width by weight, cap it at 5 for visibility
+        width = 0.1
+        color = 'r' if weight < 0.0 else 'b' # Red for inhibitory, Blue for excitatory
+        line = pg.PlotCurveItem(
+            [start[0], end[0]],
+            [start[1], end[1]],
+            pen=pg.mkPen(color, width=width)
+        )
+        self.addItem(line)
+        #self.synapses.append(line)
+
+    def clear(self):
+        self.neuron_scatter.clear()
+        for s in self.synapses:
+            self.removeItem(s)
+        self.synapses = []

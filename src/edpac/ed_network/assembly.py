@@ -6,8 +6,10 @@ Une assemblée = groupe de neurones avec même comportement
 
 import numpy as np
 from typing import List, Optional
-from ..physiology.spiking_neuron import SpikingNeuron
-from ..physiology.dynamic_synapse import DynamicSynapse
+
+from .ed_neuron import EDNeuron
+from .ed_synapse import EDSynapse
+
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 from ..config.network_config import ProjectionNature, AssemblyNature
 
@@ -43,33 +45,45 @@ class Assembly:
         self.neuron_config = neuron_config or NeuronConfig()
         
         # Créer les neurones
-        self.neurons: List[SpikingNeuron] = [
-            SpikingNeuron(self.neuron_config) 
+        self.neurons: List[EDNeuron] = [
+            EDNeuron(self.neuron_config)
             for _ in range(nb_neurons)
         ]
         
-        # Projections sortantes (vers d'autres assemblées)
-        self.outgoing_synapses: List[DynamicSynapse] = []
-        
+        self.neuron_ids: List[int] = [neuron.id for neuron in self.neurons]
+
         # Historique d'activité
         self.spike_history = []
     
-    def get_neuron(self, idx: int) -> SpikingNeuron:
+    def get_neuron_ids(self) -> List[int]:
+
+        return self.neuron_ids
+
+    def get_neuron(self, idx: int) -> EDNeuron:
         """Retourner un neurone par index"""
-        return self.neurons[idx]
+        if not idx in self.neuron_ids:
+            print(f"!!!! Error with {idx}, not availaible in assembly {self.id}, ids = {self.neuron_ids}")
+
+        index = self.neuron_ids.index(idx)
+
+        neuron = self.neurons[index]
+
+        assert neuron.id == idx, f"Error with stored neuron id {neuron.id}, should be = {idx}"
+
+        return neuron
     
-    def get_neurons(self) -> List[SpikingNeuron]:
+    def get_neurons(self) -> List[EDNeuron]:
         """Retourner tous les neurones"""
         return self.neurons
     
     def get_nb_neurons(self) -> int:
         """Retourner le nombre de neurones"""
         return len(self.neurons)
-    
-    def add_outgoing_synapse(self, synapse: DynamicSynapse):
-        """Enregistrer une synapse sortante"""
-        self.outgoing_synapses.append(synapse)
-    
+#
+#     def add_outgoing_synapse(self, synapse: EDSynapse):
+#         """Enregistrer une synapse sortante"""
+#         self.outgoing_synapses.append(synapse)
+#
     def reset(self):
         """Réinitialiser tous les neurones"""
         for neuron in self.neurons:
