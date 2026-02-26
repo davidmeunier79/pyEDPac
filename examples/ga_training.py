@@ -67,7 +67,6 @@ def main():
         ),
         mutation_config=MutationConfig(
             MUTATION_RATE=0.02,
-            GAUSSIAN_SIGMA=0.1
         ),
         VERBOSE=True
     )
