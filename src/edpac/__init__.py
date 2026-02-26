@@ -15,6 +15,10 @@ from .topology.synapse import Synapse
 from .physiology.dynamic_synapse import DynamicSynapse
 from .physiology.spiking_neuron import SpikingNeuron
 
+from .ed_network.ed_synapse import EDSynapse
+from .ed_network.ed_neuron import EDNeuron
+
+
 from .config.constants import *
 from .config.physiology_config import (
     SynapseConfig, 

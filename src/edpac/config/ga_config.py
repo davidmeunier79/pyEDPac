@@ -78,18 +78,18 @@ class MutationConfig:
     """Configuration de mutation"""
     # Taux
     MUTATION_RATE: float = 0.01    # 1% de mutation par gène
-    MUTATION_MODE: MutationMode = MutationMode.GAUSSIAN
+    #MUTATION_MODE: MutationMode = MutationMode.GAUSSIAN
     
     # Gaussienne
-    GAUSSIAN_SIGMA: float = 0.1    # Écart-type
+    #GAUSSIAN_SIGMA: float = 0.1    # Écart-type
     
     # Uniform
-    UNIFORM_MAGNITUDE: float = 0.2  # Ampleur du changement
+    #UNIFORM_MAGNITUDE: float = 0.2  # Ampleur du changement
     
     # Adaptative mutation
-    ADAPTIVE_MUTATION: bool = False
-    MUTATION_RATE_MIN: float = 0.001
-    MUTATION_RATE_MAX: float = 0.1
+    #ADAPTIVE_MUTATION: bool = False
+    #MUTATION_RATE_MIN: float = 0.001
+    #MUTATION_RATE_MAX: float = 0.1
 
 @dataclass
 class GAConfig:

@@ -52,4 +52,4 @@ class EDNeuron(SpikingNeuron):
 
 
     def __repr__(self):
-        return f"EDNeuron({self.index}, V={self.membrane_potential:.4f})"
+        return f"EDNeuron({self.id}, V={self.membrane_potential:.4f})"

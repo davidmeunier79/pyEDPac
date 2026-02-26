@@ -7,9 +7,11 @@ from typing import List, Callable, Tuple
 from .individual import Individual
 from .chromosome import Chromosome
 from ..config.ga_config import (
-    PopulationConfig, SelectionConfig, CrossoverConfig, 
+    SelectionConfig, CrossoverConfig,
     MutationConfig, SelectionMode, MutationMode
 )
+
+from ..config.constants import *
 
 class Population:
     """Population d'individus"""
@@ -155,27 +157,14 @@ class Population:
         """
         genes = individual.chromosome.get_genes()
         
+        max_val = np.array([NB_IN_ASSEMBLIES, 2, NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
+
         mutation_rate = self.mutation_config.MUTATION_RATE
         
-        if self.mutation_config.MUTATION_MODE == MutationMode.GAUSSIAN:
-            # Mutation gaussienne
-            mask = np.random.rand(len(genes)) < mutation_rate
-            genes[mask] += np.random.normal(0, self.mutation_config.GAUSSIAN_SIGMA, mask.sum())
-        
-        elif self.mutation_config.MUTATION_MODE == MutationMode.UNIFORM:
-            # Mutation uniforme
-            mask = np.random.rand(len(genes)) < mutation_rate
-            genes[mask] += np.random.uniform(
-                -self.mutation_config.UNIFORM_MAGNITUDE,
-                self.mutation_config.UNIFORM_MAGNITUDE,
-                mask.sum()
-            )
-        
-        else:
-            # Biased mutation
-            mask = np.random.rand(len(genes)) < mutation_rate
-            genes[mask] = np.random.rand(mask.sum())
-        
+        mask = np.random.rand(len(genes)) < mutation_rate
+
+        genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
+
         # Clamp to [0, 1]
         genes = np.clip(genes, 0.0, 1.0)
         

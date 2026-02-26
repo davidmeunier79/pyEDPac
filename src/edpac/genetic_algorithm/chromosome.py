@@ -29,7 +29,7 @@ class Chromosome:
         self.config = config or ChromosomeConfig()
         
         if genes is not None:
-            self.genes = np.array(genes, dtype=np.int)
+            self.genes = np.array(genes, dtype=np.int32)
         else:
             # Générer aléatoirement
             self.genes = self._initialize_random_genes()

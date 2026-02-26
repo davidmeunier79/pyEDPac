@@ -77,8 +77,7 @@ class EDSynapse(DynamicSynapse):
             time_of_bpsike: Temps du spike rétropropagé (ms)
         """
         # Mise à jour STDP via rétropropagation
-        if hasattr(self, 'update_last_time_of_post_spike'):
-            self.update_last_time_of_post_spike(time_of_bpsike)
+        self.update_last_time_of_post_spike(time_of_bpsike)
     
     def __repr__(self):
         return (f"EDSynapse(pre={self.pre_node.id}, post={self.post_node.id}, "

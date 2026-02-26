@@ -30,7 +30,7 @@ class NetworkConfig:
     """Configuration du réseau"""
     # Projection mode
     ALL_TO_ALL_PROJECTION: bool = True  # Tous vers tous (vs ratio fixe)
-    TOPOLOGICAL_PROJECTION: bool = False
+    TOPOLOGICAL_PROJECTION: bool = True
     
     # Input modes
     STOCHASTIC_INPUT: bool = True  # Vs temporal coding

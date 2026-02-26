@@ -151,6 +151,8 @@ from edpac.ed_network.network import Network # Assuming your repo structure
 from edpac.config.constants import *
 from math import sqrt
 
+from edpac.ed_network.event_manager import SpikeEvent
+
 class NetworkVisualizer(BaseVisualizer):
     def __init__(self):
         super().__init__(title="pyEDPac Network")
@@ -265,48 +267,48 @@ class NetworkVisualizer(BaseVisualizer):
         # 2. Draw Synapses (Lines)
         # We iterate through connections.
         # Note: adjust this depending on how you store synapses in your Network class
-
-        print("Draw input Synapses")
-        for assembly in network.input_assemblies:
-            if assembly.get_nb_neurons() == 0:
-                continue
-
-            for neuron in assembly.get_neurons():
-
-                # Assuming neuron has a list of outgoing synapses
-
-                if len(neuron.outgoing_links):
-                    start_pos = self.neuron_positions[neuron.id]
-                    #print("start_pos = ", start_pos)
-
-                    print("Neuron ", neuron.id)
-                    for syn in neuron.outgoing_links:
-                        end_neuron_id = syn.post_node.id
-
-                        if end_neuron_id in self.neuron_positions:
-                            end_pos = self.neuron_positions[end_neuron_id]
-                            self.draw_synapse(start_pos, end_pos, syn.weight)
-
-        print("Draw internal Synapses")
-        for assembly in network.hidden_assemblies:
-
-            print("Assembly ", assembly.id)
-            for neuron in assembly.get_neurons():
-
-
-                # Assuming neuron has a list of outgoing synapses
-                if len(neuron.outgoing_links):
-
-                    print("Neuron ", neuron.id)
-                    start_pos = self.neuron_positions[neuron.id]
-                    #print("start_pos = ", start_pos)
-
-                    for syn in neuron.outgoing_links:
-                        end_neuron_id = syn.post_node.id
-
-                        if end_neuron_id in self.neuron_positions:
-                            end_pos = self.neuron_positions[end_neuron_id]
-                            self.draw_synapse(start_pos, end_pos, syn.weight)
+        #
+        # print("Draw input Synapses")
+        # for assembly in network.input_assemblies:
+        #     if assembly.get_nb_neurons() == 0:
+        #         continue
+        #
+        #     for neuron in assembly.get_neurons():
+        #
+        #         # Assuming neuron has a list of outgoing synapses
+        #
+        #         if len(neuron.outgoing_links):
+        #             start_pos = self.neuron_positions[neuron.id]
+        #             #print("start_pos = ", start_pos)
+        #
+        #             print("Neuron ", neuron.id)
+        #             for syn in neuron.outgoing_links:
+        #                 end_neuron_id = syn.post_node.id
+        #
+        #                 if end_neuron_id in self.neuron_positions:
+        #                     end_pos = self.neuron_positions[end_neuron_id]
+        #                     self.draw_synapse(start_pos, end_pos, syn.weight)
+        #
+        # print("Draw internal Synapses")
+        # for assembly in network.hidden_assemblies:
+        #
+        #     print("Assembly ", assembly.id)
+        #     for neuron in assembly.get_neurons():
+        #
+        #
+        #         # Assuming neuron has a list of outgoing synapses
+        #         if len(neuron.outgoing_links):
+        #
+        #             print("Neuron ", neuron.id)
+        #             start_pos = self.neuron_positions[neuron.id]
+        #             #print("start_pos = ", start_pos)
+        #
+        #             for syn in neuron.outgoing_links:
+        #                 end_neuron_id = syn.post_node.id
+        #
+        #                 if end_neuron_id in self.neuron_positions:
+        #                     end_pos = self.neuron_positions[end_neuron_id]
+        #                     self.draw_synapse(start_pos, end_pos, syn.weight)
 
         print("Finished drawing ")
 
@@ -327,3 +329,23 @@ class NetworkVisualizer(BaseVisualizer):
         for s in self.synapses:
             self.removeItem(s)
         self.synapses = []
+
+    def update_visu(self, events):
+
+        all_pos_spikes = []
+        for event in events:
+            if isinstance(event, SpikeEvent):
+                print(event.neuron)
+                if event.neuron.id in self.neuron_positions.keys():
+                    pos = self.neuron_positions[event.neuron.id]
+                    all_pos_spikes.append(pos)
+
+        print(all_pos_spikes)
+
+        print("Draw Spikes")
+        self.scatter_item.addPoints(
+            pos=all_pos_spikes,
+            #brush=pg.mkBrush(50, 150, 255, 200),
+            pen=pg.mkPen('w', width=0.5))
+
+        print("Finished Draw Spikes")
