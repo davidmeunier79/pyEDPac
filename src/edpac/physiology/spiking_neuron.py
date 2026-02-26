@@ -20,8 +20,8 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         self.math_tools = NeuronMathTools(config)
         
         # État du neurone
-        self.membrane_potential = config.RESTING_POTENTIAL
-        self.threshold_potential = config.THRESHOLD_REF
+        self.membrane_potential = self.config.RESTING_POTENTIAL
+        self.threshold_potential = self.config.THRESHOLD_REF
         
         # Timing
         self.last_time_of_psp_impact = -1
