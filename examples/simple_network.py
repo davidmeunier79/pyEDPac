@@ -9,8 +9,8 @@ sys.path.insert(0, '../src')
 
 from edpac import (
     Neuron, 
-    SpikingNeuron,
-    DynamicSynapse,
+    EDNeuron,
+    EDSynapse,
     SynapseConfig,
     NeuronConfig
 )
@@ -21,7 +21,7 @@ def main():
     synapse_config = SynapseConfig()
     
     # Créer 3 neurones
-    neurons = [SpikingNeuron(neuron_config) for _ in range(3)]
+    neurons = [EDNeuron(neuron_config) for _ in range(3)]
     print(f"Created {len(neurons)} neurons")
     
     # Connecter les neurones
@@ -29,12 +29,12 @@ def main():
     synapses = []
     
     # N0 -> N1
-    syn1 = DynamicSynapse(neurons[0], neurons[1], synapse_config)
+    syn1 = EDSynapse(neurons[0], neurons[1], synapse_config)
     synapses.append(syn1)
     print(f"Created synapse: {syn1}")
     
     # N1 -> N2
-    syn2 = DynamicSynapse(neurons[1], neurons[2], synapse_config)
+    syn2 = EDSynapse(neurons[1], neurons[2], synapse_config)
     synapses.append(syn2)
     print(f"Created synapse: {syn2}")
     
@@ -50,7 +50,7 @@ def main():
     
     print("\nNetwork structure:")
     for neuron in neurons:
-        print(f"  {neuron}: {len(neuron.synapses_in)} inputs, {len(neuron.synapses_out)} outputs")
+        print(f"  {neuron}: {len(neuron.incoming_links)} inputs, {len(neuron.outgoing_links)} outputs")
 
 if __name__ == "__main__":
     main()
