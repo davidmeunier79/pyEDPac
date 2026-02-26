@@ -9,6 +9,8 @@ from typing import List, Tuple
 from copy import deepcopy
 from ..config.ga_config import ChromosomeConfig
 
+from ..config.constants import *
+
 class Chromosome:
     """
     Chromosome = Génome = Suite de gènes
@@ -27,7 +29,7 @@ class Chromosome:
         self.config = config or ChromosomeConfig()
         
         if genes is not None:
-            self.genes = np.array(genes, dtype=np.float32)
+            self.genes = np.array(genes, dtype=np.int)
         else:
             # Générer aléatoirement
             self.genes = self._initialize_random_genes()
@@ -38,12 +40,19 @@ class Chromosome:
     
     def _initialize_random_genes(self) -> np.ndarray:
         """Générer des gènes aléatoires"""
-        return np.random.uniform(
-            self.config.MIN_GENE_VALUE,
-            self.config.MAX_GENE_VALUE,
-            size=self.config.NB_GENES_EACH_CHROMOSOME
-        ).astype(np.float32)
-    
+        list_genes = [
+            np.random.randint(low = 0, high = NB_IN_ASSEMBLIES,
+                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
+
+            np.random.randint(low =0 , high = 2,
+                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
+
+            np.random.randint(low = 0, high = NB_OUT_ASSEMBLIES,
+                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME)
+            ]
+
+        return(np.concatenate(np.array(list_genes, dtype = int).T, axis = 0))
+
     def get_genes(self) -> np.ndarray:
         """Retourner les gènes"""
         return self.genes.copy()
@@ -75,16 +84,7 @@ class Chromosome:
         # Décoder les gènes
         genes_slice = self.genes[start_idx:start_idx + 3]
         
-        # Première gène: pre-assembly (entier)
-        pre_idx = int(genes_slice[0] * 25) % 25  # Exemple: 25 assemblies max
-        
-        # Deuxième gène: post-assembly (entier)
-        post_idx = int(genes_slice[1] * 25) % 25
-        
-        # Troisième gène: poids (continu)
-        weight = genes_slice[2]
-        
-        return pre_idx, post_idx, weight
+        return genes_slice
     
     def set_projection(self, projection_idx: int, pre_idx: int, post_idx: int, weight: float):
         """
