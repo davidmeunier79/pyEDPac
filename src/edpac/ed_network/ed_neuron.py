@@ -22,7 +22,8 @@ class EDNeuron(SpikingNeuron):
         Args:
             config: Configuration neuronale
         """
-        super().__init__(config)
+        self.config = config or NeuronConfig()
+        super().__init__()
     
     def emit_spike(self, spike_time: int):
         """

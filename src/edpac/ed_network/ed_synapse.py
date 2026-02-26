@@ -64,10 +64,8 @@ class EDSynapse(DynamicSynapse):
         Args:
             time_of_emission: Temps d'émission (ms)
         """
-        if self.post_node is not None:
-            # Appliquer l'impact du PSP
-            if self.post_node.compute_psp_emission(time_of_emission, self.get_weight()):
-                self.update_last_time_of_post_spike(time_of_emission)
+        if self.post_node.compute_psp_impact(time_of_emission, self.get_weight()):
+            self.update_last_time_of_post_spike(time_of_emission)
     
     def compute_bpsike_impact(self, time_of_bpsike: int):
         """
