@@ -45,6 +45,8 @@ class EDNetwork(Network):
         """
         super().__init__(config, neuron_config)
 
+        self._build_assemblies()
+
         # ✅ Créer et définir le EventManager pour toutes les synapses
         self.event_manager = EventManager()
         EDSynapse.set_event_manager(self.event_manager)
@@ -59,75 +61,6 @@ class EDNetwork(Network):
         super().reset()
 
         self.event_manager.reset()
-
-    def create_projection(self,
-                         pre_assembly: Assembly,
-                         post_assembly: Assembly,
-                         connection_ratio: float = 1.0,
-                         nature: ProjectionNature = ProjectionNature.EXCITATORY,
-                         synapse_config: SynapseConfig = None) -> List[EDSynapse]:
-        """
-        Créer une projection (ensemble de synapses)
-
-        Args:
-            pre_assembly: Assemblée pré-synaptique
-            post_assembly: Assemblée post-synaptique
-            connection_ratio: Ratio de connexions (1.0 = all-to-all)
-            nature: Type de projection (excitatory/inhibitory)
-            synapse_config: Configuration des synapses
-
-        Returns:
-            Liste des synapses créées
-        """
-        if synapse_config is None:
-            synapse_config = SynapseConfig()
-
-        # Calculer le délai topologique
-        topological_delay = 0
-        if self.config.TOPOLOGICAL_PROJECTION:
-            distance = pre_assembly.get_distance_to(post_assembly)
-            topological_delay = max(0, int(distance * 5))  # 5ms par unité
-
-        # Sélectionner les connexions
-        nb_pre = pre_assembly.get_nb_neurons()
-        nb_post = post_assembly.get_nb_neurons()
-
-        pre_indices = pre_assembly.get_neuron_ids()
-        post_indices = post_assembly.get_neuron_ids()
-
-        # Créer les synapses
-        for pre_idx, post_idx in product(pre_indices, post_indices):
-
-            if random.random() > connection_ratio:
-                continue
-
-            pre_neuron = pre_assembly.get_neuron(pre_idx)
-            post_neuron = post_assembly.get_neuron(post_idx)
-
-            # Ajuster le poids selon le type
-            if nature == ProjectionNature.INHIBITORY:
-                # Poids inhibiteur généralement plus faible
-                syn_config = synapse_config
-                syn_config.WEIGHT = - synapse_config.WEIGHT
-                syn_config.DELAY = synapse_config.INHIBITORY_DELAY
-
-            else:
-                syn_config = synapse_config
-
-            synapse = EDSynapse(pre_neuron, post_neuron, syn_config)
-
-            # Ajouter délai topologique
-            if topological_delay > 0:
-                synapse.delay += topological_delay
-
-            #synapses_created.append(synapse)
-            pre_neuron.add_outgoing_link(synapse)
-            post_neuron.add_incoming_link(synapse)
-
-            # Enregistrer dans les assemblées
-            #pre_assembly.add_outgoing_synapse(synapse)
-
-        #return synapses_created
 
     def inject_input_float(self, assembly_idx: int, time: int, pattern_float: np.ndarray):
         """

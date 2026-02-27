@@ -8,7 +8,6 @@ import numpy as np
 from typing import List, Optional
 
 from .ed_neuron import EDNeuron
-from .ed_synapse import EDSynapse
 
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 from ..config.network_config import ProjectionNature, AssemblyNature
@@ -64,7 +63,7 @@ class Assembly:
         if not idx in self.neuron_ids:
             print(f"!!!! Error with {idx}, not availaible in assembly {self.id}, ids = {self.neuron_ids}")
 
-        index = self.neuron_ids.index(idx)
+        index = self.neuron_ids[idx]
 
         neuron = self.neurons[index]
 
@@ -128,3 +127,5 @@ class Assembly:
     def reset_count():
         """Réinitialiser le compteur"""
         Assembly._assembly_count = 0
+
+        EDNeuron.reset_count()
