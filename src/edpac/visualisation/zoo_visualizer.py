@@ -3,110 +3,9 @@ import re
 import numpy as np
 from PIL import Image
 from edpac.visualisation.pixel_visualizer import PixelVisualizer
-#
-# class ZooVisualizer(PixelVisualizer):
-#     def __init__(self, width=800, height=600, scale=2, data_dir="data"):
-#         # Scale=2 makes the 16x16 icons easier to see on modern screens
-#         super().__init__(width, height, scale)
-#         self.data_dir = data_dir
-#         self.menagerie = {}  # Maps char -> list of (x, y) relative coords
-#         self.cell_size = 16  # .img files are 16x16
-#
-#     def load_menagerie(self, menagerie_file="menagerie/menagerie.txt"):
-#         """Reads menagerie.txt and loads the .img file for each animal."""
-#         path = os.path.join(self.data_dir, menagerie_file)
-#
-#         if not os.path.exists(path):
-#             print(f"Error: {path} not found.")
-#             return
-#
-#         with open(path, 'r') as f:
-#             for line in f:
-#                 print(line)
-#                 parts = line.split()
-#                 if len(parts) >= 2:
-#                     char = parts[0]
-#                     # Convert XBM extension to .img if necessary
-#                     img_rel_path = parts[1]
-#                     self.menagerie[char] = self._get_img_coords(img_rel_path)
-#
-#         # --- Manual 'dot' assignment for the '.' character ---
-#         dot_path = os.path.join(self.data_dir, "formes", "dot")
-#         self.menagerie['.'] = self._parse_xbm_hex(dot_path)
-#
-#         print(self.menagerie)
-#
-#     def _parse_xbm_hex(self, full_path):
-#         """
-#         Skips C headers, finds the { ... } block, and
-#         unpacks the hex data into (x, y) coordinates.
-#         """
-#         coords = []
-#         try:
-#             with open(full_path, 'r') as f:
-#                 content = f.read()
-#
-#             # 1. Use regex to find everything between { and }
-#             match = re.search(r'\{(.*?)\}', content, re.DOTALL)
-#             if not match:
-#                 return []
-#
-#             # 2. Extract hex strings (e.g., '0x01') and convert to integers
-#             hex_data = match.group(1).replace('\n', '').split(',')
-#             bytes_list = [int(h.strip(), 16) for h in hex_data if h.strip()]
-#
-#             # 3. Unpack bits (16x16 XBM = 2 bytes per row)
-#             # Row 0 uses bytes_list[0] and [1], Row 1 uses [2] and [3], etc.
-#             for row in range(16):
-#                 for byte_idx in range(2):
-#                     byte_val = bytes_list[row * 2 + byte_idx]
-#                     for bit in range(8):
-#                         # XBM bits are LSB first (Least Significant Bit)
-#                         if (byte_val >> bit) & 1:
-#                             x = (byte_idx * 8) + bit
-#                             y = row
-#                             coords.append((x, y))
-#         except Exception as e:
-#             print(f"Error parsing hex XBM {full_path}: {e}")
-#         return coords
-#
-#     def _get_img_coords(self, rel_path):
-#         """Parses a 16x16 text file of '0' and '1' into coordinates."""
-#         full_path = os.path.join(self.data_dir, "menagerie", rel_path)
-#         coords = []
-#         try:
-#             with open(full_path, 'r') as f:
-#                 for y, line in enumerate(f):
-#                     print(line)
-#                     # Only process the first 16 characters to avoid newlines/spaces
-#                     for x, bit in enumerate(line.strip()[:16]):
-#                         if bit == '.': # '1' represents the animal pixel
-#                             coords.append((x, y))
-#         except Exception as e:
-#             print(f"Could not load img {full_path}: {e}")
-#         return coords
-#
-#
-#     def draw_screen(self, screen_file="screens/screen.tmp"):
-#         """Reads a screen file and stamps patterns into the buffer."""
-#         path = os.path.join(self.data_dir, screen_file)
-#         self.clear_canvas((255, 255, 255)) # Dark background
-#
-#         with open(path, 'r') as f:
-#             for row_idx, line in enumerate(f):
-#                 for col_idx, char in enumerate(line.strip()):
-#                     if char in self.menagerie:
-#                         # Calculate top-left pixel for this grid cell
-#                         start_x = col_idx * self.cell_size
-#                         start_y = row_idx * self.cell_size
-#
-#                         # Stamp each pixel of the animal pattern
-#                         for px, py in self.menagerie[char]:
-#                             self.set_pixel(start_x + px, start_y + py, (200, 200, 255))
-#
-#         self.update_display()
 
 from edpac.zoo.zoo import Zoo
+from edpac.zoo.pacman import Pacman
 
 class ZooVisualizer(PixelVisualizer):
     def draw_zoo(self, zoo: Zoo):
@@ -133,4 +32,40 @@ class ZooVisualizer(PixelVisualizer):
                     for px, py in zoo.shapes[char]:
                         self.set_pixel(base_x + px, base_y + py, color)
 
+        # 3. Draw Pacman (The Body and the Head Bar)
+        self._draw_pacman(zoo)
+
         self.update_display()
+
+    def _draw_pacman(self, zoo):
+        p = zoo.pacman
+        bx = p.x * zoo.cell_size
+        by = p.y * zoo.cell_size
+
+        # A. Draw Body Sprite
+        direction_name = zoo.pacman_images[p.dir_body]
+        body_shape = zoo.pacman_shapes[direction_name]
+        for px, py in body_shape:
+            self.set_pixel(bx + px, by + py, (255, 255, 0)) # Yellow
+
+        # B. Draw Head Bar (Blue Line)
+        # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
+        blue = (50, 50, 255)
+        cs = zoo.cell_size - 1
+
+        if p.dir_head == 0: # Up: Top edge
+            for i in range(16):
+                self.set_pixel(bx + i, by, blue)
+                self.set_pixel(bx + i, by + 1, blue)
+        elif p.dir_head == 1: # Down: Bottom edge
+            for i in range(16):
+                self.set_pixel(bx + i, by + cs, blue)
+                self.set_pixel(bx + i, by + cs - 1, blue)
+        elif p.dir_head == 2: # Left: Left edge
+            for i in range(16):
+                self.set_pixel(bx, by + i, blue)
+                self.set_pixel(bx + 1, by + i, blue)
+        elif p.dir_head == 3: # Right: Right edge
+            for i in range(16):
+                self.set_pixel(bx + cs, by + i, blue)
+                self.set_pixel(bx + cs - 1, by + i, blue)
