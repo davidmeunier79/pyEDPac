@@ -10,7 +10,7 @@ from copy import deepcopy
 from ..config.ga_config import ChromosomeConfig
 from .chromosome import Chromosome
 
-class Individual:
+class Individual():
     """
     Individu d'une population
     
@@ -35,11 +35,15 @@ class Individual:
         
         self.config = config or ChromosomeConfig()
         
+        super().__init__(chromosome)
+
         if chromosome is None:
             self.chromosome = Chromosome(self.config)
         else:
             self.chromosome = chromosome
         
+
+
         # Fitness
         self.fitness = -float('inf')  # Non évalué au départ
         self.fitness_evaluated = False

@@ -34,7 +34,6 @@ class InputVisualizer(PixelVisualizer):
             base_x = i * self.square_size
             base_y = self.padding
 
-            for px, py in pattern:
-                self.set_pixel(base_x + px, base_y + py, (0, 0, 0))
+            self.set_pattern(base_x, base_y ,pattern,  (0, 0, 0))
 
         self.update_display()

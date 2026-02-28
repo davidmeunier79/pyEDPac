@@ -8,6 +8,7 @@ class Pacman(Individual):
         self.y = y
 
         self.zoo = zoo
+
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
         self.dir_body = 3  # Default Right
         self.dir_head = 3  # Default Right

@@ -25,6 +25,12 @@ class PixelVisualizer(QtWidgets.QLabel):
         self.buffer[:, :, 1] = color[1]
         self.buffer[:, :, 2] = color[2]
 
+
+    def set_pattern(self, base_x, base_y,  narr, color=(255, 255, 255)):
+        """Directly sets a pixel color at (x, y)."""
+        x, y = np.where (narr == True)
+        self.buffer[base_y + y, base_x +x, :3] = color
+
     def set_pixel(self, x, y, color=(255, 255, 255)):
         """Directly sets a pixel color at (x, y)."""
         if 0 <= x < self.w and 0 <= y < self.h:

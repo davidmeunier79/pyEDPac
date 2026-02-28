@@ -4,8 +4,12 @@ Network.py - Réseau neuronal complet
 Gère les assemblées et les connexions
 """
 
+import random
+
 import numpy as np
 from typing import List, Dict, Optional, Tuple
+
+from itertools import product
 
 from ..ed_network.assembly import Assembly
 from ..ed_network.ed_synapse import EDSynapse

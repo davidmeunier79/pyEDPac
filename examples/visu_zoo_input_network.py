@@ -11,6 +11,8 @@ from edpac.visualisation.input_visualizer import InputVisualizer
 
 from edpac.genetic_algorithm.chromosome import Chromosome
 
+from edpac.ed_network.evo_network import EvoNetwork
+
 from edpac.config.ga_config import ChromosomeConfig
 
 def main():
@@ -31,6 +33,8 @@ def main():
     zoo = Zoo(pac, data_dir="/home/INT/meunier.d/Tools/Packages/pyEdPac/data")
     zoo.load_everything(screen_file="screen.0", menagerie_file= "menagerie.txt")
 
+    print(zoo.shapes)
+
     # 2. Initialize Visualiser
     # Original EDPac screens were often around 40x25 characters
     # 40 * 16 = 640px, 25 * 16 = 400px
@@ -46,6 +50,15 @@ def main():
     input_viz.setWindowTitle("Pacman Sensors")
     input_viz.show()
 
+
+    ################################### EvoNetwork ################################
+
+    net = EvoNetwork(chromosome)
+    net.initialize_inputs()
+
+    print(net)
+
+
     # 3. Simulation Loop (simplified)
     def update():
 
@@ -59,11 +72,13 @@ def main():
 
         # 1. Get sensory data from the world
         sensory_data = zoo.pacman.integrate_visio_outputs()
-        #print(sensory_data)
+        print(sensory_data)
 
         # 2. Update the diagnostic display (the 5 squares)
         input_viz.display_inputs(sensory_data)
 
+        # 3 integrate to EDNetwork
+        net.integrate_inputs(sensory_data)
         #input_viz.display_inputs(inputs)
 
     timer = QtCore.QTimer()

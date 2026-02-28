@@ -4,9 +4,7 @@ sys.path.insert(0, '../src')
 
 import numpy as np
 
-from PySide6 import QtWidgets
 #from visualizer import BaseVisualizer,PatternVisualizer
-from edpac.visualisation.visualizer import ZooVisualizer, NetworkVisualizer
 
 from edpac.zoo.zoo import Zoo
 #from network import Network
@@ -15,7 +13,6 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 
 from edpac.ed_network.evo_network import EvoNetwork
-from edpac.ed_network.network_builder import create_simple_network
 
 from edpac.config.constants import *
 from edpac.config.physiology_config import NeuronConfig
@@ -24,10 +21,10 @@ from PySide6 import QtWidgets, QtCore
 from edpac.visualisation.network_visualizer import NetworkVisualizer
 
 
-from .chromosome import Chromosome
+from edpac.genetic_algorithm.chromosome import Chromosome
 
-from ..config.constants import *
-from ..config.ga_config import ChromosomeConfig
+from edpac.config.constants import *
+from edpac.config.ga_config import ChromosomeConfig
 
 def run_simulation_step(viz):
     """
@@ -64,7 +61,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
 
     # Create visualizer (800x600 pixels, scaled up 2x for visibility)
-    viz_net = NetworkVisualizer( width=200, height=100, scale=5, title = "EDPac network visualizer")
+    viz_net = NetworkVisualizer( width=300, height=200, scale=5, title = "EDPac network visualizer")
     viz_net.show()
 
     # initilisation

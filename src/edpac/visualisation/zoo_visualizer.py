@@ -29,8 +29,7 @@ class ZooVisualizer(PixelVisualizer):
                     elif zoo.danger[char] == '-1':
                         color = (255, 0, 0) # Red for predators
 
-                    for px, py in zoo.shapes[char]:
-                        self.set_pixel(base_x + px, base_y + py, color)
+                    self.set_pattern(base_x, base_y , zoo.shapes[char].T, color)
 
         # 3. Draw Pacman (The Body and the Head Bar)
         self._draw_pacman(zoo)
@@ -45,8 +44,7 @@ class ZooVisualizer(PixelVisualizer):
         # A. Draw Body Sprite
         direction_name = zoo.pacman_images[p.dir_body]
         body_shape = zoo.pacman_shapes[direction_name]
-        for px, py in body_shape:
-            self.set_pixel(bx + px, by + py, (255, 255, 0)) # Yellow
+        self.set_pattern(bx, by ,body_shape,  (255, 255, 0)) # Yellow
 
         # B. Draw Head Bar (Blue Line)
         # We draw a 2-pixel thick blue line on the edge of the 16x16 cell

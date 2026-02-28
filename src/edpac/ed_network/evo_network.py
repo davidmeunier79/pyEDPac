@@ -8,7 +8,6 @@ import numpy as np
 from typing import List
 from ..ed_network.ed_network import EDNetwork
 
-from ..genetic_algorithm.individual import Individual
 from ..genetic_algorithm.chromosome import Chromosome
 from ..config.network_config import NetworkConfig, AssemblyNature, ProjectionNature
 from ..config.physiology_config import NeuronConfig, SynapseConfig
@@ -83,18 +82,3 @@ class EvoNetwork(EDNetwork):
                 nature=nature,
                 synapse_config=SynapseConfig()
             )
-    
-    @staticmethod
-    def from_individual(individual: Individual, 
-                        config: NetworkConfig = None) -> 'EvoNetwork':
-        """
-        Créer un réseau à partir d'un individu GA
-        
-        Args:
-            individual: Individu GA
-            config: Configuration réseau
-            
-        Returns:
-            Nouveau réseau
-        """
-        return EvoNetwork(individual.chromosome, config)

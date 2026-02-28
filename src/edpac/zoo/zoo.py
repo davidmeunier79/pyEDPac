@@ -2,20 +2,27 @@ import os
 import re
 import random
 from math import floor
+import numpy as np
 
 from edpac.config.constants import *
 
 from .pacman import Pacman
 
 class Zoo:
-    def __init__(self, data_dir="data"):
+    def __init__(self, pac, data_dir="data"):
         self.data_dir = data_dir
         self.shapes = {}  # char -> list of (x, y), dangerosity
         self.grid = []    # 2D list of characters
         self.cell_size = 20
         self.danger = {}
 
-        self.pacman = Pacman(zoo = self) # The dedicated Pacman object
+        self.pacman = pac # The dedicated Pacman object
+        pac.zoo = self
+
+    def set_pacman(self, pac):
+        self.pacman = pac
+
+
 
     def _get_pacman_pos(self):
         """Locates Pacman ('0') on the grid."""
@@ -27,7 +34,8 @@ class Zoo:
 
     def _parse_xbm_hex(self, full_path):
         """Unpacks C-style XBM hex data into coordinates."""
-        coords = []
+        coords = np.zeros(shape = (VISIO_SQRT_NB_NEURONS,VISIO_SQRT_NB_NEURONS), dtype = int)
+
         try:
             with open(full_path, 'r') as f:
                 content = f.read()
@@ -42,7 +50,12 @@ class Zoo:
                     byte_val = bytes_list[row * 2 + byte_idx]
                     for bit in range(8):
                         if (byte_val >> bit) & 1:
-                            coords.append(((byte_idx * 8) + bit + 2, row + 2))
+                            print((byte_idx * 8) + bit , row)
+
+                            assert 0 <= (byte_idx * 8) + bit and (byte_idx * 8) + bit < VISIO_SQRT_NB_NEURONS
+                            assert 0 <= row + bit and row < VISIO_SQRT_NB_NEURONS
+
+                            coords[(byte_idx * 8) + bit , row ] = 1
 
         except Exception as e:
             print(f"Error parsing {full_path}: {e}")
@@ -53,15 +66,35 @@ class Zoo:
 
     def _parse_img_file(self, full_path):
         """Parses the 16x16 '0/1' text files."""
-        coords = []
+        coords = np.zeros(shape = (VISIO_SQRT_NB_NEURONS,VISIO_SQRT_NB_NEURONS), dtype = int)
         try:
             with open(full_path, 'r') as f:
-                for y, line in enumerate(f):
-                    for x, bit in enumerate(line.strip()):
-                        if bit == '.': coords.append((x, y))
-        except Exception: pass
+                # first line
+                firstl = f.readline().strip().split(":")
+                nb_lines = int(firstl[1])
 
-        print(coords)
+                # second line
+                secondl = f.readline().strip().split(":")
+                nb_cols = int(secondl[1])
+
+                #empty line
+                void = f.readline()
+
+                print(f)
+                for y, line in enumerate(f.readlines()):
+                    print(y)
+                    line_ = line.replace("\"", "").replace(",", "")
+
+                    for x, bit in enumerate(line_):
+
+                        if bit == '.':
+
+                            assert 0 <= int(x) and int(x) < nb_lines, f"Error with x: {x}"
+                            assert 0 <= int(y) and int(y) < nb_cols, f"Error with x: {x}"
+
+                            coords[int(y), int(x)] = 1
+        except Exception as e:
+            print(e)
 
         return coords
 
@@ -189,10 +222,4 @@ class Zoo:
         self.grid[old_y][old_x] = '.'
         self.grid[new_y][new_x] = char
 
-    def send_inputs(self):
-
-        for i in range(-floor(NB_VISIO_INPUTS/2), floor(NB_VISIO_INPUTS/2)+1):
-            print(i)
-
-        0/0
 

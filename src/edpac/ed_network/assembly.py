@@ -63,7 +63,7 @@ class Assembly:
         if not idx in self.neuron_ids:
             print(f"!!!! Error with {idx}, not availaible in assembly {self.id}, ids = {self.neuron_ids}")
 
-        index = self.neuron_ids[idx]
+        index = self.neuron_ids.index(idx)
 
         neuron = self.neurons[index]
 

@@ -4,12 +4,8 @@ EvoNetwork.py - Réseau neuronal évolutionnaire
 Construit le réseau à partir d'un chromosome GA
 """
 
-import random
-
 import numpy as np
 from typing import List, Dict, Optional, Tuple
-
-from itertools import product
 
 
 from ..ed_network.network import Network
@@ -87,6 +83,41 @@ class EDNetwork(Network):
                 #self.event_manager.inject_input(neuron, time, weight=activation)
 
 
+    def initialize_inputs(self):
+        """
+        Injecter tous les inputs dans input_assemblies
+
+        Args:
+            sensory_patterns: NB_VISIO_INPUTS
+        """
+        time = 0
+
+        for i in range(NB_VISIO_INPUTS):
+
+            input_pattern = np.ones(shape = (VISIO_SQRT_NB_NEURONS,VISIO_SQRT_NB_NEURONS))
+
+            self.inject_input(assembly_idx = i,  time = time , pattern = input_pattern.reshape(-1,1))
+
+    def integrate_inputs(self, sensory_patterns):
+        """
+        Injecter tous les inputs dans input_assemblies
+
+        Args:
+            sensory_patterns: NB_VISIO_INPUTS
+        """
+        assert len(sensory_patterns) == len(self.input_assemblies), \
+            f"Error {len(sensory_patterns)} != {len(self.input_assemblies)}"
+
+        time = EDSynapse.event_manager.get_time()
+
+        for i, pattern in enumerate(sensory_patterns):
+            if pattern is None:
+                continue
+
+            assert pattern.shape == (VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS)
+
+            self.inject_input(assembly_idx = i,  time = time , pattern = pattern.reshape(-1,1))
+
     def inject_input(self, assembly_idx: int, time: int, pattern: np.ndarray):
         """
         Injecter un input dans une assemblée input
@@ -105,11 +136,10 @@ class EDNetwork(Network):
             raise ValueError(f"Pattern size {len(pattern)} != assembly size {assembly.get_nb_neurons()}")
 
         # Injecter stochastiquement selon le pattern
-        for neuron_idx, activation in enumerate(pattern):
+        for i, activation in enumerate(pattern):
             if np.random.rand() < activation:
-                neuron = assembly.get_neuron(neuron_idx)
+                neuron = assembly.neurons[i]
                 neuron.emit_spike(time)
-                #self.event_manager.inject_input(neuron, time, weight=activation)
 
     def simulate(self, duration: int) -> Dict:
         """
