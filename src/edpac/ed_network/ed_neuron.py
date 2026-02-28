@@ -48,7 +48,7 @@ class EDNeuron(SpikingNeuron):
         #self.compute_spike_emission(time_of_impact, weight_of_impact)
 
         if self.compute_spike_emission(time_of_impact, weight_of_impact):
-            print(f"***** Emitting spike at {time_of_impact}*****")
+            #print(f"***** Emitting spike at {time_of_impact}*****")
             self.emit_spike(time_of_impact)
 
 

@@ -8,12 +8,16 @@ from edpac.zoo.zoo import Zoo, Pacman
 
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
 from edpac.visualisation.input_visualizer import InputVisualizer
+from edpac.visualisation.network_visualizer import NetworkVisualizer
 
 from edpac.genetic_algorithm.chromosome import Chromosome
 
 from edpac.ed_network.evo_network import EvoNetwork
+from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.ga_config import ChromosomeConfig
+from edpac.config.constants import MINIMAL_TIME
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -32,8 +36,6 @@ def main():
     # 1. Initialize Data
     zoo = Zoo(pac, data_dir="/home/INT/meunier.d/Tools/Packages/pyEdPac/data")
     zoo.load_everything(screen_file="screen.0", menagerie_file= "menagerie.txt")
-
-    print(zoo.shapes)
 
     # 2. Initialize Visualiser
     # Original EDPac screens were often around 40x25 characters
@@ -58,12 +60,61 @@ def main():
 
     print(net)
 
+    ################################### Network Vizualisaer ################################
+
+    # Create visualizer (800x600 pixels, scaled up 2x for visibility)
+    viz_net = NetworkVisualizer( width=300, height=200, scale=5, title = "EDPac network visualizer")
+    viz_net.show()
+
+    # initilisation
+    viz_net.init_network(network=net)
+    viz_net.display_network()
+    viz_net.update_display()
+
+
+
+
+
+
+    #
+    #
+    # net.init_output_patterns()
+    #
+    # current_time = EDSynapse.event_manager.get_time()
+    #
+    #
+    # while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
+    #     events = EDSynapse.event_manager.run_one_step()
+    #
+    #     if events is not None:
+    #         viz_net.display_network()
+    #
+    #         #print(events)
+    #         viz_net.update_visu(events)
+    #
+    #     else:
+    #         print("No more events in event manager, breaking")
+    #
+    # output_patterns = net.get_output_patterns()
+    # print(output_patterns)
+    #
+    # zoo.pacman.integrate_motor_outputs(output_patterns)
+    #
+    # # 0/0
+    #
+
+
+
+
+
+
+
+
+
+
 
     # 3. Simulation Loop (simplified)
     def update():
-
-        # Get simulated inputs (e.g., [Wall, Empty, Food, Wall, Animal])
-        #mock_inputs = [1, 0, 2, 1, 3]
 
         zoo.live_one_step()  # Update the model()
 
@@ -72,14 +123,46 @@ def main():
 
         # 1. Get sensory data from the world
         sensory_data = zoo.pacman.integrate_visio_outputs()
-        print(sensory_data)
+        #print(sensory_data)
 
         # 2. Update the diagnostic display (the 5 squares)
         input_viz.display_inputs(sensory_data)
 
         # 3 integrate to EDNetwork
         net.integrate_inputs(sensory_data)
-        #input_viz.display_inputs(inputs)
+
+        viz_net.update_display()
+
+        current_time = EDSynapse.event_manager.get_time()
+
+        net.init_output_patterns()
+
+        while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
+            events = EDSynapse.event_manager.run_one_step()
+
+            if events is not None:
+                viz_net.display_network()
+
+                #print(events)
+                viz_net.update_visu(events)
+
+            else:
+                print("No more events in event manager, breaking")
+                break
+
+            viz_net.update_display()
+
+        output_patterns = net.get_output_patterns()
+        print(output_patterns)
+
+
+        zoo.pacman.integrate_motor_outputs(output_patterns)
+
+
+        # Get simulated inputs (e.g., [Wall, Empty, Food, Wall, Animal])
+        #mock_inputs = [1, 0, 2, 1, 3]
+
+
 
     timer = QtCore.QTimer()
     timer.timeout.connect(update)

@@ -50,7 +50,6 @@ class Zoo:
                     byte_val = bytes_list[row * 2 + byte_idx]
                     for bit in range(8):
                         if (byte_val >> bit) & 1:
-                            print((byte_idx * 8) + bit , row)
 
                             assert 0 <= (byte_idx * 8) + bit and (byte_idx * 8) + bit < VISIO_SQRT_NB_NEURONS
                             assert 0 <= row + bit and row < VISIO_SQRT_NB_NEURONS
@@ -59,8 +58,6 @@ class Zoo:
 
         except Exception as e:
             print(f"Error parsing {full_path}: {e}")
-
-
 
         return coords
 
@@ -80,9 +77,7 @@ class Zoo:
                 #empty line
                 void = f.readline()
 
-                print(f)
                 for y, line in enumerate(f.readlines()):
-                    print(y)
                     line_ = line.replace("\"", "").replace(",", "")
 
                     for x, bit in enumerate(line_):
@@ -111,6 +106,7 @@ class Zoo:
             "up":    self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "userup")),
             "down":  self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "userdown")),
         }
+
         self.shapes['0'] = self.pacman_shapes["right"] # Default
         self.danger['0'] = 0
 

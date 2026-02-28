@@ -29,8 +29,6 @@ class InputVisualizer(PixelVisualizer):
             if pattern is None:
                 continue
 
-            print(pattern)
-
             base_x = i * self.square_size
             base_y = self.padding
 

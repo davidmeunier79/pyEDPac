@@ -180,7 +180,18 @@ class EDNetwork(Network):
 
         return stats
 
-    def get_output_pattern(self) -> np.ndarray:
+    def init_output_patterns(self):
+
+        if not self.output_assemblies:
+            return np.array([])
+
+        # Récupérer toutes les activités de sortie
+        for assembly in self.output_assemblies:
+            for neuron in assembly.neurons:
+                neuron.spike_times = []
+
+
+    def get_output_patterns(self) -> np.ndarray:
         """
         Retourner le pattern de sortie
 
@@ -195,13 +206,14 @@ class EDNetwork(Network):
         # Récupérer toutes les activités de sortie
         output_activities = []
         for assembly in self.output_assemblies:
+            spike_count = []
+
             for neuron in assembly.neurons:
-                spike_count = len(neuron.spike_times)
-                output_activities.append(spike_count)
+                spike_count.append(len(neuron.spike_times))
+
+            output_activities.append(np.sum(np.array(spike_count))/len(assembly.neurons))
 
         if not output_activities:
             return np.zeros(len(self.output_assemblies))
 
-        # Normaliser
-        max_spikes = max(output_activities) if max(output_activities) > 0 else 1
-        return np.array(output_activities) / max_spikes
+        return np.array(output_activities)

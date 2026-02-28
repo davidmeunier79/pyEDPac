@@ -7,6 +7,8 @@ class Pacman(Individual):
         self.x = x
         self.y = y
 
+        self.motor_threshold = 0.5
+
         self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
@@ -20,6 +22,110 @@ class Pacman(Individual):
     def set_directions(self, body, head):
         self.dir_body = body
         self.dir_head = head
+
+    def _get_turn(self, current_dir, turn_type):
+        """
+        Calculates 90-degree turn.
+        turn_type: -1 for Left, 1 for Right
+        Directions: 0:UP, 1:DOWN, 2:LEFT, 3:RIGHT
+        """
+        # Mapping: {current: (turn_left, turn_right)}
+        rotation_map = {
+            0: (2, 3), # Up -> Left is LEFT, Right is RIGHT
+            1: (3, 2), # Down -> Left is RIGHT, Right is LEFT
+            2: (1, 0), # Left -> Left is DOWN, Right is UP
+            3: (0, 1)  # Right -> Left is UP, Right is DOWN
+        }
+        left, right = rotation_map[current_dir]
+        return left if turn_type == -1 else right
+
+    def integrate_motor_outputs(self, motor_values):
+        """
+        m0, m1: Head control
+        m2, m3: Body control
+        """
+        if len(motor_values) < 4: return
+
+        # --- 1. HEAD CONTROL ---
+        h1 = motor_values[0] > self.motor_threshold
+        h2 = motor_values[1] > self.motor_threshold
+
+        if h1 and not h2: # One active: Turn Left
+            self.dir_head = self._get_turn(self.dir_head, -1)
+        elif h2 and not h1: # One active: Turn Right
+            self.dir_head = self._get_turn(self.dir_head, 1)
+        elif h1 and h2: # Both active: Realign to Body
+            self.dir_head = self.dir_body
+
+        # --- 2. BODY CONTROL ---
+        b1 = motor_values[2] > self.motor_threshold
+        b2 = motor_values[3] > self.motor_threshold
+
+        if b1 and not b2: # One active: Turn Left
+            self.dir_body = self._get_turn(self.dir_body, -1)
+        elif b2 and not b1: # One active: Turn Right
+            self.dir_body = self._get_turn(self.dir_body, 1)
+        elif b1 and b2: # Both active: Move Forward
+            self._move_forward()
+
+    def _move_forward(self):
+        """Calculates movement based on dir_body and updates grid."""
+        # Map dir_body to coordinate changes
+        move_map = {0: (0, -1), 1: (0, 1), 2: (-1, 0), 3: (1, 0)}
+        dx, dy = move_map[self.dir_body]
+
+        new_x = self.x + dx
+        new_y = self.y + dy
+
+        # Check for walls in the Zoo grid before moving
+        if 0 <= new_x < len(self.zoo.grid[0]) and 0 <= new_y < len(self.zoo.grid):
+            if self.zoo.grid[new_y][new_x] != 'X': # Not a wall
+                # Update grid data: old position becomes a dot
+
+                #TODO if this a pacgum, increase life; also contacts with prey and predator?
+
+                self.zoo.grid[self.y][self.x] = ' '
+                self.x, self.y = new_x, new_y
+                # New position becomes Pacman
+                self.zoo.grid[self.y][self.x] = '0'
+
+#
+#     def integrate_motor_outputs(self, motor_values):
+#         """
+#         Processes 4 motor signals:
+#         [0, 1] -> Head Direction (Blue Bar / Vision)
+#         [2, 3] -> Body Direction (Movement / Sprite)
+#
+#         Logic:
+#         - If neuron A > 0.5 and B > 0.5 -> RIGHT (3)
+#         - If neuron A > 0.5 and B <= 0.5 -> LEFT (2)
+#         - If neuron A <= 0.5 and B > 0.5 -> DOWN (1)
+#         - If neuron A <= 0.5 and B <= 0.5 -> UP (0)
+#         """
+#         if len(motor_values) < 4:
+#             return
+#
+#         # 1. Integrate Head (Sensors)
+#         h_a, h_b = motor_values[0], motor_values[1]
+#         self.dir_head = self._decode_direction(h_a, h_b)
+#
+#         # 2. Integrate Body (Movement)
+#         b_a, b_b = motor_values[2], motor_values[3]
+#         new_dir_body = self._decode_direction(b_a, b_b)
+#
+#         # If the body direction changed, we attempt a movement in the Zoo
+#         if new_dir_body != self.dir_body:
+#             self.dir_body = new_dir_body
+#             # Note: The actual movement in the grid happens in Zoo.live_one_step
+#             # using this updated dir_body.
+#
+#     def _decode_direction(self, a, b):
+#         """Helper to map two [0,1] neurons to a 0-3 direction index."""
+#         if a > 0.5:
+#             return 3 if b > 0.5 else 2 # Right if B high, else Left
+#         else:
+#             return 1 if b > 0.5 else 0 # Down if B high, else Up
+#
 
     def integrate_visio_outputs(self):
         """
@@ -60,14 +166,16 @@ class Pacman(Individual):
                 nx = self.x + (j * df[0]) + (rel_col * ds[0])
                 ny = self.y + (j * df[1]) + (rel_col * ds[1])
 
-                char = self.zoo.grid[ny][nx]
+                if (0<=ny and ny < len(self.zoo.grid)) and (0<=ny and nx < len(self.zoo.grid[0])):
 
-                if char == '.' or char == ' ' :
-                    continue
+                    char = self.zoo.grid[ny][nx]
 
-                # 4. Check for Objects (Walls or Animals)
-                found_shape = self.zoo.shapes[char]
-                break
+                    if char == '.' or char == ' ' :
+                        continue
+
+                    # 4. Check for Objects (Walls or Animals)
+                    found_shape = self.zoo.shapes[char]
+                    break
 
             # If nothing found in this column, it's an empty sensor
             visio_patterns.append(found_shape)
