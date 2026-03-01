@@ -13,11 +13,15 @@ from ..config.ga_config import (
 
 from ..config.constants import *
 
+from ..config.ga_config import PopulationConfig
+
+pop_config = PopulationConfig()
+
+
 class Population:
     """Population d'individus"""
     
-    def __init__(self, 
-                 size: int,
+    def __init__(self,
                  chromosome_config,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
@@ -32,7 +36,8 @@ class Population:
             crossover_config: Configuration de crossover
             mutation_config: Configuration de mutation
         """
-        self.size = size
+        self.size = pop_config.POPULATION_SIZE
+
         self.chromosome_config = chromosome_config
         
         self.selection_config = selection_config or SelectionConfig()
@@ -42,7 +47,7 @@ class Population:
         # Créer population initiale
         self.individuals: List[Individual] = [
             Individual(config=chromosome_config) 
-            for _ in range(size)
+            for _ in range(self.size)
         ]
         
         # Statistiques

@@ -4,25 +4,35 @@ import random
 from math import floor
 import numpy as np
 
-from edpac.config.constants import *
+from edpac.config.constants import NB_LIFE_POINTS_PER_PREY, VISIO_SQRT_NB_NEURONS
 
 from .pacman import Pacman
 
 class Zoo:
-    def __init__(self, pac, data_dir="data"):
+    def __init__(self, data_dir="data"):
         self.data_dir = data_dir
         self.shapes = {}  # char -> list of (x, y), dangerosity
         self.grid = []    # 2D list of characters
         self.cell_size = 20
         self.danger = {}
 
-        self.pacman = pac # The dedicated Pacman object
-        pac.zoo = self
+        self.pacman = None # The dedicated Pacman object
+
 
     def set_pacman(self, pac):
         self.pacman = pac
+        pac.zoo = self
+        self._set_pacman_pos()
 
 
+
+
+    def _set_pacman_pos(self):
+        """Locates Pacman ('0') on the grid."""
+        for y, row in enumerate(self.grid):
+            for x, char in enumerate(row):
+                if char == '0':
+                    self.pacman.set_position(x, y)
 
     def _get_pacman_pos(self):
         """Locates Pacman ('0') on the grid."""
@@ -133,11 +143,7 @@ class Zoo:
         with open(screen_path, 'r') as f:
             for y, line in enumerate(f):
                 row = list(line.rstrip('\n'))
-                for x, char in enumerate(row):
-                    if char == '0':
-                        self.pacman.set_position(x, y)
                 self.grid.append(row)
-
 
     def get_move_probabilities(self, animal_x, animal_y, char):
         """
@@ -196,7 +202,17 @@ class Zoo:
 
         for x, y, char in entities:
             if char == '0':
-                # Pacman movement (to be driven by Network later)
+
+                for dir_x, dir_y in directions[:-1]:
+                    if 0 <= x + dir_x < cols and 0 <= y + dir_y < rows:
+
+                        char = self.grid
+                        if zoo.danger[char] == -1:
+
+                            self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
+
+                            print("Contact with predator ", char, " Life points: " , self.pacman.life_points)
+
                 continue
 
             # Calculate biased probabilities
@@ -215,7 +231,9 @@ class Zoo:
     def _move_actor(self, old_x, old_y, new_x, new_y, char):
         """Helper to update grid and leave a dot behind if necessary."""
         # In EDPac, usually, when an animal moves, it leaves the floor ('.') behind.
-        self.grid[old_y][old_x] = '.'
+        tmp_char = self.grid[new_y][new_x]
+
+        self.grid[old_y][old_x] = tmp_char
         self.grid[new_y][new_x] = char
 
 

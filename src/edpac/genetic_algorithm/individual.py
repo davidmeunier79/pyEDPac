@@ -35,13 +35,13 @@ class Individual():
         
         self.config = config or ChromosomeConfig()
         
-        super().__init__(chromosome)
-
         if chromosome is None:
             self.chromosome = Chromosome(self.config)
         else:
             self.chromosome = chromosome
         
+        super().__init__()
+
 
 
         # Fitness
@@ -52,8 +52,7 @@ class Individual():
         self.age = 0
         self.birth_generation = 0
         
-        # Réseau (sera créé lors de l'évaluation)
-        self.network = None
+
     
     def set_chromosome(self, chromosome: Chromosome):
         """Définir le chromosome"""
@@ -61,6 +60,11 @@ class Individual():
         self.fitness_evaluated = False
         self.fitness = -float('inf')
     
+    def get_chromosome(self):
+
+        if self.chromosome:
+            return self.chromosome
+
     def evaluate(self, eval_func) -> float:
         """
         Évaluer l'individu

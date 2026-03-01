@@ -1,5 +1,5 @@
 from edpac.genetic_algorithm.individual import Individual
-from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH
+from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY
 
 class Pacman(Individual):
     def __init__(self, x=0, y=0, zoo=None):
@@ -8,7 +8,7 @@ class Pacman(Individual):
         self.y = y
 
         self.motor_threshold = 0.5
-
+        self.life_points = INITIAL_LIFE_POINTS
         self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
@@ -83,49 +83,28 @@ class Pacman(Individual):
                 # Update grid data: old position becomes a dot
 
                 #TODO if this a pacgum, increase life; also contacts with prey and predator?
+                if self.zoo.grid[new_y][new_x] == ".":
+                    self.life_points = self.life_points + NB_LIFE_POINTS_PER_PACGUM
+
+                    print("Eating pacgum, Life points: " , self.life_points)
+
+                if self.zoo.grid[new_y][new_x] != " ":
+
+                    char = self.zoo.grid[new_y][new_x]
+                    if self.zoo.danger[char] == "1":
+                        self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
+
+
+                        print("Eating prey, Life points: " , self.life_points)
 
                 self.zoo.grid[self.y][self.x] = ' '
+
+
+
                 self.x, self.y = new_x, new_y
                 # New position becomes Pacman
                 self.zoo.grid[self.y][self.x] = '0'
 
-#
-#     def integrate_motor_outputs(self, motor_values):
-#         """
-#         Processes 4 motor signals:
-#         [0, 1] -> Head Direction (Blue Bar / Vision)
-#         [2, 3] -> Body Direction (Movement / Sprite)
-#
-#         Logic:
-#         - If neuron A > 0.5 and B > 0.5 -> RIGHT (3)
-#         - If neuron A > 0.5 and B <= 0.5 -> LEFT (2)
-#         - If neuron A <= 0.5 and B > 0.5 -> DOWN (1)
-#         - If neuron A <= 0.5 and B <= 0.5 -> UP (0)
-#         """
-#         if len(motor_values) < 4:
-#             return
-#
-#         # 1. Integrate Head (Sensors)
-#         h_a, h_b = motor_values[0], motor_values[1]
-#         self.dir_head = self._decode_direction(h_a, h_b)
-#
-#         # 2. Integrate Body (Movement)
-#         b_a, b_b = motor_values[2], motor_values[3]
-#         new_dir_body = self._decode_direction(b_a, b_b)
-#
-#         # If the body direction changed, we attempt a movement in the Zoo
-#         if new_dir_body != self.dir_body:
-#             self.dir_body = new_dir_body
-#             # Note: The actual movement in the grid happens in Zoo.live_one_step
-#             # using this updated dir_body.
-#
-#     def _decode_direction(self, a, b):
-#         """Helper to map two [0,1] neurons to a 0-3 direction index."""
-#         if a > 0.5:
-#             return 3 if b > 0.5 else 2 # Right if B high, else Left
-#         else:
-#             return 1 if b > 0.5 else 0 # Down if B high, else Up
-#
 
     def integrate_visio_outputs(self):
         """
