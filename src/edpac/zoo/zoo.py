@@ -103,7 +103,7 @@ class Zoo:
 
         return coords
 
-    def load_everything(self, screen_file="screen.0", menagerie_file= "menagerie.txt"):
+    def load_menagerie(self,  menagerie_file= "menagerie.txt"):
         # 1. Load the '.' (dot)
         self.shapes['.'] = self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "dot"))
         self.danger['.'] = 0
@@ -138,10 +138,18 @@ class Zoo:
                     self.shapes[char] = self._parse_img_file(os.path.join(self.data_dir, "menagerie", rel_path))
                     self.danger[char] = parts[2]
 
+
+    def load_screen(self, screen_file="screen.0"):
+
         # Load the screen and find the initial '0' to place Pacman
         screen_path = os.path.join(self.data_dir, "screens",  f"{screen_file}")
         with open(screen_path, 'r') as f:
             for y, line in enumerate(f):
+                for x, el in enumerate(line.strip()):
+                    if el == '0':
+                        print("Found pacman position !")
+                        self.pacman.set_position(x, y)
+
                 row = list(line.rstrip('\n'))
                 self.grid.append(row)
 

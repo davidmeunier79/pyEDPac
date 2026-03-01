@@ -18,7 +18,6 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.ga_config import ChromosomeConfig
 from edpac.config.constants import MINIMAL_TIME, DATA_PATH
 
 
@@ -38,7 +37,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def evaluate_individual(indiv):
+def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -47,52 +46,15 @@ def evaluate_individual(indiv):
     #app = QtWidgets.QApplication(sys.argv)
 
 
-
-    zoo_viz = ZooVisualizer(width=800, height=500, scale=2)
-
-    zoo = Zoo(data_dir=DATA_PATH)
-
-
-    # Connect the "X" button of the window to our stop function
-    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
-    # if 'destroyed' signal doesn't fire immediately.
-    zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
-    zoo_viz.destroyed.connect(stop_everything)
-
-
-    #################################### Zoo ######################################
-    # 1. Initialize Data
-    zoo.load_everything(screen_file="screen.0", menagerie_file= "menagerie.txt")
-
-    ################################## Inputs #####################################
-    # 2. Input/Sensor View (The new class)
-    input_viz = InputVisualizer(scale=2)
-
-    input_viz.setAttribute(Qt.WA_DeleteOnClose)
-    input_viz.destroyed.connect(stop_everything)
-
-    input_viz.setWindowTitle("Pacman Sensors")
-    input_viz.show()
-
-    ################################### Network Vizualisaer ################################
-
-    # Create visualizer (800x600 pixels, scaled up 2x for visibility)
-    viz_net = NetworkVisualizer( width=300, height=200, scale=5, title = "EDPac network visualizer")
-
-    viz_net.setAttribute(Qt.WA_DeleteOnClose)
-    viz_net.destroyed.connect(stop_everything)
-
-    viz_net.show()
-
-
     ################################# Pacman ###########################
-
-
     print(indiv)
 
     pac = Pacman(indiv)
 
     zoo.set_pacman(pac)
+    zoo.load_screen(screen_file="screen.0")
+
+
 
     ################################### EvoNetwork ################################
 
@@ -102,15 +64,14 @@ def evaluate_individual(indiv):
     print(net)
 
     # initilisation
-    viz_net.init_network(network=net)
-    viz_net.display_network()
-    viz_net.update_display()
+    net_viz.init_network(network=net)
+    net_viz.display_network()
+    net_viz.update_display()
 
-    #################################### Zoo Visualiser ###################################
+    #################################### Zoo  ###################################
     # 2. Initialize Visualiser
     # Original EDPac screens were often around 40x25 characters
     # 40 * 16 = 640px, 25 * 16 = 400px
-    zoo_viz.show()
 
     # 3. Initial Draw
     zoo_viz.draw_zoo(zoo)
@@ -146,7 +107,7 @@ def evaluate_individual(indiv):
         # 3 integrate to EDNetwork
         net.integrate_inputs(sensory_data)
 
-        viz_net.update_display()
+        net_viz.update_display()
 
         current_time = EDSynapse.event_manager.get_time()
 
@@ -156,16 +117,16 @@ def evaluate_individual(indiv):
             events = EDSynapse.event_manager.run_one_step()
 
             if events is not None:
-                viz_net.display_network()
+                net_viz.display_network()
 
                 #print(events)
-                viz_net.update_visu(events)
+                net_viz.update_visu(events)
 
             else:
                 print("No more events in event manager, breaking")
                 break
 
-            viz_net.update_display()
+            net_viz.update_display()
 
         output_patterns = net.get_output_patterns()
         print(output_patterns)
@@ -206,17 +167,49 @@ def main():
     global SIMULATION_ACTIVE
 
 
-    # Create objects
-    chromo_config = ChromosomeConfig()
 
-    population = Population(chromo_config)
+    ################################### Zoo Visualizer ################################
+    zoo_viz = ZooVisualizer(width=800, height=500, scale=2)
+    # Connect the "X" button of the window to our stop function
+    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
+    # if 'destroyed' signal doesn't fire immediately.
+    zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
+    zoo_viz.destroyed.connect(stop_everything)
+
+    zoo_viz.show()
+    ################################### Network Visualizer ################################
+    # Create visualizer (800x600 pixels, scaled up 2x for visibility)
+    net_viz = NetworkVisualizer( width=300, height=200, scale=5, title = "EDPac network visualizer")
+    net_viz.setAttribute(Qt.WA_DeleteOnClose)
+    net_viz.destroyed.connect(stop_everything)
+
+    net_viz.show()
+    ################################## Inputs Visualizer #####################################
+    # 2. Input/Sensor View (The new class)
+    input_viz = InputVisualizer(scale=2)
+
+    input_viz.setAttribute(Qt.WA_DeleteOnClose)
+    input_viz.destroyed.connect(stop_everything)
+
+    input_viz.setWindowTitle("Pacman Sensors")
+    input_viz.show()
+
+    # Create objects
+    #################################### Population ######################################
+
+    population = Population()
+
+    #################################### Zoo ######################################
+    # 1. Initialize Data
+    zoo = Zoo(data_dir=DATA_PATH)
+    zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
     for i, ind in enumerate(population.individuals):
         # Check the flag BEFORE starting the next individual
         if not SIMULATION_ACTIVE:
             break
 
-        score = evaluate_individual(ind)
+        score = evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
         print(f"Gen {i} Fitness: {score}")
 
     print("Evolution finished or aborted.")

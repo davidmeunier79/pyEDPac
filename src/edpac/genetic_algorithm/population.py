@@ -15,6 +15,8 @@ from ..config.constants import *
 
 from ..config.ga_config import PopulationConfig
 
+from edpac.config.ga_config import ChromosomeConfig
+
 pop_config = PopulationConfig()
 
 
@@ -22,7 +24,7 @@ class Population:
     """Population d'individus"""
     
     def __init__(self,
-                 chromosome_config,
+                 chromosome_config = None,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
                  mutation_config: MutationConfig = None):
@@ -38,7 +40,7 @@ class Population:
         """
         self.size = pop_config.POPULATION_SIZE
 
-        self.chromosome_config = chromosome_config
+        self.chromosome_config = chromosome_config or ChromosomeConfig()
         
         self.selection_config = selection_config or SelectionConfig()
         self.crossover_config = crossover_config or CrossoverConfig()
