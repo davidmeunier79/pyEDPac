@@ -8,6 +8,9 @@ Toutes les constantes globales du projet
 # Tous les temps sont en secondes
 # Tous les potentiels sont en millivolts
 
+
+DATA_PATH = "/home/INT/meunier.d/Tools/Packages/pyEdPac/data"
+
 # Pacman parameters (from DefineZoo.h concept)
 NB_MOTOR_PATTERNS = 4
 

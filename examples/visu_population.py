@@ -19,7 +19,7 @@ from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.ga_config import ChromosomeConfig
-from edpac.config.constants import MINIMAL_TIME
+from edpac.config.constants import MINIMAL_TIME, DATA_PATH
 
 
 
@@ -50,7 +50,7 @@ def evaluate_individual(indiv):
 
     zoo_viz = ZooVisualizer(width=800, height=500, scale=2)
 
-    zoo = Zoo(data_dir="/home/INT/meunier.d/Tools/Packages/pyEdPac/data")
+    zoo = Zoo(data_dir=DATA_PATH)
 
 
     # Connect the "X" button of the window to our stop function

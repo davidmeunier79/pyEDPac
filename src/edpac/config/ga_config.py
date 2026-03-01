@@ -40,12 +40,21 @@ class ChromosomeConfig:
 class PopulationConfig:
     """Configuration de la population"""
     # Taille population
-    POPULATION_SIZE: int = 100
-    ELITE_SIZE: int = 10         # Meilleurs individus conservés
-    
+#     POPULATION_SIZE: int = 100
+#     ELITE_SIZE: int = 10         # Meilleurs individus conservés
+#
+#     # Génération
+#     NB_GENERATIONS: int = 50
+#
+        # Taille population
+    POPULATION_SIZE: int = 5
+    ELITE_SIZE: int = 1         # Meilleurs individus conservés
+
     # Génération
-    NB_GENERATIONS: int = 50
-    
+    NB_GENERATIONS: int = 2
+
+
+
     # Remplacement
     #REPLACEMENT_RATE: float = 0.8  # 80% de la population remplacée
 
