@@ -20,6 +20,7 @@ class Synapse(Link):
         # Enregistrer auprès des neurones
         if pre_neuron is not None:
             pre_neuron.add_outgoing_link(self)
+
         if post_neuron is not None:
             post_neuron.add_incoming_link(self)
     

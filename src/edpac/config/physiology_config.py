@@ -16,11 +16,11 @@ class SynapseConfig:
     
     # Poids initial
     WEIGHT: float = 0.5          # Poids moyen
-    INITIAL_WEIGHT_MODE: str = "random"  # "fixed" ou "random"
+    #INITIAL_WEIGHT_MODE: str = "fixed"  # "fixed" ou "random"
     
     # Modes
-    NO_AUTO_CONNEXIONS: bool = True  # Pas d'autosynapses
-    TOPOLOGICAL_DELAY: bool = False   # Délai basé topologie
+    #NO_AUTO_CONNEXIONS: bool = True  # Pas d'autosynapses
+    #TOPOLOGICAL_DELAY: bool = False   # Délai basé topologie
     
     # STDP (Spike-Timing-Dependent Plasticity)
     ONLINE_LEARNING: bool = False
@@ -36,10 +36,13 @@ class NeuronConfig:
     """Configuration des neurones"""
     # Potentiel de repos
     RESTING_POTENTIAL: float = 0.0  # mV
-    
+
+    MEMBRANE_TIME_CONSTANT = 50.0  # ms (tau)
+    #SYNAPSE_TIME_CONSTANT = 10.0   # ms
+
     # Seuil
     NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
-    THRESHOLD_REF: float = 2.0     # Seuil de référence
+    THRESHOLD_REF: float = 2     # Seuil de référence
     
     # Refractory periods
     ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
@@ -47,14 +50,14 @@ class NeuronConfig:
     BURSTY_MODE: bool = True          # Bursting neurons
     
     # Inhibition
-    HYPER_POLARISATION_POTENTIAL: float = -20  # mV
-    INHIBITION_RESET_MODE: bool = True
+    #HYPER_POLARISATION_POTENTIAL: float = -20  # mV
+    #INHIBITION_RESET_MODE: bool = True
 
 @dataclass  
 class EventManagerConfig:
     """Configuration du gestionnaire d'événements"""
     DELAY_STEP: int = 5
-    MAX_DELAY: float = 7.07  # 1.414 * SQRT_NB_ASSEMBLIES
+    #MAX_DELAY: float = 7.07  # 1.414 * SQRT_NB_ASSEMBLIES
     PSP_EVENT_PACKAGE_SIZE: int = 10000
 
 # Instances par défaut

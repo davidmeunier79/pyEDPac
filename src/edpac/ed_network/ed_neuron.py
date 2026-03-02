@@ -32,24 +32,30 @@ class EDNeuron(SpikingNeuron):
         Args:
             spike_time: Temps du spike (ms)
         """
-        self.last_time_of_firing = spike_time
-        self.spike_times.append(spike_time)
-        
-        if len(self.incoming_links):
-            for synapse in self.incoming_links:
-                synapse.update_last_time_of_post_spike(spike_time)
 
-        # Programmer le spike dans le EventManager
-        manager = EDSynapse.get_event_manager()
-        manager.schedule_spike(spike_time, self)
-    
+        for synapse in self.incoming_links:
+            synapse.update_last_time_of_post_spike(spike_time)
+
+        # Pour chaque synapse sortante, programmer le PSP arrivant
+        for synapse in self.outgoing_links:
+            EDSynapse.event_manager.schedule_psp(synapse, spike_time)
+
+            # Mise à jour STDP pour synapses pré-synaptiques
+            synapse.update_last_time_of_pre_spike(spike_time)
+
     def compute_psp_impact(self, time_of_impact: int, weight_of_impact: float):
         """Traiter l'impact d'un PSP"""
         #self.compute_spike_emission(time_of_impact, weight_of_impact)
 
-        if self.compute_spike_emission(time_of_impact, weight_of_impact):
+        if self.test_spike_emission(time_of_impact, weight_of_impact):
+
             #print(f"***** Emitting spike at {time_of_impact}*****")
+
             self.emit_spike(time_of_impact)
+
+            return True
+        else:
+            return False
 
 
     def __repr__(self):

@@ -139,6 +139,7 @@ class EDNetwork(Network):
         for i, activation in enumerate(pattern):
             if np.random.rand() < activation:
                 neuron = assembly.neurons[i]
+                #print("Input spike in neuron ", i)
                 neuron.emit_spike(time)
 
     def simulate(self, duration: int) -> Dict:

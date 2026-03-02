@@ -3,7 +3,6 @@ from edpac.ed_network.network import Network # Assuming your repo structure
 from edpac.config.constants import *
 from math import sqrt
 
-from edpac.ed_network.event_manager import SpikeEvent
 from .pixel_visualizer import PixelVisualizer
 
 class NetworkVisualizer(PixelVisualizer):
@@ -97,7 +96,9 @@ class NetworkVisualizer(PixelVisualizer):
 
             self.draw_assembly(assembly, x_base, y_offset )
 
-    def display_network(self):
+    def display_empty_network(self):
+
+        self._init_buffer()
 
         all_pos = list(self.neuron_positions.values())
 
@@ -106,20 +107,20 @@ class NetworkVisualizer(PixelVisualizer):
         for x,y in all_pos:
             self.set_pixel(x, y, (0, 0, 0)) # Black
 
-        #self.update_display()
+        self.update_display()
 
-    def update_visu(self, events):
+    def update_visu(self, spike_neuron_ids):
 
         all_pos_spikes = []
 
-        for event in events:
-            if isinstance(event, SpikeEvent):
-                if event.neuron.id in self.neuron_positions.keys():
-                    pos = self.neuron_positions[event.neuron.id]
-                    all_pos_spikes.append(pos)
+        for neuron_id in spike_neuron_ids:
+
+            if neuron_id in self.neuron_positions.keys():
+                pos = self.neuron_positions[neuron_id]
+                all_pos_spikes.append(pos)
 
         for x,y in all_pos_spikes:
             self.set_pixel(x, y, (255, 255, 0)) # Yellow
 
-        #self.update_display()
+        self.update_display()
 

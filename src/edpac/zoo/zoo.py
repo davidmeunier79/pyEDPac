@@ -22,7 +22,6 @@ class Zoo:
     def set_pacman(self, pac):
         self.pacman = pac
         pac.zoo = self
-        self._set_pacman_pos()
 
 
 
@@ -143,6 +142,11 @@ class Zoo:
 
         # Load the screen and find the initial '0' to place Pacman
         screen_path = os.path.join(self.data_dir, "screens",  f"{screen_file}")
+
+        if len(self.grid):
+            del self.grid
+
+        self.grid = []
         with open(screen_path, 'r') as f:
             for y, line in enumerate(f):
                 for x, el in enumerate(line.strip()):

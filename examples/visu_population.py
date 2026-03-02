@@ -1,4 +1,6 @@
 import os
+import gc
+
 import sys
 sys.path.insert(0, '../src')
 
@@ -50,7 +52,6 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     print(indiv)
 
     pac = Pacman(indiv)
-
     zoo.set_pacman(pac)
     zoo.load_screen(screen_file="screen.0")
 
@@ -65,8 +66,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     # initilisation
     net_viz.init_network(network=net)
-    net_viz.display_network()
-    net_viz.update_display()
+    net_viz.display_empty_network()
 
     #################################### Zoo  ###################################
     # 2. Initialize Visualiser
@@ -107,26 +107,24 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         # 3 integrate to EDNetwork
         net.integrate_inputs(sensory_data)
 
-        net_viz.update_display()
-
         current_time = EDSynapse.event_manager.get_time()
 
         net.init_output_patterns()
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
-            events = EDSynapse.event_manager.run_one_step()
 
-            if events is not None:
-                net_viz.display_network()
+            net_viz.display_empty_network()
 
-                #print(events)
-                net_viz.update_visu(events)
+            spike_neuron_ids = EDSynapse.event_manager.run_one_step()
+
+            if spike_neuron_ids is not None:
+
+                print("Nb spikes: ", len(spike_neuron_ids))
+                net_viz.update_visu(spike_neuron_ids)
 
             else:
                 print("No more events in event manager, breaking")
                 break
-
-            net_viz.update_display()
 
         output_patterns = net.get_output_patterns()
         print(output_patterns)
@@ -158,6 +156,17 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     # 4. BLOCK here until loop.quit() is called
     loop.exec_()
+
+    # --- CRITICAL CLEANUP STEP ---
+    # 2. Disconnect signals to allow the GC to see these objects as 'dead'
+    timer.timeout.disconnect(update)
+
+    # 3. Explicitly delete heavy local references
+    del net
+    del pac
+
+    del timer
+    del loop
 
     # 5. Now we can finally return the value to the EA
     return EDSynapse.event_manager.get_time()
@@ -211,6 +220,10 @@ def main():
 
         score = evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
         print(f"Gen {i} Fitness: {score}")
+
+        # 5. Force Python to reclaim memory now rather than 'whenever'
+        # This is especially helpful when dealing with large neural networks
+        gc.collect()
 
     print("Evolution finished or aborted.")
 

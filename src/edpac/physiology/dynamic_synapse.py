@@ -30,22 +30,27 @@ class DynamicSynapse(Synapse):
     
     def _initialize_weight(self) -> float:
         """Initialiser le poids"""
-        if self.config.INITIAL_WEIGHT_MODE == "fixed":
-            return self.config.WEIGHT
-        elif self.config.INITIAL_WEIGHT_MODE == "random":
-            sign = np.random.choice([-1, 1])
-            return self.config.WEIGHT * (1.0 + sign * np.random.random())
-        else:
-            return self.config.WEIGHT
+#         #TODO
+#         if self.config.INITIAL_WEIGHT_MODE == "fixed":
+#             return self.config.WEIGHT
+#         elif self.config.INITIAL_WEIGHT_MODE == "random":
+#             sign = np.random.choice([-1, 1])
+#             return self.config.WEIGHT * (1.0 + sign * np.random.random())
+#         else:
+#
+        return self.config.WEIGHT
     
     def _initialize_delay(self) -> int:
         """Initialiser le délai de transmission"""
-        if self.config.TOPOLOGICAL_DELAY:
-            # À implémenter: calculer délai topologique
-            return self.config.DELAY
-        else:
-            # Délai aléatoire
-            return np.random.randint(1, self.config.DELAY + 1)
+#
+#         #TODO
+#         if self.config.TOPOLOGICAL_DELAY:
+#             # À implémenter: calculer délai topologique
+#             return self.config.DELAY
+#         else:
+
+        # Délai aléatoire
+        return np.random.randint(1, self.config.DELAY + 1)
     
     def get_weight(self) -> float:
         """Retourner le poids"""
@@ -57,7 +62,7 @@ class DynamicSynapse(Synapse):
     
     def update_last_time_of_pre_spike(self, new_time: int):
         """Mettre à jour le temps du dernier spike pré-synaptique"""
-        self.last_time_of_pre_spike = new_time
+        self.last_time_of_pre_spike = new_time + self.delay
         if self.config.ONLINE_LEARNING:
             self.compute_new_weight()
     

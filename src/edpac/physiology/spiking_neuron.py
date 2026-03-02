@@ -7,9 +7,9 @@ Neurone avec génération de spikes (event-driven)
 import numpy as np
 from ..topology.neuron import Neuron
 from ..config.physiology_config import NeuronConfig
-from ..math_tools.neuron_math import NeuronMathTools
+#from ..math_tools.neuron_math import NeuronMathTools
 
-class SpikingNeuron(Neuron, NeuronMathTools):
+class SpikingNeuron(Neuron):
     """Neurone générant des spikes (potentiels d'action)"""
     
     def __init__(self, config: NeuronConfig = None):
@@ -17,8 +17,7 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         super().__init__()
         
         self.config = config or NeuronConfig()
-        self.math_tools = NeuronMathTools(config)
-        
+
         # État du neurone
         self.membrane_potential = self.config.RESTING_POTENTIAL
         self.threshold_potential = self.config.THRESHOLD_REF
@@ -29,7 +28,6 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         
         # Historique (pour traçage/stats)
         self.spike_times = []
-        self.membrane_potential_history = []
     
     def init_neuron(self):
         """Initialiser le neurone"""
@@ -42,7 +40,6 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         self.last_time_of_psp_impact = -1
         self.last_time_of_firing = -1
         self.spike_times = []
-        self.membrane_potential_history = []
     
     def update_membrane_potential(self, current_time: int) -> float:
         """
@@ -51,18 +48,18 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         Applique la décroissance exponentielle ou linéaire
         """
         if self.last_time_of_psp_impact == -1:
-            return self.membrane_potential
+            self.last_time_of_psp_impact = current_time
         
         time_elapsed = current_time - self.last_time_of_psp_impact
         
         # Décroissance du potentiel (simplifié)
-        decay_factor = np.exp(-time_elapsed / self.math_tools.MEMBRANE_TIME_CONSTANT)  # Tau = 50ms
+        decay_factor = np.exp(-time_elapsed / self.config.MEMBRANE_TIME_CONSTANT)  # Tau = 50ms
         self.membrane_potential *= decay_factor
-        
-        # Limiter aux bornes
-        self.membrane_potential = max(
-            self.config.HYPER_POLARISATION_POTENTIAL,
-            self.membrane_potential)
+#
+#         # Limiter aux bornes
+#         self.membrane_potential = max(
+#             self.config.HYPER_POLARISATION_POTENTIAL,
+#             self.membrane_potential)
 
         
         return self.membrane_potential
@@ -73,25 +70,21 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         
         (Peut inclure période réfractaire absolue/relative)
         """
-        if self.last_time_of_firing == -1:
-            return self.threshold_potential
-        
-        time_since_spike = current_time - self.last_time_of_firing
-        
-        # Période réfractaire absolue
-        if self.config.ABSOLUTE_REFRACTORY > 0:
+        if self.last_time_of_firing != -1:
+
+            time_since_spike = current_time - self.last_time_of_firing
+#
+#             # Période réfractaire absolue
+#             if self.config.ABSOLUTE_REFRACTORY > 0:
+#
             if time_since_spike < self.config.ABSOLUTE_REFRACTORY:
-                return float('inf')  # Impossible de tirer
-        
-        # Période réfractaire relative (seuil augmente progressivement)
-        if self.config.RELATIVE_REFRACTORY > 0 and time_since_spike < self.config.RELATIVE_REFRACTORY:
-            relief = time_since_spike / self.config.RELATIVE_REFRACTORY
-            return self.config.THRESHOLD_REF * (1.0 + relief)
-        
+                self.threshold_potential = float('inf')  # Impossible de tirer
+                return
+
         # Seuil revient à la normale
-        return self.config.THRESHOLD_REF
+        self.threshold_potential = self.config.THRESHOLD_REF
     
-    def compute_spike_emission(self, time_of_impact: int, weight_of_impact: float) -> bool:
+    def test_spike_emission(self, time_of_impact: int, weight_of_impact: float) -> bool:
         """
         Calculer et retourner si le neurone génère un spike
         
@@ -104,27 +97,29 @@ class SpikingNeuron(Neuron, NeuronMathTools):
         """
         # Mettre à jour les potentiels
         self.update_membrane_potential(time_of_impact)
-        current_threshold = self.update_threshold_potential(time_of_impact)
+        self.update_threshold_potential(time_of_impact)
         
         # Ajouter l'impact du PSP
         #print("membrane_potential before PSP:", self.membrane_potential, current_threshold )
-
         self.membrane_potential += weight_of_impact
         #print("membrane_potential after PSP:", self.membrane_potential, current_threshold )
 
         self.last_time_of_psp_impact = time_of_impact
         
         # Vérifier si spike
-        if self.membrane_potential >= current_threshold:
+        if self.membrane_potential >= self.threshold_potential:
             self.spike_times.append(time_of_impact)
             self.last_time_of_firing = time_of_impact
             
             # Appliquer inhibition (hyperpolarisation)
-            if self.config.INHIBITION_RESET_MODE:
-                self.membrane_potential = self.config.HYPER_POLARISATION_POTENTIAL
-            else:
-                self.membrane_potential = self.config.RESTING_POTENTIAL
-            
+            self.membrane_potential = self.config.RESTING_POTENTIAL
+#
+#             #TODO
+#             if self.config.INHIBITION_RESET_MODE:
+#                 self.membrane_potential = self.config.HYPER_POLARISATION_POTENTIAL
+#             else:
+#                 self.membrane_potential = self.config.RESTING_POTENTIAL
+#
             return True
         
         return False

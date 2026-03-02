@@ -13,11 +13,14 @@ class PixelVisualizer(QtWidgets.QLabel):
         self.scale = scale # Zoom factor (e.g., 2 makes 1 pixel look like 2x2)
 
         # Create a black background buffer (RGBA)
-        self.buffer = np.zeros((self.h, self.w, 4), dtype=np.uint8)
-        self.buffer[:, :, 3] = 255  # Set Alpha channel to opaque
+        self._init_buffer()
 
         self.setFixedSize(self.w * self.scale, self.h * self.scale)
         self.setWindowTitle(title)
+
+    def _init_buffer(self):
+        self.buffer = np.zeros((self.h, self.w, 4), dtype=np.uint8)
+        self.buffer[:, :, 3] = 255  # Set Alpha channel to opaque
 
     def clear_canvas(self, color=(0, 0, 0)):
         """Resets the whole buffer to a specific color."""
