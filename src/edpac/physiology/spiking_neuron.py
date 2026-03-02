@@ -20,7 +20,7 @@ class SpikingNeuron(Neuron):
 
         # État du neurone
         self.membrane_potential = self.config.RESTING_POTENTIAL
-        self.threshold_potential = self.config.THRESHOLD_REF
+        #self.threshold_potential = self.config.THRESHOLD_REF
         
         # Timing
         self.last_time_of_psp_impact = -1
@@ -36,7 +36,7 @@ class SpikingNeuron(Neuron):
     def reset_neuron(self):
         """Réinitialiser l'état du neurone"""
         self.membrane_potential = self.config.RESTING_POTENTIAL
-        self.threshold_potential = self.config.THRESHOLD_REF
+        #self.threshold_potential = self.config.THRESHOLD_REF
         self.last_time_of_psp_impact = -1
         self.last_time_of_firing = -1
         self.spike_times = []
@@ -52,9 +52,12 @@ class SpikingNeuron(Neuron):
         
         time_elapsed = current_time - self.last_time_of_psp_impact
         
+        #print(time_elapsed)
+        #print(self.membrane_potential)
         # Décroissance du potentiel (simplifié)
         decay_factor = np.exp(-time_elapsed / self.config.MEMBRANE_TIME_CONSTANT)  # Tau = 50ms
         self.membrane_potential *= decay_factor
+        #print(self.membrane_potential)
 #
 #         # Limiter aux bornes
 #         self.membrane_potential = max(
@@ -78,11 +81,11 @@ class SpikingNeuron(Neuron):
 #             if self.config.ABSOLUTE_REFRACTORY > 0:
 #
             if time_since_spike < self.config.ABSOLUTE_REFRACTORY:
-                self.threshold_potential = float('inf')  # Impossible de tirer
-                return
+                return float('inf')  # Impossible de tirer
+
 
         # Seuil revient à la normale
-        self.threshold_potential = self.config.THRESHOLD_REF
+        return self.config.THRESHOLD_REF
     
     def test_spike_emission(self, time_of_impact: int, weight_of_impact: float) -> bool:
         """
@@ -97,22 +100,24 @@ class SpikingNeuron(Neuron):
         """
         # Mettre à jour les potentiels
         self.update_membrane_potential(time_of_impact)
-        self.update_threshold_potential(time_of_impact)
+        current_threshold = self.update_threshold_potential(time_of_impact)
         
         # Ajouter l'impact du PSP
-        #print("membrane_potential before PSP:", self.membrane_potential, current_threshold )
+        #print("membrane_potential before PSP:", self.membrane_potential," ", current_threshold )
         self.membrane_potential += weight_of_impact
-        #print("membrane_potential after PSP:", self.membrane_potential, current_threshold )
+        #print("membrane_potential after PSP:", self.membrane_potential, " ", current_threshold )
 
         self.last_time_of_psp_impact = time_of_impact
         
         # Vérifier si spike
-        if self.membrane_potential >= self.threshold_potential:
+        if self.membrane_potential >= current_threshold:
+
+            #print("***** Spike emission:", self.membrane_potential, " ", current_threshold , " ", self.spike_times)
             self.spike_times.append(time_of_impact)
             self.last_time_of_firing = time_of_impact
             
             # Appliquer inhibition (hyperpolarisation)
-            self.membrane_potential = self.config.RESTING_POTENTIAL
+            self.membrane_potential = self.config.HYPER_POLARISATION_POTENTIAL
 #
 #             #TODO
 #             if self.config.INHIBITION_RESET_MODE:

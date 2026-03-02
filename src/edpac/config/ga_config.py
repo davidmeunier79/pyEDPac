@@ -33,8 +33,8 @@ class ChromosomeConfig:
     NB_GENES_EACH_CHROMOSOME: int = 360        # Total = 120 * 3
     
     # Validation
-    MIN_GENE_VALUE: float = 0.0
-    MAX_GENE_VALUE: float = 1.0
+    #MIN_GENE_VALUE: float = 0.0
+    #MAX_GENE_VALUE: float = 1.0
 
 @dataclass
 class PopulationConfig:

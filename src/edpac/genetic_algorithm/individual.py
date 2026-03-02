@@ -64,21 +64,33 @@ class Individual():
 
         if self.chromosome:
             return self.chromosome
+#
+#     def evaluate(self, eval_func) -> float:
+#         """
+#         Évaluer l'individu
+#
+#         Args:
+#             eval_func: Fonction d'évaluation(individual) -> fitness
+#
+#         Returns:
+#             Fitness calculée
+#         """
+#         self.fitness = eval_func(self)
+#         self.fitness_evaluated = True
+#         return self.fitness
+#
+#
+    def set_fitness(self, fitness_value) -> float:
 
-    def evaluate(self, eval_func) -> float:
-        """
-        Évaluer l'individu
-        
-        Args:
-            eval_func: Fonction d'évaluation(individual) -> fitness
-            
-        Returns:
-            Fitness calculée
-        """
-        self.fitness = eval_func(self)
-        self.fitness_evaluated = True
-        return self.fitness
-    
+
+        if not self.fitness_evaluated:
+
+            self.fitness = fitness_value
+            self.fitness_evaluated = True
+
+        else:
+            raise ValueError("Individual already evaluated")
+
     def get_fitness(self) -> float:
         """Retourner la fitness"""
         #print(self.fitness_evaluated)
@@ -97,8 +109,10 @@ class Individual():
     def clone(self) -> 'Individual':
         """Cloner l'individu"""
         new_ind = Individual(self.chromosome.clone(), self.config)
-        new_ind.fitness = self.fitness
-        new_ind.fitness_evaluated = self.fitness_evaluated
+        new_ind.fitness = - float('inf')
+
+        new_ind.fitness_evaluated = False
+
         return new_ind
     
     def increase_age(self):

@@ -22,6 +22,7 @@ class PixelVisualizer(QtWidgets.QLabel):
         self.buffer = np.zeros((self.h, self.w, 4), dtype=np.uint8)
         self.buffer[:, :, 3] = 255  # Set Alpha channel to opaque
 
+
     def clear_canvas(self, color=(0, 0, 0)):
         """Resets the whole buffer to a specific color."""
         self.buffer[:, :, 0] = color[0]

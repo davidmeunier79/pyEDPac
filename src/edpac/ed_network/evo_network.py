@@ -46,6 +46,8 @@ class EvoNetwork(EDNetwork):
     def _create_projections_from_chromosome(self):
         """Créer les projections en décodant le chromosome"""
         
+        print(self.chromosome)
+
         # Pour chaque projection codée
         for proj_idx in range(self.chromosome.config.NB_PROJECTIONS_EACH_CHROMOSOME):
             #print("Projection: ", proj_idx)

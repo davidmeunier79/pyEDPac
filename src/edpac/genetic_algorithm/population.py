@@ -57,6 +57,14 @@ class Population:
         self.best_individual = None
         self.fitness_history = []
     
+    def clean_population(self):
+
+        for indiv in self.individuals :
+            del indiv
+
+        del self.individuals
+
+
     def evaluate(self, eval_func: Callable[[Individual], float]):
         """
         Évaluer toute la population
@@ -147,13 +155,17 @@ class Population:
                 )
             )
             
+            print(crossover_points)
+
             offspring_genes = genes1.copy()
             for i, point in enumerate(crossover_points):
                 if i % 2 == 1:
                     offspring_genes[point:] = genes2[point:]
-        
+        print("Offspring: ")
+        print(offspring_genes)
+
         chromosome = Chromosome(self.chromosome_config, offspring_genes)
-        return Individual(chromosome, self.chromosome_config)
+        return Individual(chromosome)
     
     def mutate(self, individual: Individual):
         """
@@ -169,16 +181,18 @@ class Population:
         mutation_rate = self.mutation_config.MUTATION_RATE
         
         mask = np.random.rand(len(genes)) < mutation_rate
-
+        print("Mask mutation: ", mask)
         genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
+        print("Genes after mutation: ", genes)
 
         # Clamp to [0, 1]
-        genes = np.clip(genes, 0.0, 1.0)
+        #genes = np.clip(genes, 0.0, 1.0)
         
         individual.chromosome.set_genes(genes)
         individual.fitness_evaluated = False
+        individual.fitness = -float("inf")
     
-    def evolve_generation(self, eval_func: Callable, elite_size: int = 10):
+    def evolve_generation(self):
         """
         Générer la prochaine génération
         
@@ -187,7 +201,7 @@ class Population:
             elite_size: Nombre d'élites à conserver
         """
         # Évaluer la population actuelle
-        self.evaluate(eval_func)
+        #self.evaluate(eval_func)
         
         # Trouver les élites
         sorted_inds = sorted(
@@ -196,6 +210,11 @@ class Population:
             reverse=True
         )
         
+        print("******************* After gen ", self.generation)
+        print(sorted_inds)
+
+        elite_size = pop_config.ELITE_SIZE
+
         elite = sorted_inds[:elite_size]
         self.best_individual = elite[0]
         
@@ -211,31 +230,40 @@ class Population:
             'std': np.std(fitnesses)
         })
         
+        print(self.fitness_history)
+
         # Créer nouvelle génération
         new_pop = [ind.clone() for ind in elite]  # Conserver élites
         
         # Générer offspring
         while len(new_pop) < self.size:
             if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
+                print("Crossing Over")
                 # Crossover
                 parent1 = self.select_parent()
                 parent2 = self.select_parent()
                 offspring = self.crossover(parent1, parent2)
             else:
+                print("No Crossing Over")
                 # Mutation seule
                 parent = self.select_parent()
                 offspring = parent.clone()
             
             # Muter
             self.mutate(offspring)
+
+            print(offspring)
+
             new_pop.append(offspring)
         
         # Remplacer population
-        self.individuals = new_pop[:self.size]
+        #self.clean_population()
+
+        print(new_pop)
+
+        self.individuals = new_pop
         self.generation += 1
 
-        return self.best_individual
-    
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""
         return max(self.individuals, key=lambda x: x.get_fitness())

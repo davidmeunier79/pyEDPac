@@ -23,9 +23,6 @@ class Zoo:
         self.pacman = pac
         pac.zoo = self
 
-
-
-
     def _set_pacman_pos(self):
         """Locates Pacman ('0') on the grid."""
         for y, row in enumerate(self.grid):
@@ -151,7 +148,6 @@ class Zoo:
             for y, line in enumerate(f):
                 for x, el in enumerate(line.strip()):
                     if el == '0':
-                        print("Found pacman position !")
                         self.pacman.set_position(x, y)
 
                 row = list(line.rstrip('\n'))

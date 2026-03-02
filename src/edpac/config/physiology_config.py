@@ -12,7 +12,7 @@ class SynapseConfig:
     """Configuration des synapses"""
     # Paramètres de délai
     DELAY: int = 10              # Délai max excitateur (ms)
-    INHIBITORY_DELAY: int = 1   # Délai max inhibiteur (ms)
+    INHIBITORY_DELAY: int = 5   # Délai max inhibiteur (ms)
     
     # Poids initial
     WEIGHT: float = 0.5          # Poids moyen
@@ -37,12 +37,12 @@ class NeuronConfig:
     # Potentiel de repos
     RESTING_POTENTIAL: float = 0.0  # mV
 
-    MEMBRANE_TIME_CONSTANT = 50.0  # ms (tau)
+    MEMBRANE_TIME_CONSTANT = 5.0  # ms (tau)
     #SYNAPSE_TIME_CONSTANT = 10.0   # ms
 
     # Seuil
-    NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
-    THRESHOLD_REF: float = 2     # Seuil de référence
+    #NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
+    THRESHOLD_REF: float = 20     # Seuil de référence
     
     # Refractory periods
     ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
@@ -50,7 +50,7 @@ class NeuronConfig:
     BURSTY_MODE: bool = True          # Bursting neurons
     
     # Inhibition
-    #HYPER_POLARISATION_POTENTIAL: float = -20  # mV
+    HYPER_POLARISATION_POTENTIAL: float = -20  # mV
     #INHIBITION_RESET_MODE: bool = True
 
 @dataclass  

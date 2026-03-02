@@ -1,7 +1,8 @@
+import numpy as np
+from math import sqrt
 
 from edpac.ed_network.network import Network # Assuming your repo structure
 from edpac.config.constants import *
-from math import sqrt
 
 from .pixel_visualizer import PixelVisualizer
 
@@ -12,21 +13,8 @@ class NetworkVisualizer(PixelVisualizer):
         #self.neuron_scatter = pg.ScatterPlotItem(pxMode=True)
         #self.addItem(self.neuron_scatter)
 
-#         if not QtWidgets.QApplication.instance():
-#             self.app = QtWidgets.QApplication([])
-#         else:
-#             self.app = QtWidgets.QApplication.instance()
-#
-#         super().__init__()
-#         self.setBackground('w')
-#         self.setWindowTitle(title)
-#
-#
-#         # Store lines (synapses)
-#         self.synapses = []
-#
-#         # Mapping to store neuron positions for synapse drawing
-#         self.neuron_positions = {} # {neuron_id: (x, y)}
+        self.background_template = np.zeros_like(self.buffer)
+
 
     def draw_assembly(self, assembly, x_offset, y_offset ):
 
@@ -62,7 +50,7 @@ class NetworkVisualizer(PixelVisualizer):
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
 
 
-            y_offset = a * (sqrt_num_neurons + GAP_INPUT_ASSEMBLY)
+            y_offset = a * sqrt_num_neurons
 
             self.draw_assembly(assembly, x_base, y_offset )
 
@@ -92,9 +80,11 @@ class NetworkVisualizer(PixelVisualizer):
 
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
 
-            y_offset = a * (sqrt_num_neurons + GAP_OUTPUT_ASSEMBLY)
+            y_offset = a * sqrt_num_neurons
 
             self.draw_assembly(assembly, x_base, y_offset )
+
+        self.create_template()
 
     def display_empty_network(self):
 
@@ -109,18 +99,39 @@ class NetworkVisualizer(PixelVisualizer):
 
         self.update_display()
 
-    def update_visu(self, spike_neuron_ids):
+    def create_template(self):
+        """Call this ONCE when the network is loaded."""
+        self.background_template.fill(0) # Start Black
 
-        all_pos_spikes = []
+        for x, y in list(self.neuron_positions.values()):
+            # Draw static neurons in a dim color
+            # Draw a dim gray pixel for every neuron
+            if 0 <= x and x < self.w and 0 <= y and y < self.h:
+                self.background_template[y, x, :3] = [40, 40, 60]
 
-        for neuron_id in spike_neuron_ids:
+    def display_network(self, spike_neuron_ids):
 
-            if neuron_id in self.neuron_positions.keys():
-                pos = self.neuron_positions[neuron_id]
-                all_pos_spikes.append(pos)
+        # 1. Clear the canvas (Wipe old yellow spikes)
+        # Use (10, 10, 10) for a dark gray background
+        #self.clear_canvas((10, 10, 10))
+        #self.buffer.fill(0)
 
-        for x,y in all_pos_spikes:
-            self.set_pixel(x, y, (255, 255, 0)) # Yellow
+        #np.copyto(self.buffer, self.background_template)
 
+        # 2. Redraw the static structure (The "Off" Neurons)
+        # Usually drawn in a dim color like dark blue or gray
+        for idx, (x, y) in enumerate(list(self.neuron_positions.values())):
+            self.set_pixel(x, y, (50, 50, 80))
+
+        # 3. Draw the active "Spikes" in Yellow
+        # These will now be the ONLY yellow pixels on the screen
+
+        for idx in spike_neuron_ids:
+            x, y = self.neuron_positions[idx]
+            self.set_pixel(x, y, (255, 255, 0))
+            # Optional: draw a small 2x2 square for better visibility
+            # self.set_pattern(x, y, [[0,0], [1,0], [0,1], [1,1]], yellow)
+
+        # 4. Push to pyqtgraph
         self.update_display()
 

@@ -59,8 +59,6 @@ class Chromosome:
     
     def set_genes(self, genes: np.ndarray):
         """Définir les gènes"""
-        genes = np.array(genes, dtype=np.float32)
-        genes = np.clip(genes, self.config.MIN_GENE_VALUE, self.config.MAX_GENE_VALUE)
         assert len(genes) == self.config.NB_GENES_EACH_CHROMOSOME
         self.genes = genes
     
@@ -85,22 +83,6 @@ class Chromosome:
         genes_slice = self.genes[start_idx:start_idx + 3]
         
         return genes_slice
-    
-    def set_projection(self, projection_idx: int, pre_idx: int, post_idx: int, weight: float):
-        """
-        Modifier une projection
-        
-        Args:
-            projection_idx: Index de la projection
-            pre_idx: Index pré-assemblée
-            post_idx: Index post-assemblée
-            weight: Poids de la connexion
-        """
-        start_idx = projection_idx * self.config.NB_GENES_EACH_PROJECTION
-        
-        self.genes[start_idx] = pre_idx / 25.0
-        self.genes[start_idx + 1] = post_idx / 25.0
-        self.genes[start_idx + 2] = np.clip(weight, 0.0, 1.0)
     
     def clone(self) -> 'Chromosome':
         """Cloner le chromosome"""

@@ -22,6 +22,7 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME, DATA_PATH
 
+from edpac.config.ga_config import PopulationConfig
 
 
 # 1. Global flag to track if we should keep evolving
@@ -49,7 +50,6 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
 
     ################################# Pacman ###########################
-    print(indiv)
 
     pac = Pacman(indiv)
     zoo.set_pacman(pac)
@@ -75,8 +75,6 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     # 3. Initial Draw
     zoo_viz.draw_zoo(zoo)
-
-    print(zoo)
 
     # 2. Create a local event loop
     loop = QEventLoop()
@@ -113,14 +111,14 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            net_viz.display_empty_network()
+            #net_viz.display_empty_network()
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
             if spike_neuron_ids is not None:
 
                 print("Nb spikes: ", len(spike_neuron_ids))
-                net_viz.update_visu(spike_neuron_ids)
+                net_viz.display_network(spike_neuron_ids)
 
             else:
                 print("No more events in event manager, breaking")
@@ -155,7 +153,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     timer.start(10) # Run fast for evaluation
 
     # 4. BLOCK here until loop.quit() is called
-    loop.exec_()
+    loop.exec()
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
@@ -169,7 +167,11 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     del loop
 
     # 5. Now we can finally return the value to the EA
-    return EDSynapse.event_manager.get_time()
+    score = EDSynapse.event_manager.get_time()
+
+    indiv.set_fitness(score)
+
+    print(indiv)
 
 def main():
 
@@ -207,23 +209,30 @@ def main():
     #################################### Population ######################################
 
     population = Population()
+    pop_config = PopulationConfig()
 
     #################################### Zoo ######################################
     # 1. Initialize Data
     zoo = Zoo(data_dir=DATA_PATH)
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
-    for i, ind in enumerate(population.individuals):
-        # Check the flag BEFORE starting the next individual
-        if not SIMULATION_ACTIVE:
-            break
+    for gen in range(pop_config.NB_GENERATIONS):
 
-        score = evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
-        print(f"Gen {i} Fitness: {score}")
+        print(f"Starting Generation {gen}")
 
-        # 5. Force Python to reclaim memory now rather than 'whenever'
-        # This is especially helpful when dealing with large neural networks
-        gc.collect()
+        for i, ind in enumerate(population.individuals):
+            # Check the flag BEFORE starting the next individual
+            if not SIMULATION_ACTIVE:
+                break
+
+            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
+
+            # 5. Force Python to reclaim memory now rather than 'whenever'
+            # This is especially helpful when dealing with large neural networks
+            gc.collect()
+
+        population.evolve_generation()
+
 
     print("Evolution finished or aborted.")
 

@@ -127,7 +127,7 @@ class Network:
             if nature == ProjectionNature.INHIBITORY:
                 # Poids inhibiteur généralement plus faible
                 syn_config = synapse_config
-                syn_config.WEIGHT = - synapse_config.WEIGHT
+                syn_config.WEIGHT = -synapse_config.WEIGHT
                 syn_config.DELAY = synapse_config.INHIBITORY_DELAY
 
             else:
