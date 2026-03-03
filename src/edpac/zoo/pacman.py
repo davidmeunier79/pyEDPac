@@ -153,7 +153,7 @@ class Pacman(Individual):
                         continue
 
                     # 4. Check for Objects (Walls or Animals)
-                    found_shape = self.zoo.shapes[char]
+                    found_shape = self.zoo.shapes[char].T
                     break
 
             # If nothing found in this column, it's an empty sensor

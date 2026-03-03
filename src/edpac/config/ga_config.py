@@ -28,10 +28,10 @@ class ChromosomeConfig:
     DISTRIBUTED_PROJECTION: bool = True
     
     # Nombre de gènes
-    NB_PROJECTIONS_EACH_CHROMOSOME: int = 120  # Nombre de projections
+    NB_PROJECTIONS_EACH_CHROMOSOME: int = 480  # Nombre de projections
     NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
-    NB_GENES_EACH_CHROMOSOME: int = 360        # Total = 120 * 3
-    
+    NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
+
     # Validation
     #MIN_GENE_VALUE: float = 0.0
     #MAX_GENE_VALUE: float = 1.0
@@ -47,11 +47,11 @@ class PopulationConfig:
 #     NB_GENERATIONS: int = 50
 #
         # Taille population
-    POPULATION_SIZE: int = 5
-    ELITE_SIZE: int = 1         # Meilleurs individus conservés
+    POPULATION_SIZE: int = 30
+    ELITE_SIZE: int = 2         # Meilleurs individus conservés
 
     # Génération
-    NB_GENERATIONS: int = 2
+    NB_GENERATIONS: int = 10
 
 
 

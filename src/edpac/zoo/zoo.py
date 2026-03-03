@@ -4,7 +4,7 @@ import random
 from math import floor
 import numpy as np
 
-from edpac.config.constants import NB_LIFE_POINTS_PER_PREY, VISIO_SQRT_NB_NEURONS
+from edpac.config.constants import NB_LIFE_POINTS_PER_PREY, VISIO_SQRT_NB_NEURONS, NB_LIFE_POINTS_PER_PREDATOR
 
 from .pacman import Pacman
 
@@ -172,16 +172,18 @@ class Zoo:
         # Base weights (Equal chance)
         # Order: 0:Up (0,-1), 1:Down (0,1), 2:Left (-1,0), 3:Right (1,0), 4:Stay (0,0)
         weights = [1.0, 1.0, 1.0, 1.0, 0.5]
+        #weights = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Strength of attraction/repulsion (equivalent to COEF_ATTR in C++)
-        bias = 5.0
+        bias = 1.0
 
-        if nature == -1: # PREDATOR: Wants to decrease distance
+        if nature == "-1": # PREDATOR: Wants to decrease distance
             if dy < 0: weights[0] += bias # Up
             if dy > 0: weights[1] += bias # Down
             if dx < 0: weights[2] += bias # Left
             if dx > 0: weights[3] += bias # Right
-        elif nature == 1: # PREY: Wants to increase distance
+
+        elif nature == "1": # PREY: Wants to increase distance
             if dy < 0: weights[1] += bias # Move Down if Pacman is Up
             if dy > 0: weights[0] += bias # Move Up if Pacman is Down
             if dx < 0: weights[3] += bias # Move Right if Pacman is Left
@@ -203,7 +205,7 @@ class Zoo:
         for y in range(rows):
             for x in range(cols):
                 char = self.grid[y][x]
-                if char in self.shapes and char not in ('.', '0', 'X'):
+                if char in self.shapes and char not in ('.', 'X', " "):
                     entities.append((x, y, char))
 
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (0, 0)]
@@ -214,8 +216,9 @@ class Zoo:
                 for dir_x, dir_y in directions[:-1]:
                     if 0 <= x + dir_x < cols and 0 <= y + dir_y < rows:
 
-                        char = self.grid
-                        if zoo.danger[char] == -1:
+                        char = self.grid[y + dir_y][x + dir_x]
+
+                        if self.danger[char] == "-1":
 
                             self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
 

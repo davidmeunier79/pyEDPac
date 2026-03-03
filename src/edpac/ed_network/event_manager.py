@@ -140,7 +140,7 @@ class EventManager:
         next_event = self.event_queue[0]
         self.current_time = next_event.time
 
-        print("time: ",self.current_time)
+        #print("time: ",self.current_time)
 
         # Traiter tous les événements à ce temps
         events_at_current_time = []
