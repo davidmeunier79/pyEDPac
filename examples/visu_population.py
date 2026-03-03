@@ -117,7 +117,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
             if spike_neuron_ids is not None:
 
-                print("Nb spikes: ", len(spike_neuron_ids))
+                #print("Nb spikes: ", len(spike_neuron_ids))
                 net_viz.display_network(spike_neuron_ids)
 
             else:
@@ -171,6 +171,10 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     indiv.set_fitness(score)
 
+    EDSynapse.event_manager.reset()
+
+    del EDSynapse.event_manager
+
     print(indiv)
 
 def main():
@@ -215,6 +219,9 @@ def main():
     # 1. Initialize Data
     zoo = Zoo(data_dir=DATA_PATH)
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
+
+    print(zoo.shapes)
+
 
     for gen in range(pop_config.NB_GENERATIONS):
 
