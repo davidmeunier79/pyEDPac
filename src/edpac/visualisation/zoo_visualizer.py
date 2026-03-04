@@ -5,7 +5,7 @@ from PIL import Image
 from edpac.visualisation.pixel_visualizer import PixelVisualizer
 
 from edpac.zoo.zoo import Zoo
-from edpac.zoo.pacman import Pacman
+from edpac.zoo.pacman import Pacman, Direction
 
 class ZooVisualizer(PixelVisualizer):
 
@@ -80,13 +80,13 @@ class ZooVisualizer(PixelVisualizer):
         # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
         blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
 
-        if pacman.dir_head == 0: # Up: Top edge
-            blue_bar[2:19, -2:] = 1
-        elif pacman.dir_head == 1: # Down: Bottom edge
+        if pacman.dir_head == Direction.UP: # Up: Top edge
             blue_bar[2:19, :2] = 1
-        elif pacman.dir_head == 2: # Left: Left edge
+        elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
+            blue_bar[2:19, -2:] = 1
+        elif pacman.dir_head == Direction.LEFT: # Left: Left edge
             blue_bar[:2, 2:19] = 1
-        elif pacman.dir_head == 3: # Right: Right edge
+        elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
             blue_bar[-2:, 2:19] = 1
         self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
 

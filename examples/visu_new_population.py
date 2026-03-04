@@ -40,7 +40,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def evaluate_individual(indiv, zoo):
+def evaluate_individual(indiv):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -48,6 +48,11 @@ def evaluate_individual(indiv, zoo):
 
     #app = QtWidgets.QApplication(sys.argv)
 
+
+    #################################### Zoo ######################################
+    # 1. Initialize Data
+    zoo = Zoo(data_dir=DATA_PATH)
+    zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
     ################################# Pacman ###########################
 
@@ -84,7 +89,6 @@ def evaluate_individual(indiv, zoo):
     net_viz.destroyed.connect(stop_everything)
 
     net_viz.setup_topology()
-    net_viz.adjust_view()
     net_viz.show()
 
     ################################## Inputs Visualizer #####################################
@@ -115,6 +119,9 @@ def evaluate_individual(indiv, zoo):
 
         # Update both windows
         zoo_viz.draw_zoo()
+
+
+        zoo.test_pacman_contacts()
 
         # 1. Get sensory data from the world
         sensory_data = zoo.pacman.integrate_visio_outputs()
@@ -187,6 +194,8 @@ def evaluate_individual(indiv, zoo):
     del timer
     del loop
 
+    print("After Loop")
+
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
 
@@ -203,13 +212,6 @@ def main():
     global SIMULATION_ACTIVE
 
 
-    #################################### Zoo ######################################
-    # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
-    zoo.load_menagerie(menagerie_file= "menagerie.txt")
-
-    print(zoo.animals)
-
 
     # Create objects
     #################################### Population ######################################
@@ -225,13 +227,15 @@ def main():
         for i, ind in enumerate(population.individuals):
             # Check the flag BEFORE starting the next individual
             if not SIMULATION_ACTIVE:
+                print("Simualtion is over, breaking")
                 break
 
-            evaluate_individual(ind, zoo)
+            evaluate_individual(ind)
 
+            print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'
             # This is especially helpful when dealing with large neural networks
-            gc.collect()
+            #gc.collect()
 
         population.evolve_generation()
 

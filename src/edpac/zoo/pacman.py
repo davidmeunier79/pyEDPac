@@ -1,6 +1,37 @@
 from edpac.genetic_algorithm.individual import Individual
 from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY, MOTOR_THRESHOLD
 
+from enum import IntEnum
+
+class Direction(IntEnum):
+    """
+    Énumération des 4 directions cardinales
+
+    Convention:
+    - 0 = UP (Haut, y diminue)
+    - 1 = DOWN (Bas, y augmente)
+    - 2 = LEFT (Gauche, x diminue)
+    - 3 = RIGHT (Droite, x augmente)
+    """
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
+
+    def to_string(self) -> str:
+        """Convertir Direction en string"""
+        names = {
+            Direction.UP: "UP",
+            Direction.DOWN: "DOWN",
+            Direction.LEFT: "LEFT",
+            Direction.RIGHT: "RIGHT"
+        }
+        return names[self]
+
+
+
+
+
 class Pacman(Individual):
     def __init__(self, x=0, y=0, zoo=None):
 
@@ -12,8 +43,8 @@ class Pacman(Individual):
         self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
-        self.dir_body = 3  # Default Right
-        self.dir_head = 3  # Default Right
+        self.dir_body = Direction.RIGHT  # Default Right
+        self.dir_head = Direction.RIGHT  # Default Right
 
     def set_position(self, x, y):
         self.x = x
@@ -31,64 +62,112 @@ class Pacman(Individual):
         """
         # Mapping: {current: (turn_left, turn_right)}
         rotation_map = {
-            0: (2, 3), # Up -> Left is LEFT, Right is RIGHT
-            1: (3, 2), # Down -> Left is RIGHT, Right is LEFT
-            2: (1, 0), # Left -> Left is DOWN, Right is UP
-            3: (0, 1)  # Right -> Left is UP, Right is DOWN
+            Direction.UP: (Direction.LEFT, Direction.RIGHT), # Up -> Left is LEFT, Right is RIGHT
+            Direction.DOWN: (Direction.RIGHT, Direction.LEFT), # Down -> Left is RIGHT, Right is LEFT
+            Direction.LEFT: (Direction.DOWN, Direction.UP), # Left -> Left is DOWN, Right is UP
+            Direction.RIGHT: (Direction.UP, Direction.DOWN)  # Right -> Left is UP, Right is DOWN
         }
         left, right = rotation_map[current_dir]
         return left if turn_type == -1 else right
 
     def integrate_motor_outputs(self, motor_values):
         """
-        m0, m1: Head control
-        m2, m3: Body control
+        Traiter les outputs moteurs du réseau
+
+        motor_values[0] (m0): Head LEFT control
+        motor_values[1] (m1): Head RIGHT control
+        motor_values[2] (b1): Body LEFT control
+        motor_values[3] (b2): Body RIGHT control
+
+        ✅ FIXED: Indexing et logique correcte
         """
-        if len(motor_values) < 4: return
-
-        # --- 1. HEAD CONTROL ---
-        h1 = motor_values[0] > self.motor_threshold
-        h2 = motor_values[1] > self.motor_threshold
-
-        if h1 and not h2: # One active: Turn Left
-            self.dir_head = self._get_turn(self.dir_head, -1)
-        elif h2 and not h1: # One active: Turn Right
-            self.dir_head = self._get_turn(self.dir_head, 1)
-        elif h1 and h2: # Both active: Realign to Body
-            self.dir_head = self.dir_body
+        if len(motor_values) < 4:
+            return
 
         # --- 2. BODY CONTROL ---
-        b1 = motor_values[2] > self.motor_threshold
-        b2 = motor_values[3] > self.motor_threshold
+        # b1 = Turn Left, b2 = Turn Right
+        b_left = motor_values[2] > self.motor_threshold
+        b_right = motor_values[3] > self.motor_threshold
 
-        if b1 and not b2: # One active: Turn Left
+        old_dir_body = Direction(self.dir_body).to_string()
+        old_dir_head = Direction(self.dir_head).to_string()
+
+        if b_left and not b_right:
+            # Turn body left
+
             self.dir_body = self._get_turn(self.dir_body, -1)
-        elif b2 and not b1: # One active: Turn Right
+            new_dir_body = Direction(self.dir_body).to_string()
+            print(f"Turn body left from {old_dir_body} to {new_dir_body}")
+
+        elif b_right and not b_left:
+            # Turn body right
             self.dir_body = self._get_turn(self.dir_body, 1)
-        elif b1 and b2: # Both active: Move Forward
+
+            new_dir_body = Direction(self.dir_body).to_string()
+            print(f"Turn body right from {old_dir_body} to {new_dir_body}")
+
+        elif b_left and b_right:
+            # Both active: Move forward
+
             self._move_forward()
+            print("Move Forward")
+
+        # --- 1. HEAD CONTROL ---
+        # m0 = Turn Left, m1 = Turn Right
+        h_left = motor_values[0] > self.motor_threshold
+        h_right = motor_values[1] > self.motor_threshold
+
+        if h_left and not h_right:
+            # Turn head left
+            self.dir_head = self._get_turn(self.dir_head, -1)
+            new_dir_head = Direction(self.dir_head).to_string()
+            print(f"Turn head left from {old_dir_head} to {new_dir_head}")
+
+        elif h_right and not h_left:
+            # Turn head right
+            self.dir_head = self._get_turn(self.dir_head, 1)
+            new_dir_head = Direction(self.dir_head).to_string()
+            print(f"Turn head right from {old_dir_head} to {new_dir_head}")
+
+        elif h_left and h_right:
+            # Both active: Realign head to body
+            self.dir_head = self.dir_body
+            print("Realign head to body")
 
     def _move_forward(self):
         """Calculates movement based on dir_body and updates grid."""
         # Map dir_body to coordinate changes
-        move_map = {0: (0, -1), 1: (0, 1), 2: (-1, 0), 3: (1, 0)}
+        move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
         dx, dy = move_map[self.dir_body]
 
         new_x = self.x + dx
         new_y = self.y + dy
 
-        # Check for walls in the Zoo grid before moving
-        if 0 <= new_x < len(self.zoo.grid[0]) and 0 <= new_y < len(self.zoo.grid):
-            if self.zoo.grid[new_y][new_x] != 'X': # Not a wall
-                # Update grid data: old position becomes a dot
+        print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
-                #TODO if this a pacgum, increase life; also contacts with prey and predator?
+        rows, cols = self.zoo.grid.shape
+
+        # Check for walls in the Zoo grid before moving
+        if 0 <= new_x < cols and 0 <= new_y < rows:
+
+            print("OK in grid !")
+            if self.zoo.grid[new_y][new_x] != 'X': # Not a wall
+
+
+                print("OK not a wall!")
+
+                # Update grid data: old position becomes a dot
+                # if this a pacgum, increase life
                 if self.zoo.grid[new_y][new_x] == ".":
                     self.life_points = self.life_points + NB_LIFE_POINTS_PER_PACGUM
-
                     print("Eating pacgum, Life points: " , self.life_points)
 
-                if self.zoo.grid[new_y][new_x] != " ":
+                elif self.zoo.grid[new_y][new_x] == " ":
+
+                    print("Moving forward in empty space")
+
+                else:
+                    print("Eating animal")
 
                     char = self.zoo.grid[new_y][new_x].decode("utf-8")
 
@@ -96,23 +175,29 @@ class Pacman(Individual):
                         print("Eating prey, Life points: " , self.life_points)
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
 
+                print(f"Moving from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
-                self.zoo.grid[self.y][self.x] = ' '
-
-
-
+                self.zoo.grid[self.y][self.x] = b' '
                 self.x, self.y = new_x, new_y
-                # New position becomes Pacman
-                self.zoo.grid[self.y][self.x] = '0'
 
+                # New position becomes Pacman
+                self.zoo.grid[self.y][self.x] = b'0'
+
+                print(self.zoo.grid)
+
+            else:
+                print("Bumping in a wall")
+        else:
+            print("Outside grid !!!!!!!!!!!!!!!!!")
 
     def integrate_visio_outputs(self):
         """
         Scans the zoo grid in a fan shape based on dir_head.
         Returns a list of 5 shapes (lists of pixel coordinates).
         """
-        rows = len(self.zoo.grid)
-        cols = len(self.zoo.grid[0])
+
+        rows, cols = self.zoo.grid.shape
+
 
         # 1. Define directional vectors based on dir_head
         # dirX/Y = Forward, dirPerX/Y = Side-step (Perpendicular)
@@ -120,13 +205,13 @@ class Pacman(Individual):
         #0: Up, 1: Down, 2: Left, 3: Right
 
         # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
-        if self.dir_head == 0: # HAUT (UP)
+        if self.dir_head == Direction.UP: # HAUT (UP)
             df, ds = (0, -1), (1, 0)
-        elif self.dir_head == 1: # BAS (DOWN)
+        elif self.dir_head == Direction.DOWN: # BAS (DOWN)
             df, ds = (0, 1), (-1, 0)
-        elif self.dir_head == 2: # GAUCHE (LEFT)
+        elif self.dir_head == Direction.LEFT: # GAUCHE (LEFT)
             df, ds = (-1, 0), (0, -1)
-        elif self.dir_head == 3: # DROITE (RIGHT)
+        elif self.dir_head == Direction.RIGHT: # DROITE (RIGHT)
             df, ds = (1, 0), (0, 1)
         else:
             df, ds = (0, 0), (0, 0)
@@ -148,7 +233,7 @@ class Pacman(Individual):
                 nx = self.x + (j * df[0]) + (rel_col * ds[0])
                 ny = self.y + (j * df[1]) + (rel_col * ds[1])
 
-                if (0<=ny and ny < len(self.zoo.grid)) and (0<=ny and nx < len(self.zoo.grid[0])):
+                if (0<=ny and ny < rows) and (0<=nx and nx < cols):
 
                     char = self.zoo.grid[ny][nx].decode("utf-8")
 
@@ -157,6 +242,7 @@ class Pacman(Individual):
 
                     # 4. Check for Objects (Walls or Animals)
                     assert char in self.zoo.animals.keys(), f"Error with {char}"
+
                     found_shape = self.zoo.animals[char]["shape"].T
                     break
 

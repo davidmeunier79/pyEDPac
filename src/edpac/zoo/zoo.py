@@ -119,7 +119,8 @@ class Zoo:
         # 1. Load the '.' (dot)
         self.animals['.'] = {
             "shape": self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "dot")),
-            "danger": 0}
+            "danger": 0,
+            "name" : "dot"}
 
 
         # 2. Load Pacman directions ('0')
@@ -146,7 +147,8 @@ class Zoo:
                     char, rel_path = parts[0], parts[1]
                     self.animals[char] = {
                         "shape": self._parse_img_file(os.path.join(self.data_dir, "menagerie", rel_path)),
-                        "danger": parts[2]
+                        "danger": parts[2],
+                        "name" : rel_path.split("/")[0]
                         }
 
     def load_screen(self, screen_file):
@@ -258,7 +260,7 @@ class Zoo:
         for code in np.unique(self.grid):
             char = code.decode("utf-8")
 
-            if char == 'X' or char == " " or char == '.':
+            if char == 'X' or char == " " or char == '.' or char ==  "0":
                 continue
 
             pos_x, pos_y = np.where(self.grid == code)
@@ -268,17 +270,7 @@ class Zoo:
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (0, 0)]
 
         for x, y, char in entities:
-            #print(x, y, char)
 
-            if char == '0':
-                for dir_x, dir_y in directions[:-1]:
-                    if 0 <= x + dir_x < cols and 0 <= y + dir_y < rows:
-                        char = self.grid[y + dir_y][x + dir_x]
-
-                        if self.animals[char]["danger"] == "-1":
-                            self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
-                            print("Contact with predator ", char, " Life points: " , self.pacman.life_points)
-                continue
 
             # Calculate biased probabilities
             weights = self.get_move_probabilities(x, y, char)
@@ -294,6 +286,28 @@ class Zoo:
                     self._move_actor(x, y, nx, ny, char)
             else:
                 print(f"Error with 0 <= {nx} < {rows} or 0 <= {ny} < {cols } ")
+
+    def test_pacman_contacts(self):
+
+        x, y = self._get_pacman_pos()
+
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+
+        rows, cols = self.grid.shape
+
+        for dir_x, dir_y in directions:
+            if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
+                char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
+
+                if char_contact not in (".", "") :
+                    print(char_contact)
+                    print(self.animals[char_contact]["name"])
+
+                if self.animals[char_contact]["danger"] == "-1":
+                    self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
+                    print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , self.pacman.life_points)
+            else:
+                print("Outside")
 
 
 
