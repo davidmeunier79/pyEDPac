@@ -1,5 +1,5 @@
 from edpac.genetic_algorithm.individual import Individual
-from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY
+from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY, MOTOR_THRESHOLD
 
 class Pacman(Individual):
     def __init__(self, x=0, y=0, zoo=None):
@@ -7,7 +7,7 @@ class Pacman(Individual):
         self.x = x
         self.y = y
 
-        self.motor_threshold = 0.5
+        self.motor_threshold = MOTOR_THRESHOLD
         self.life_points = INITIAL_LIFE_POINTS
         self.zoo = zoo
 
@@ -90,12 +90,12 @@ class Pacman(Individual):
 
                 if self.zoo.grid[new_y][new_x] != " ":
 
-                    char = self.zoo.grid[new_y][new_x]
-                    if self.zoo.danger[char] == "1":
+                    char = self.zoo.grid[new_y][new_x].decode("utf-8")
+
+                    if self.zoo.animals[char]["danger"] == "1":
+                        print("Eating prey, Life points: " , self.life_points)
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
 
-
-                        print("Eating prey, Life points: " , self.life_points)
 
                 self.zoo.grid[self.y][self.x] = ' '
 
@@ -116,6 +116,9 @@ class Pacman(Individual):
 
         # 1. Define directional vectors based on dir_head
         # dirX/Y = Forward, dirPerX/Y = Side-step (Perpendicular)
+
+        #0: Up, 1: Down, 2: Left, 3: Right
+
         # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
         if self.dir_head == 0: # HAUT (UP)
             df, ds = (0, -1), (1, 0)
@@ -147,13 +150,14 @@ class Pacman(Individual):
 
                 if (0<=ny and ny < len(self.zoo.grid)) and (0<=ny and nx < len(self.zoo.grid[0])):
 
-                    char = self.zoo.grid[ny][nx]
+                    char = self.zoo.grid[ny][nx].decode("utf-8")
 
                     if char == '.' or char == ' ' :
                         continue
 
                     # 4. Check for Objects (Walls or Animals)
-                    found_shape = self.zoo.shapes[char].T
+                    assert char in self.zoo.animals.keys(), f"Error with {char}"
+                    found_shape = self.zoo.animals[char]["shape"].T
                     break
 
             # If nothing found in this column, it's an empty sensor

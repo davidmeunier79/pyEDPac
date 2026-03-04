@@ -20,6 +20,9 @@ NB_VISIO_INPUTS = 5
 VISIO_COLUMN_DEPTH = 6
 
 MINIMAL_TIME = 5
+MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+
+
 
 #TODO ZooConfig?
 INITIAL_LIFE_POINTS = 100
@@ -51,4 +54,4 @@ NB_OUT_ASSEMBLIES = NB_OUTPUT_ASSEMBLIES + NB_ASSEMBLIES
 # for visio
 GAP_INPUT_ASSEMBLY = 5 # gap in visu between assemblies
 GAP_HIDDEN_ASSEMBLY = 5
-GAP_OUTPUT_ASSEMBLY = 20
+GAP_OUTPUT_ASSEMBLY = 5

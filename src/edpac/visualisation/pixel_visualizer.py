@@ -3,17 +3,21 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import pyqtgraph as pg
 
 class PixelVisualizer(QtWidgets.QMainWindow):
-    def __init__(self, height, width, title="Visualizer"):
+#class PixelVisualizer(QtWidgets.QLabel):
+    def __init__(self, height, width, scale = 1, title="Visualizer"):
         super().__init__()
         self.setWindowTitle(title)
         self.height = height
         self.width = width
+        self.scale = scale
 
         # Buffers: uint8 is critical for pyqtgraph RGB performance
         self.buffer = np.zeros((height, width, 3), dtype=np.uint8)
         self.background = np.zeros((height, width, 3), dtype=np.uint8)
 
         # UI Setup
+        self.setFixedSize(self.width * self.scale, self.height * self.scale)
+
         self.view = pg.GraphicsLayoutWidget()
         self.setCentralWidget(self.view)
         self.vb = self.view.addViewBox()
@@ -53,3 +57,7 @@ class PixelVisualizer(QtWidgets.QMainWindow):
     def update_display(self):
         """Push buffer to GPU."""
         self.img.setImage(self.buffer, autoLevels=False)
+        #
+        # if self.scale > 1:
+        #     pixmap = pixmap.scaled(self.w * self.scale, self.h * self.scale, QtCore.Qt.KeepAspectRatio)
+        #

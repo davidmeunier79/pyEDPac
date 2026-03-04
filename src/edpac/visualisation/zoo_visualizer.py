@@ -8,12 +8,13 @@ from edpac.zoo.zoo import Zoo
 from edpac.zoo.pacman import Pacman
 
 class ZooVisualizer(PixelVisualizer):
-    def __init__(self, zoo: Zoo ):
+
+    def __init__(self, zoo: Zoo, scale = 1):
         self.rows, self.cols = zoo.grid.shape
         self.cell_size = zoo.cell_size
         self.zoo = zoo
 
-        super().__init__(self.rows * self.cell_size, self.cols * self.cell_size, title="Zoo Display")
+        super().__init__(self.rows * self.cell_size, self.cols * self.cell_size, title="Zoo Display", scale=scale)
 
     def draw_static_grid(self, grid_array, wall_color=(100, 100, 100)):
         """
@@ -80,9 +81,9 @@ class ZooVisualizer(PixelVisualizer):
         blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
 
         if pacman.dir_head == 0: # Up: Top edge
-            blue_bar[2:19, :2] = 1
-        elif pacman.dir_head == 1: # Down: Bottom edge
             blue_bar[2:19, -2:] = 1
+        elif pacman.dir_head == 1: # Down: Bottom edge
+            blue_bar[2:19, :2] = 1
         elif pacman.dir_head == 2: # Left: Left edge
             blue_bar[:2, 2:19] = 1
         elif pacman.dir_head == 3: # Right: Right edge
