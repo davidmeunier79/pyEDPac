@@ -40,7 +40,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def evaluate_individual(indiv):
+def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -49,26 +49,12 @@ def evaluate_individual(indiv):
     #app = QtWidgets.QApplication(sys.argv)
 
 
-    #################################### Zoo ######################################
-    # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
-    zoo.load_menagerie(menagerie_file= "menagerie.txt")
-
-    ################################# Pacman ###########################
-
     pac = Pacman(indiv)
     zoo.set_pacman(pac)
     zoo.load_screen(screen_file="screen.0")
 
-    ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(zoo, scale = 2)
-    # Connect the "X" button of the window to our stop function
-    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
-    # if 'destroyed' signal doesn't fire immediately.
-    zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
-    zoo_viz.destroyed.connect(stop_everything)
-
     # 3. Initial Draw
+    zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid(zoo.grid)
     zoo_viz.draw_zoo()
     zoo_viz.show()
@@ -82,21 +68,11 @@ def evaluate_individual(indiv):
 
     # initilisation
 
-    ################################### Network Visualizer ################################
-    # Create visualizer (800x600 pixels, scaled up 2x for visibility)
-    net_viz = NetworkVisualizer(net, title = "EDPac network visualizer", scale = 2)
-    net_viz.setAttribute(Qt.WA_DeleteOnClose)
-    net_viz.destroyed.connect(stop_everything)
-
+    net_viz.init_network(net)
     net_viz.setup_topology()
     net_viz.show()
 
-    ################################## Inputs Visualizer #####################################
-    # 2. Input/Sensor View (The new class)
-    input_viz = InputVisualizer(title = "EDPac inputs", scale = 2)
-    input_viz.setAttribute(Qt.WA_DeleteOnClose)
-    input_viz.destroyed.connect(stop_everything)
-
+    # input_viz
     input_viz.draw_background()
     input_viz.show()
 
@@ -210,8 +186,36 @@ def evaluate_individual(indiv):
 def main():
 
     global SIMULATION_ACTIVE
+    SIMULATION_ACTIVE = True
 
 
+    #################################### Zoo ######################################
+    # 1. Initialize Data
+    zoo = Zoo(data_dir=DATA_PATH)
+    zoo.load_menagerie(menagerie_file= "menagerie.txt")
+
+    ################################# Pacman ###########################
+
+    ################################### Zoo Visualizer ################################
+    zoo_viz = ZooVisualizer(scale = 2, title = "EDPac zoo")
+    # Connect the "X" button of the window to our stop function
+    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
+    # if 'destroyed' signal doesn't fire immediately.
+    zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
+    zoo_viz.destroyed.connect(stop_everything)
+
+
+    ################################### Network Visualizer ################################
+    # Create visualizer (800x600 pixels, scaled up 2x for visibility)
+    net_viz = NetworkVisualizer(title = "EDPac network", scale = 2)
+    net_viz.setAttribute(Qt.WA_DeleteOnClose)
+    net_viz.destroyed.connect(stop_everything)
+
+    ################################## Inputs Visualizer #####################################
+    # 2. Input/Sensor View (The new class)
+    input_viz = InputVisualizer(title = "EDPac inputs", scale = 2)
+    input_viz.setAttribute(Qt.WA_DeleteOnClose)
+    input_viz.destroyed.connect(stop_everything)
 
     # Create objects
     #################################### Population ######################################
@@ -230,7 +234,7 @@ def main():
                 print("Simualtion is over, breaking")
                 break
 
-            evaluate_individual(ind)
+            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
 
             print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'

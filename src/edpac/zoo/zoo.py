@@ -299,13 +299,13 @@ class Zoo:
             if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
                 char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
 
-                if char_contact not in (".", "") :
-                    print(char_contact)
-                    print(self.animals[char_contact]["name"])
+                if char_contact not in (".", " ") :
+                    continue
 
                 if self.animals[char_contact]["danger"] == "-1":
                     self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
                     print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , self.pacman.life_points)
+
             else:
                 print("Outside")
 

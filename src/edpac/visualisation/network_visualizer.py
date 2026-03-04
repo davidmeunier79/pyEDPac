@@ -7,7 +7,7 @@ from edpac.config.constants import *
 from .pixel_visualizer import PixelVisualizer
 
 class NetworkVisualizer(PixelVisualizer):
-    def __init__(self, net, title="Neural Activity", scale=1):
+    def __init__(self, title="Neural Activity", scale=1):
 
         width = VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY) + GAP_OUTPUT_ASSEMBLY+MOTOR_SQRT_NB_NEURONS
 
@@ -20,7 +20,6 @@ class NetworkVisualizer(PixelVisualizer):
 
         self.neuron_positions = {}
         self.neuron_mask = np.ones((1, 1), dtype=np.uint8) # 1x1 pixel or larger
-        self.init_network(net)
 
     def draw_assembly(self, assembly, x_offset, y_offset ):
 

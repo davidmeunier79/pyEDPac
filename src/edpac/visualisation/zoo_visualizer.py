@@ -7,14 +7,18 @@ from edpac.visualisation.pixel_visualizer import PixelVisualizer
 from edpac.zoo.zoo import Zoo
 from edpac.zoo.pacman import Pacman, Direction
 
+from edpac.config.constants import ZOO_NB_COLS, ZOO_NB_ROWS, ZOO_CELL_SIZE
+
 class ZooVisualizer(PixelVisualizer):
 
-    def __init__(self, zoo: Zoo, scale = 1):
-        self.rows, self.cols = zoo.grid.shape
-        self.cell_size = zoo.cell_size
-        self.zoo = zoo
+    def __init__(self, scale = 1, title="Zoo Display"):
+        self.rows, self.cols = ZOO_NB_ROWS, ZOO_NB_COLS
+        self.cell_size = ZOO_CELL_SIZE
+        self.zoo = None
+        super().__init__(self.rows * self.cell_size, self.cols * self.cell_size,title=title , scale=scale)
 
-        super().__init__(self.rows * self.cell_size, self.cols * self.cell_size, title="Zoo Display", scale=scale)
+    def init_zoo(self, zoo : Zoo):
+        self.zoo = zoo
 
     def draw_static_grid(self, grid_array, wall_color=(100, 100, 100)):
         """
