@@ -299,7 +299,7 @@ class Zoo:
             if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
                 char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
 
-                if char_contact not in (".", " ") :
+                if char_contact in (".", " ") :
                     continue
 
                 if self.animals[char_contact]["danger"] == "-1":

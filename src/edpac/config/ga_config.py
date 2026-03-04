@@ -28,7 +28,7 @@ class ChromosomeConfig:
     DISTRIBUTED_PROJECTION: bool = True
     
     # Nombre de gènes
-    NB_PROJECTIONS_EACH_CHROMOSOME: int = 480  # Nombre de projections
+    NB_PROJECTIONS_EACH_CHROMOSOME: int = 120  # Nombre de projections
     NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
     NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 

@@ -143,7 +143,7 @@ class Pacman(Individual):
         new_x = self.x + dx
         new_y = self.y + dy
 
-        print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
+        #print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
         rows, cols = self.zoo.grid.shape
 
@@ -151,18 +151,18 @@ class Pacman(Individual):
         if 0 <= new_x < cols and 0 <= new_y < rows:
 
             print("OK in grid !")
-            if self.zoo.grid[new_y][new_x] != 'X': # Not a wall
+            if self.zoo.grid[new_y][new_x] != b'X': # Not a wall
 
 
                 print("OK not a wall!")
 
                 # Update grid data: old position becomes a dot
                 # if this a pacgum, increase life
-                if self.zoo.grid[new_y][new_x] == ".":
+                if self.zoo.grid[new_y][new_x] == b".":
                     self.life_points = self.life_points + NB_LIFE_POINTS_PER_PACGUM
                     print("Eating pacgum, Life points: " , self.life_points)
 
-                elif self.zoo.grid[new_y][new_x] == " ":
+                elif self.zoo.grid[new_y][new_x] == b" ":
 
                     print("Moving forward in empty space")
 
@@ -172,8 +172,13 @@ class Pacman(Individual):
                     char = self.zoo.grid[new_y][new_x].decode("utf-8")
 
                     if self.zoo.animals[char]["danger"] == "1":
-                        print("Eating prey, Life points: " , self.life_points)
+                        print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
+
+                    elif self.zoo.animals[char]["danger"] == "1":
+                        print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
+                        return
+
 
                 print(f"Moving from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
@@ -183,7 +188,7 @@ class Pacman(Individual):
                 # New position becomes Pacman
                 self.zoo.grid[self.y][self.x] = b'0'
 
-                print(self.zoo.grid)
+                #print(self.zoo.grid)
 
             else:
                 print("Bumping in a wall")
