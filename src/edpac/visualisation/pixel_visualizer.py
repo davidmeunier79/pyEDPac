@@ -1,66 +1,55 @@
 import numpy as np
 from PySide6 import QtWidgets, QtGui, QtCore
+import pyqtgraph as pg
 
-class PixelVisualizer(QtWidgets.QLabel):
-    """
-    A simple pixel-based visualizer.
-    Acts like a canvas where you can set individual pixel colors.
-    """
-    def __init__(self, width=800, height=600, scale=1, title = "pyEDPac Pixel View"):
+class PixelVisualizer(QtWidgets.QMainWindow):
+    def __init__(self, height, width, title="Visualizer"):
         super().__init__()
-        self.w = width
-        self.h = height
-        self.scale = scale # Zoom factor (e.g., 2 makes 1 pixel look like 2x2)
-
-        # Create a black background buffer (RGBA)
-        self._init_buffer()
-
-        self.setFixedSize(self.w * self.scale, self.h * self.scale)
         self.setWindowTitle(title)
+        self.height = height
+        self.width = width
 
-    def _init_buffer(self):
-        self.buffer = np.zeros((self.h, self.w, 4), dtype=np.uint8)
-        self.buffer[:, :, 3] = 255  # Set Alpha channel to opaque
+        # Buffers: uint8 is critical for pyqtgraph RGB performance
+        self.buffer = np.zeros((height, width, 3), dtype=np.uint8)
+        self.background = np.zeros((height, width, 3), dtype=np.uint8)
 
+        # UI Setup
+        self.view = pg.GraphicsLayoutWidget()
+        self.setCentralWidget(self.view)
+        self.vb = self.view.addViewBox()
+        self.vb.setAspectLocked(True)
 
-    def clear_canvas(self, color=(0, 0, 0)):
-        """Resets the whole buffer to a specific color."""
-        self.buffer[:, :, 0] = color[0]
-        self.buffer[:, :, 1] = color[1]
-        self.buffer[:, :, 2] = color[2]
+        self.img = pg.ImageItem(axisOrder='row-major')
+        self.vb.addItem(self.img)
 
+    def refresh_from_background(self):
+        """Clean the active buffer by copying the background."""
+        np.copyto(self.buffer, self.background)
 
-    def set_pattern(self, base_x, base_y, narr, color=(255, 255, 255)):
-        height, width = narr.shape
+    def set_background_color(self, color):
+        """Fill background with a solid color (R, G, B)."""
+        self.background[:] = color
 
-        #self.buffer = np.zeros(shape = self.buffer.shape)
-        #self.buffer[:, :, 3] = 255
-        #
-        # self.buffer[base_x:(base_x+height),base_y:(base_y+width), :3] = (255,255,255)
+    def set_pattern(self, base_y, base_x, pattern_arr, color, target_buffer=None):
+        """
+        Draws a numpy pattern (mask of 1s) onto the buffer.
+        target_buffer: if None, draws to active buffer. Else draws to background.
+        """
+        dest = self.buffer if target_buffer is None else target_buffer
 
-        for x, y in np.argwhere (narr == 1):
-            self.set_pixel(base_x + x, base_y + y, color)
+        # Get indices where pattern is active
+        rows, cols = np.where(pattern_arr > 0)
 
-    def set_pixel(self, x, y, color=(255, 255, 255)):
-        """Directly sets a pixel color at (x, y)."""
-        if 0 <= x < self.w and 0 <= y < self.h:
-            self.buffer[y, x, :3] = color
+        # Shift indices
+        target_rows = rows + base_y
+        target_cols = cols + base_x
+
+        # Boundary check using boolean masking
+        valid = (target_rows >= 0) & (target_rows < self.height) & \
+                (target_cols >= 0) & (target_cols < self.width)
+
+        dest[target_rows[valid], target_cols[valid]] = color
 
     def update_display(self):
-        """Converts the NumPy buffer to a QImage and displays it."""
-        image = QtGui.QImage(
-            self.buffer.data,
-            self.w, self.h,
-            QtGui.QImage.Format_RGBA8888
-        )
-        pixmap = QtGui.QPixmap.fromImage(image)
-
-        # If scale > 1, resize the pixmap to make pixels visible
-        if self.scale > 1:
-            pixmap = pixmap.scaled(self.w * self.scale, self.h * self.scale, QtCore.Qt.KeepAspectRatio)
-
-        self.setPixmap(pixmap)
-
-    def closeEvent(self, event):
-        QtWidgets.QApplication.quit()
-        event.accept()
+        """Push buffer to GPU."""
+        self.img.setImage(self.buffer, autoLevels=False)

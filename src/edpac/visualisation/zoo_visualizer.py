@@ -8,62 +8,85 @@ from edpac.zoo.zoo import Zoo
 from edpac.zoo.pacman import Pacman
 
 class ZooVisualizer(PixelVisualizer):
-    def draw_zoo(self, zoo: Zoo):
-        self.clear_canvas((255, 255, 255)) # Deep black background
+    def __init__(self, zoo: Zoo ):
+        self.rows, self.cols = zoo.grid.shape
+        self.cell_size = zoo.cell_size
+        self.zoo = zoo
 
-        for row_idx, row in enumerate(zoo.grid):
-            for col_idx, char in enumerate(row):
-                if char in zoo.shapes:
-                    base_x = col_idx * zoo.cell_size
-                    base_y = row_idx * zoo.cell_size
+        super().__init__(self.rows * self.cell_size, self.cols * self.cell_size, title="Zoo Display")
 
-                    #color = (0, 0, 0)
+    def draw_static_grid(self, grid_array, wall_color=(100, 100, 100)):
+        """
+        Draw walls into the BACKGROUND buffer so they don't need
+        to be recalculated every frame.
+        """
+        self.set_background_color((255, 255, 255))
+        wall_mask = np.ones((self.cell_size, self.cell_size), dtype=np.uint8)
 
-                    # Color Logic
-                    if char == '.' or char == 'X':
-                        color = (80, 80, 80)    # Dim gray for dots
-                    elif char == '0':
-                        color = (255, 255, 0)   # Yellow for Pacman
-                    elif zoo.danger[char] == '1':
-                        color = (0, 0, 255) # Blue for preys
-                    elif zoo.danger[char] == '-1':
-                        color = (255, 0, 0) # Red for predators
+        # Find walls in grid_array (assuming grid_array is a numpy array)
+        yy, xx = np.where(grid_array == b'X')
+        for y, x in zip(yy, xx):
+            self.set_pattern(y * self.cell_size, x * self.cell_size,
+                             wall_mask, wall_color, target_buffer=self.background)
 
-                    self.set_pattern(base_x, base_y , zoo.shapes[char].T, color)
+    def draw_zoo(self):
+        """
+        1) Clear frame with background (walls)
+        2) Draw Pacman and animals on active buffer
+        """
+        self.refresh_from_background()
 
-        # 3. Draw Pacman (The Body and the Head Bar)
-        self._draw_pacman(zoo)
-
+        self._draw_pacman()
         self.update_display()
 
-    def _draw_pacman(self, zoo):
-        p = zoo.pacman
-        bx = p.x * zoo.cell_size
-        by = p.y * zoo.cell_size
+        # Draw Animals
+        for code in np.unique(self.zoo.grid):
+            char = code.decode("utf-8")
+
+            if char == "0" or char == 'X' or char == " ":
+                continue
+
+            val = self.zoo.animals[char]
+            if val["danger"] == "-1":
+                color = (255, 0, 0) # Red for predators
+
+            elif val["danger"] == "1":
+                color = (0, 0, 255) # Blue for preys
+
+            else:
+                color = (80, 80, 80)    # Dim gray for dots
+
+            pos_x, pos_y = np.where(self.zoo.grid == code)
+            for (x, y) in zip(pos_x, pos_y):
+                self.set_pattern(x * self.cell_size,
+                                 y * self.cell_size,
+                                 val["shape"],
+                                 color )
+        self.update_display()
+
+    def _draw_pacman(self):
+        pacman = self.zoo.pacman
+        x,y = self.zoo._get_pacman_pos()
+
+        bx = x * self.cell_size
+        by = y * self.cell_size
 
         # A. Draw Body Sprite
-        direction_name = zoo.pacman_images[p.dir_body]
-        body_shape = zoo.pacman_shapes[direction_name]
+        body_shape = self.zoo.pacman_shapes[pacman.dir_body]
         self.set_pattern(bx, by ,body_shape,  (255, 255, 0)) # Yellow
 
         # B. Draw Head Bar (Blue Line)
         # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
-        blue = (50, 50, 255)
-        cs = zoo.cell_size - 1
+        blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
 
-        if p.dir_head == 0: # Up: Top edge
-            for i in range(16):
-                self.set_pixel(bx + i, by, blue)
-                self.set_pixel(bx + i, by + 1, blue)
-        elif p.dir_head == 1: # Down: Bottom edge
-            for i in range(16):
-                self.set_pixel(bx + i, by + cs, blue)
-                self.set_pixel(bx + i, by + cs - 1, blue)
-        elif p.dir_head == 2: # Left: Left edge
-            for i in range(16):
-                self.set_pixel(bx, by + i, blue)
-                self.set_pixel(bx + 1, by + i, blue)
-        elif p.dir_head == 3: # Right: Right edge
-            for i in range(16):
-                self.set_pixel(bx + cs, by + i, blue)
-                self.set_pixel(bx + cs - 1, by + i, blue)
+        if pacman.dir_head == 0: # Up: Top edge
+            blue_bar[2:19, :2] = 1
+        elif pacman.dir_head == 1: # Down: Bottom edge
+            blue_bar[2:19, -2:] = 1
+        elif pacman.dir_head == 2: # Left: Left edge
+            blue_bar[:2, 2:19] = 1
+        elif pacman.dir_head == 3: # Right: Right edge
+            blue_bar[-2:, 2:19] = 1
+        self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
+
+        self.update_display()
