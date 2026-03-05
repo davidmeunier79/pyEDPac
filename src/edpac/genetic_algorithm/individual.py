@@ -115,9 +115,10 @@ class Individual():
 
         return new_ind
     
-    def increase_age(self):
-        """Incrémenter l'âge"""
-        self.age += 1
+    def set_age(self, new_age):
+        """Fixer l'âge"""
+        if self.age==0:
+            self.age = new_age
     
     def __repr__(self):
         fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"

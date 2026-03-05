@@ -233,6 +233,7 @@ class Population:
         print(self.fitness_history)
 
         # Créer nouvelle génération
+
         new_pop = [ind.clone() for ind in elite]  # Conserver élites
         
         # Générer offspring
@@ -262,7 +263,18 @@ class Population:
         print(new_pop)
 
         self.individuals = new_pop
+
+
         self.generation += 1
+
+        self.set_indivual_ages()
+
+    def set_indivual_ages(self):
+
+        for indiv in self.individuals:
+
+            indiv.set_age(self.generation)
+
 
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""

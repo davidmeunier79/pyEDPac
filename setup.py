@@ -37,7 +37,9 @@ setup(
             "sphinx>=4.0",
             "sphinx-rtd-theme>=1.0",
         ],
+        "visu": ["PySide6","pillow", "pyqtgraph"] # pyside6 conda version not pip # pillow conda also # pyqtgraph conda also
     },
+
     
     classifiers=[
         "Development Status :: 3 - Alpha",
