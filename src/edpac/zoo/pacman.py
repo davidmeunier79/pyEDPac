@@ -150,11 +150,7 @@ class Pacman(Individual):
         # Check for walls in the Zoo grid before moving
         if 0 <= new_x < cols and 0 <= new_y < rows:
 
-            print("OK in grid !")
             if self.zoo.grid[new_y][new_x] != b'X': # Not a wall
-
-
-                print("OK not a wall!")
 
                 # Update grid data: old position becomes a dot
                 # if this a pacgum, increase life
@@ -163,7 +159,6 @@ class Pacman(Individual):
                     print("Eating pacgum, Life points: " , self.life_points)
 
                 elif self.zoo.grid[new_y][new_x] == b" ":
-
                     print("Moving forward in empty space")
 
                 else:
@@ -175,7 +170,7 @@ class Pacman(Individual):
                         print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
 
-                    elif self.zoo.animals[char]["danger"] == "1":
+                    elif self.zoo.animals[char]["danger"] == "-1":
                         print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
                         return
 
