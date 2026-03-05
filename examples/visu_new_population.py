@@ -197,7 +197,7 @@ def main():
     ################################# Pacman ###########################
 
     ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(scale = 2, title = "EDPac zoo")
+    zoo_viz = ZooVisualizer(title = "EDPac zoo")
     # Connect the "X" button of the window to our stop function
     # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
     # if 'destroyed' signal doesn't fire immediately.
