@@ -1,5 +1,5 @@
 from edpac.genetic_algorithm.individual import Individual
-from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY, MOTOR_THRESHOLD
+from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY, MOTOR_THRESHOLD, BLURRED_FACTOR
 
 from enum import IntEnum
 
@@ -199,36 +199,83 @@ class Pacman(Individual):
         rows, cols = self.zoo.grid.shape
 
 
-        # 1. Define directional vectors based on dir_head
-        # dirX/Y = Forward, dirPerX/Y = Side-step (Perpendicular)
 
-        #0: Up, 1: Down, 2: Left, 3: Right
+
+
+        #
+        # # 1. Define directional vectors based on dir_head
+        # # dirX/Y = Forward, dirPerX/Y = Side-step (Perpendicular)
+        #
+        # #0: Up, 1: Down, 2: Left, 3: Right
+        #
+        # # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
+        # if self.dir_head == Direction.UP: # HAUT (UP)
+        #     df, ds = (0, -1), (1, 0)
+        # elif self.dir_head == Direction.DOWN: # BAS (DOWN)
+        #     df, ds = (0, 1), (-1, 0)
+        # elif self.dir_head == Direction.LEFT: # GAUCHE (LEFT)
+        #     df, ds = (-1, 0), (0, -1)
+        # elif self.dir_head == Direction.RIGHT: # DROITE (RIGHT)
+        #     df, ds = (1, 0), (0, 1)
+        # else:
+        #     df, ds = (0, 0), (0, 0)
+        #
+        # print("Head: ", Direction(self.dir_head).to_string())
+        # print("Body: ", Direction(self.dir_body).to_string())
+        #
+        # visio_patterns = []
+        #
+        # # 2. Iterate through each sensory column (i)
+        # for i in range(NB_VISIO_INPUTS):
+        #     # Calculate column index relative to center (e.g., -2, -1, 0, 1, 2)
+        #     rel_col = i - (NB_VISIO_INPUTS - 1) // 2
+        #
+
+
 
         # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
         if self.dir_head == Direction.UP: # HAUT (UP)
-            df, ds = (0, -1), (1, 0)
+            df, ds, inc_lat, inc_depth = (0, 1), (1, 0), 1, 1
         elif self.dir_head == Direction.DOWN: # BAS (DOWN)
-            df, ds = (0, 1), (-1, 0)
+            df, ds, inc_lat, inc_depth = (0, 1), (1, 0), -1, -1
         elif self.dir_head == Direction.LEFT: # GAUCHE (LEFT)
-            df, ds = (-1, 0), (0, -1)
+            df, ds, inc_lat, inc_depth = (1, 0), (0, 1), 1, -1
         elif self.dir_head == Direction.RIGHT: # DROITE (RIGHT)
-            df, ds = (1, 0), (0, 1)
+            df, ds, inc_lat, inc_depth = (1, 0), (0, 1), -1, 1
         else:
-            df, ds = (0, 0), (0, 0)
+            print(f"Error, could not decipher dir_head = {dir_head}")
+            return []
+
+        #print("Head: ", Direction(self.dir_head).to_string())
+        #print("Body: ", Direction(self.dir_body).to_string())
 
         visio_patterns = []
 
+        if inc_lat == 1:
+            ### scanning laterally from lower to higher if dir_head = DOWN or RIGHT
+            lateral_values = range(NB_VISIO_INPUTS)
+        elif inc_lat == -1:
+            ### scanning laterally from higher to lower if dir_head = UP or LEFT
+            lateral_values = range(NB_VISIO_INPUTS-1, -1, -1)
+
         # 2. Iterate through each sensory column (i)
-        for i in range(NB_VISIO_INPUTS):
+        for i in lateral_values:
+
             # Calculate column index relative to center (e.g., -2, -1, 0, 1, 2)
             rel_col = i - (NB_VISIO_INPUTS - 1) // 2
 
-
             found_shape = None
+
+            if inc_depth == 1:
+                ### scanning depth from lower to higher if dir_head = UP or RIGHT
+                depth_values = range(max(abs(rel_col), 1), VISIO_COLUMN_DEPTH)
+            elif inc_depth == -1:
+                ### scanning depth from higher to lower if dir_head = DOWN or LEFT
+                depth_values = range( -max(abs(rel_col), 1) , -VISIO_COLUMN_DEPTH  , -1)
 
             # 3. Scan depth (j) in the current column
             # Start depth at abs(rel_col) to create a "V" shaped fan
-            for j in range(max(abs(rel_col), 1), VISIO_COLUMN_DEPTH):
+            for j in depth_values:
                 # Calculate grid coordinates: Start + (depth * Forward) + (offset * Side)
                 nx = self.x + (j * df[0]) + (rel_col * ds[0])
                 ny = self.y + (j * df[1]) + (rel_col * ds[1])
@@ -237,16 +284,32 @@ class Pacman(Individual):
 
                     char = self.zoo.grid[ny][nx].decode("utf-8")
 
+                    #print(f"{nx},{ny} = {char}")
+
                     if char == '.' or char == ' ' :
                         continue
 
                     # 4. Check for Objects (Walls or Animals)
                     assert char in self.zoo.animals.keys(), f"Error with {char}"
 
-                    found_shape = self.zoo.animals[char]["shape"].T
+                    found_shape = self.blur_pattern(self.zoo.animals[char]["shape"].T, float(abs(j))/(VISIO_COLUMN_DEPTH-1)*BLURRED_FACTOR)
+
                     break
+                else:
+                    print("nx: {nx}, ny: {ny} outside grid")
+
 
             # If nothing found in this column, it's an empty sensor
             visio_patterns.append(found_shape)
 
         return visio_patterns
+
+    def blur_pattern(self, pattern, noise):
+        import numpy as np
+
+        new_pattern = pattern.copy()
+        mask = np.random.rand(*pattern.shape) < noise
+        rand_values = np.random.randint(2, size=pattern.shape)
+        new_pattern[mask] = rand_values[mask]
+
+        return new_pattern

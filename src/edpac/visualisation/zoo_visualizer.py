@@ -85,13 +85,13 @@ class ZooVisualizer(PixelVisualizer):
         blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
 
         if pacman.dir_head == Direction.UP: # Up: Top edge
-            blue_bar[2:19, :2] = 1
-        elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
-            blue_bar[2:19, -2:] = 1
-        elif pacman.dir_head == Direction.LEFT: # Left: Left edge
-            blue_bar[:2, 2:19] = 1
-        elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
             blue_bar[-2:, 2:19] = 1
+        elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
+            blue_bar[:2, 2:19] = 1
+        elif pacman.dir_head == Direction.LEFT: # Left: Left edge
+            blue_bar[2:19, :2] = 1
+        elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
+            blue_bar[2:19, -2:] = 1
         self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
 
         self.update_display()

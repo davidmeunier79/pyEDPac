@@ -10,7 +10,7 @@ Toutes les constantes globales du projet
 
 
 DATA_PATH = "/home/INT/meunier.d/Tools/Packages/pyEdPac/data"
-DATA_PATH = "/envau/work/nit/users/meunier.d/Packages/pyEDPac/data"
+#DATA_PATH = "/envau/work/nit/users/meunier.d/Packages/pyEDPac/data"
 
 
 # Pacman parameters (from DefineZoo.h concept)
@@ -66,3 +66,4 @@ ZOO_NB_COLS = 40
 
 ZOO_CELL_SIZE = VISIO_SQRT_NB_NEURONS
 
+BLURRED_FACTOR = 0.2
