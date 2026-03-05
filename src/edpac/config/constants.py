@@ -10,6 +10,8 @@ Toutes les constantes globales du projet
 
 
 DATA_PATH = "/home/INT/meunier.d/Tools/Packages/pyEdPac/data"
+DATA_PATH = "/envau/work/nit/users/meunier.d/Packages/pyEDPac/data"
+
 
 # Pacman parameters (from DefineZoo.h concept)
 NB_MOTOR_PATTERNS = 4
