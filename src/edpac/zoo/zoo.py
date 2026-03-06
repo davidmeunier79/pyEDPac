@@ -122,7 +122,6 @@ class Zoo:
             "danger": 0,
             "name" : "dot"}
 
-
         # 2. Load Pacman directions ('0')
         # We store them in a dict inside shapes or specific attributes
         # 0: Up, 1: Down, 2: Left, 3: Right
@@ -132,11 +131,6 @@ class Zoo:
             2:  self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "userleft")),
             3:  self._parse_xbm_hex(os.path.join(self.data_dir, "formes", "userright")),
         }
-
-        print(self.pacman_shapes)
-
-        #self.shapes['0'] = self.pacman_shapes["right"] # Default
-        #self.danger['0'] = 0
 
         # 3. Load Menagerie ()
         men_path = os.path.join(self.data_dir, "menagerie", menagerie_file)
@@ -304,10 +298,10 @@ class Zoo:
 
                 if self.animals[char_contact]["danger"] == "-1":
                     self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
-                    print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , self.pacman.life_points)
-
-            else:
-                print("Outside")
+                    #print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , self.pacman.life_points)
+            #
+            # else:
+            #     print("Outside")
 
 
 

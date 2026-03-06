@@ -157,14 +157,16 @@ class Population:
                 )
             )
             
-            print(crossover_points)
-
             offspring_genes = genes1.copy()
             for i, point in enumerate(crossover_points):
                 if i % 2 == 1:
                     offspring_genes[point:] = genes2[point:]
-        print("Offspring: ")
-        print(offspring_genes)
+                else:
+                    offspring_genes[point:] = genes1[point:]
+
+#
+#         print("Offspring: ")
+#         print(offspring_genes)
 
         chromosome = Chromosome(self.chromosome_config, offspring_genes)
         return Individual(chromosome)
@@ -183,9 +185,9 @@ class Population:
         mutation_rate = self.mutation_config.MUTATION_RATE
         
         mask = np.random.rand(len(genes)) < mutation_rate
-        print("Mask mutation: ", mask)
+        #print("Mask mutation: ", mask)
         genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-        print("Genes after mutation: ", genes)
+        #print("Genes after mutation: ", genes)
 
         # Clamp to [0, 1]
         #genes = np.clip(genes, 0.0, 1.0)
@@ -204,7 +206,11 @@ class Population:
         """
         # Évaluer la population actuelle
         #self.evaluate(eval_func)
-        
+#
+#         for indiv in self.individuals:
+#             print(indiv.id)
+#             print(indiv.get_fitness())
+
         # Trouver les élites
         sorted_inds = sorted(
             self.individuals,
@@ -255,23 +261,27 @@ class Population:
             # Muter
             self.mutate(offspring)
 
-            print(offspring)
+            #print(offspring)
 
             new_pop.append(offspring)
         
         # Remplacer population
         #self.clean_population()
 
-        print(new_pop)
+        #print(new_pop)
 
         self.previous_populations[self.generation] = self.individuals
-
         self.individuals = new_pop
-
-
         self.generation += 1
-
         self.set_indivual_ages()
+
+    def set_fitnesses(self, list_fitnesses):
+
+        assert len(list_fitnesses) == len(self.individuals), "Error, Fitness length not matching individuals length"
+
+        for indiv, fitness in zip(self.individuals, list_fitnesses):
+
+            indiv.set_fitness(fitness)
 
     def set_indivual_ages(self):
 

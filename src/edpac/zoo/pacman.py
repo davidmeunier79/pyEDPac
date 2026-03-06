@@ -97,20 +97,20 @@ class Pacman(Individual):
 
             self.dir_body = self._get_turn(self.dir_body, -1)
             new_dir_body = Direction(self.dir_body).to_string()
-            print(f"Turn body left from {old_dir_body} to {new_dir_body}")
+            #print(f"Turn body left from {old_dir_body} to {new_dir_body}")
 
         elif b_right and not b_left:
             # Turn body right
             self.dir_body = self._get_turn(self.dir_body, 1)
 
             new_dir_body = Direction(self.dir_body).to_string()
-            print(f"Turn body right from {old_dir_body} to {new_dir_body}")
+            #print(f"Turn body right from {old_dir_body} to {new_dir_body}")
 
         elif b_left and b_right:
             # Both active: Move forward
 
             self._move_forward()
-            print("Move Forward")
+            #print("Move Forward")
 
         # --- 1. HEAD CONTROL ---
         # m0 = Turn Left, m1 = Turn Right
@@ -121,18 +121,18 @@ class Pacman(Individual):
             # Turn head left
             self.dir_head = self._get_turn(self.dir_head, -1)
             new_dir_head = Direction(self.dir_head).to_string()
-            print(f"Turn head left from {old_dir_head} to {new_dir_head}")
+            #print(f"Turn head left from {old_dir_head} to {new_dir_head}")
 
         elif h_right and not h_left:
             # Turn head right
             self.dir_head = self._get_turn(self.dir_head, 1)
             new_dir_head = Direction(self.dir_head).to_string()
-            print(f"Turn head right from {old_dir_head} to {new_dir_head}")
+            #print(f"Turn head right from {old_dir_head} to {new_dir_head}")
 
         elif h_left and h_right:
             # Both active: Realign head to body
             self.dir_head = self.dir_body
-            print("Realign head to body")
+            #print("Realign head to body")
 
     def _move_forward(self):
         """Calculates movement based on dir_body and updates grid."""
@@ -156,22 +156,23 @@ class Pacman(Individual):
                 # if this a pacgum, increase life
                 if self.zoo.grid[new_y][new_x] == b".":
                     self.life_points = self.life_points + NB_LIFE_POINTS_PER_PACGUM
-                    print("Eating pacgum, Life points: " , self.life_points)
+                    #print("Eating pacgum, Life points: " , self.life_points)
 
                 elif self.zoo.grid[new_y][new_x] == b" ":
-                    print("Moving forward in empty space")
+                    pass
+                    #print("Moving forward in empty space")
 
                 else:
-                    print("Eating animal")
+                    #print("Eating animal")
 
                     char = self.zoo.grid[new_y][new_x].decode("utf-8")
 
                     if self.zoo.animals[char]["danger"] == "1":
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
-                        print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
+                        #print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
 
                     elif self.zoo.animals[char]["danger"] == "-1":
-                        print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
+                        #print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
                         return
 
                 self.zoo.grid[self.y][self.x] = b' '
@@ -181,11 +182,11 @@ class Pacman(Individual):
                 self.zoo.grid[self.y][self.x] = b'0'
 
                 #print(self.zoo.grid)
-
-            else:
-                print("Bumping in a wall")
-        else:
-            print("Outside grid !!!!!!!!!!!!!!!!!")
+        #
+        #     else:
+        #         print("Bumping in a wall")
+        # else:
+        #     print("Outside grid !!!!!!!!!!!!!!!!!")
 
     def integrate_visio_outputs(self):
         """
