@@ -20,7 +20,7 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfig
 
@@ -129,8 +129,6 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
                 break
 
         output_patterns = net.get_output_patterns()
-        print(output_patterns)
-
 
         zoo.pacman.integrate_motor_outputs(output_patterns)
 
@@ -191,7 +189,7 @@ def main():
 
     #################################### Zoo ######################################
     # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
+    zoo = Zoo()
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
     ################################# Pacman ###########################

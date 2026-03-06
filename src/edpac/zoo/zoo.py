@@ -3,12 +3,13 @@ import re
 import random
 from math import floor
 import numpy as np
+import pathlib
 
 from edpac.config.constants import NB_LIFE_POINTS_PER_PREY, VISIO_SQRT_NB_NEURONS, NB_LIFE_POINTS_PER_PREDATOR
 
 from .pacman import Pacman
 class Zoo:
-    def __init__(self, data_dir, cell_size=VISIO_SQRT_NB_NEURONS):
+    def __init__(self, cell_size=VISIO_SQRT_NB_NEURONS):
         self.cell_size = cell_size
         self.rows = 0
         self.cols = 0
@@ -19,13 +20,26 @@ class Zoo:
         #self.danger = {}
         self.animals = {}
 
-        self.data_dir = data_dir
+        self.data_dir = self._get_data_dir()
 
         # Mapping for clarity
         self.WALL = 'X'
         self.EMPTY = ' '
         self.DOT = '.'
 
+
+    def _get_data_dir(self):
+
+        # 1. Get the absolute path of constants.py
+        current_file = pathlib.Path(__file__).resolve()
+
+        # 2. Go up the folder tree to find the project root
+        # (In your case: constants.py -> config/ -> edpac/ -> src/ -> ROOT)
+        # Adjust the number of .parent calls to match your actual structure
+        PROJECT_ROOT = current_file.parent.parent.parent.parent
+
+        data_dir = os.path.join(PROJECT_ROOT, "data")
+        return data_dir
 
     def set_pacman(self, pac):
         self.pacman = pac

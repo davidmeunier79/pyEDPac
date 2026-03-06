@@ -142,27 +142,22 @@ class Population:
         """
         genes1 = parent1.chromosome.get_genes().copy()
         genes2 = parent2.chromosome.get_genes().copy()
-        
-        if self.crossover_config.UNIFORM_CROSSOVER:
-            # Uniform crossover
-            mask = np.random.rand(len(genes1)) < self.crossover_config.UNIFORM_CROSSOVER_RATIO
-            offspring_genes = np.where(mask, genes1, genes2)
-        else:
-            # One-point or multi-point crossover
-            crossover_points = np.sort(
-                np.random.choice(
-                    len(genes1),
-                    self.crossover_config.CROSSOVER_POINTS,
-                    replace=False
-                )
+
+        # One-point or multi-point crossover
+        crossover_points = np.sort(
+            np.random.choice(
+                len(genes1),
+                self.crossover_config.CROSSOVER_POINTS,
+                replace=False
             )
-            
-            offspring_genes = genes1.copy()
-            for i, point in enumerate(crossover_points):
-                if i % 2 == 1:
-                    offspring_genes[point:] = genes2[point:]
-                else:
-                    offspring_genes[point:] = genes1[point:]
+        )
+
+        offspring_genes = genes1.copy()
+        for i, point in enumerate(crossover_points):
+            if i % 2 == 1:
+                offspring_genes[point:] = genes2[point:]
+            else:
+                offspring_genes[point:] = genes1[point:]
 
 #
 #         print("Offspring: ")

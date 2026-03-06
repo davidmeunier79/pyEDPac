@@ -9,10 +9,6 @@ Toutes les constantes globales du projet
 # Tous les potentiels sont en millivolts
 
 
-DATA_PATH = "/home/INT/meunier.d/Tools/Packages/pyEdPac/data"
-#DATA_PATH = "/envau/work/nit/users/meunier.d/Packages/pyEDPac/data"
-
-
 # Pacman parameters (from DefineZoo.h concept)
 NB_MOTOR_PATTERNS = 4
 
@@ -30,7 +26,7 @@ NB_INPUT_ASSEMBLIES = NB_VISIO_INPUTS # + NB_AUDIO_INPUTS
 NB_OUTPUT_ASSEMBLIES = NB_MOTOR_PATTERNS  # Number of motor patterns
 
 # Network topology
-SQRT_NB_ASSEMBLIES = 5
+SQRT_NB_ASSEMBLIES = 10
 NB_ASSEMBLIES = SQRT_NB_ASSEMBLIES * SQRT_NB_ASSEMBLIES
 
 SQRT_NB_NEURONS = 5

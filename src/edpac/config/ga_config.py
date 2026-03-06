@@ -28,7 +28,7 @@ class ChromosomeConfig:
     DISTRIBUTED_PROJECTION: bool = True
     
     # Nombre de gènes
-    NB_PROJECTIONS_EACH_CHROMOSOME: int = 120  # Nombre de projections
+    NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
     NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
     NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 
@@ -39,20 +39,20 @@ class ChromosomeConfig:
 @dataclass
 class PopulationConfig:
     """Configuration de la population"""
-    # Taille population
-    POPULATION_SIZE: int = 100
-    ELITE_SIZE: int = 10         # Meilleurs individus conservés
+    # # Taille population
+    # POPULATION_SIZE: int = 100
+    # ELITE_SIZE: int = 10         # Meilleurs individus conservés
+    #
+    # # Génération
+    # NB_GENERATIONS: int = 30
+
+
+        # Taille population
+    POPULATION_SIZE: int = 5
+    ELITE_SIZE: int = 1        # Meilleurs individus conservés
 
     # Génération
-    NB_GENERATIONS: int = 30
-#
-#
-#         # Taille population
-#     POPULATION_SIZE: int = 5
-#     ELITE_SIZE: int = 1        # Meilleurs individus conservés
-#
-#     # Génération
-#     NB_GENERATIONS: int = 3
+    NB_GENERATIONS: int = 3
 
 
 
@@ -63,12 +63,11 @@ class PopulationConfig:
 class SelectionConfig:
     """Configuration de sélection"""
     # Mode
-    SELECTION_MODE: SelectionMode = SelectionMode.TOURNAMENT
+    SELECTION_MODE: SelectionMode = SelectionMode.TOURNAMENT ##Autre choix, ROULETTE_WHEEL
     
     # Tournoi
     #TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
-    TOURNAMENT_SIZE: int = 5       # Nombre d'individus dans tournoi
-    TOURNAMENT_SELECTION_PRESSURE: float = 2.0
+    TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
     
     # Roulette
     ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus
@@ -80,10 +79,6 @@ class CrossoverConfig:
     CROSSOVER_RATE: float = 0.8    # 80% des offspring viennent de crossover
     CROSSOVER_POINTS: int = 1      # One-point crossover
     
-    # Uniform crossover
-    UNIFORM_CROSSOVER: bool = False
-    UNIFORM_CROSSOVER_RATIO: float = 0.5
-
 @dataclass
 class MutationConfig:
     """Configuration de mutation"""
