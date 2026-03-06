@@ -239,12 +239,12 @@ def main():
             print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'
             # This is especially helpful when dealing with large neural networks
-            #gc.collect()
+            gc.collect()
 
         population.evolve_generation()
 
-
     print("Evolution finished or aborted.")
+    print(population.fitness_history)
 
 
     #

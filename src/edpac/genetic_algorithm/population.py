@@ -56,6 +56,8 @@ class Population:
         self.generation = 0
         self.best_individual = None
         self.fitness_history = []
+
+        self.previous_populations = {}
     
     def clean_population(self):
 
@@ -261,6 +263,8 @@ class Population:
         #self.clean_population()
 
         print(new_pop)
+
+        self.previous_populations[self.generation] = self.individuals
 
         self.individuals = new_pop
 

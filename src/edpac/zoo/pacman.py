@@ -167,15 +167,12 @@ class Pacman(Individual):
                     char = self.zoo.grid[new_y][new_x].decode("utf-8")
 
                     if self.zoo.animals[char]["danger"] == "1":
-                        print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
                         self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
+                        print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
 
                     elif self.zoo.animals[char]["danger"] == "-1":
                         print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
                         return
-
-
-                print(f"Moving from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
                 self.zoo.grid[self.y][self.x] = b' '
                 self.x, self.y = new_x, new_y
@@ -240,7 +237,7 @@ class Pacman(Individual):
                     # 4. Check for Objects (Walls or Animals)
                     assert char in self.zoo.animals.keys(), f"Error with {char}"
 
-                    found_shape = self.blur_pattern(self.zoo.animals[char]["shape"].T, float(abs(j))/VISIO_COLUMN_DEPTH * BLURRED_FACTOR)
+                    found_shape = self.blur_pattern(self.zoo.animals[char]["shape"], float(abs(j))/VISIO_COLUMN_DEPTH * BLURRED_FACTOR)
 
                     break
 

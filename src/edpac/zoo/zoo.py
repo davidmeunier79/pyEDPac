@@ -113,7 +113,7 @@ class Zoo:
                         #coords[int(y), int(x)] = 1
                         coords[ int(x), int(y)] = 1
 
-        return coords
+        return np.flipud(coords)
 
     def load_menagerie(self,  menagerie_file= "menagerie.txt"):
         # 1. Load the '.' (dot)
