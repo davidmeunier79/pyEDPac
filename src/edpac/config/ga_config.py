@@ -66,8 +66,8 @@ class SelectionConfig:
     SELECTION_MODE: SelectionMode = SelectionMode.TOURNAMENT ##Autre choix, ROULETTE_WHEEL
     
     # Tournoi
-    #TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
-    TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
+    TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
+    #TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
     
     # Roulette
     ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus

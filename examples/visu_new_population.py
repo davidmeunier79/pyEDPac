@@ -107,7 +107,11 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         input_viz.display_inputs(sensory_data)
 
         # 3 integrate to EDNetwork
-        net.integrate_inputs(sensory_data)
+        spike_neuron_ids = net.integrate_inputs(sensory_data)
+
+        net_viz.display_spikes(spike_neuron_ids)
+        net_viz.update_display()
+        QtWidgets.QApplication.processEvents()
 
         current_time = EDSynapse.event_manager.get_time()
 
@@ -115,17 +119,29 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            #net_viz.display_empty_network()
-
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
             if spike_neuron_ids is not None:
 
+                print(spike_neuron_ids)
                 #print("Nb spikes: ", len(spike_neuron_ids))
+
+
+
                 net_viz.display_spikes(spike_neuron_ids)
+                net_viz.update_display()
+                QtWidgets.QApplication.processEvents()
+
 
             else:
                 print("No more events in event manager, breaking")
+
+                net_viz.refresh_from_background()()
+
+                net_viz.update_display()
+                QtWidgets.QApplication.processEvents()
+
+
                 break
 
         output_patterns = net.get_output_patterns()
