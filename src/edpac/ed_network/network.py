@@ -11,6 +11,7 @@ from typing import List, Dict, Optional, Tuple
 
 from itertools import product
 
+from ..ed_network.projection import Projection
 from ..ed_network.assembly import Assembly
 from ..ed_network.ed_synapse import EDSynapse
 from ..config.physiology_config import NeuronConfig, SynapseConfig
@@ -42,6 +43,8 @@ class Network:
         self.input_assemblies: List[Assembly] = []
         self.hidden_assemblies: List[Assembly] = []
         self.output_assemblies: List[Assembly] = []
+
+        self.projections: List[Projection] = []
 
     def _build_assemblies(self):
 
@@ -146,7 +149,7 @@ class Network:
             # Enregistrer dans les assemblées
             #pre_assembly.add_outgoing_synapse(synapse)
 
-        #return synapses_created
+        return Projection(pre_assembly.id, post_assembly.id, nature)
 
     def add_assembly(self, assembly: Assembly) -> int:
         """

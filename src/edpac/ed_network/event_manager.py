@@ -10,7 +10,7 @@ import heapq
 import numpy as np
 
 
-from ..config.network_config import EventManagerConfig
+from ..config.physiology_config import EventManagerConfig
 from ..physiology.dynamic_synapse import DynamicSynapse
 
 

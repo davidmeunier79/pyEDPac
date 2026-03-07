@@ -2,6 +2,8 @@ import numpy as np
 from math import sqrt
 
 from edpac.ed_network.network import Network # Assuming your repo structure
+from edpac.config.network_config import ProjectionNature
+
 from edpac.config.constants import *
 
 from .pixel_visualizer import PixelVisualizer
@@ -21,6 +23,10 @@ class NetworkVisualizer(PixelVisualizer):
         super().__init__( height=height, width=width,title=title, scale=scale)
 
         self.neuron_positions = {}
+        self.assembly_positions = {}
+
+        self.set_background_color(0)
+
 
     def draw_assembly(self, assembly, x_offset, y_offset ):
 
@@ -44,7 +50,7 @@ class NetworkVisualizer(PixelVisualizer):
 
         # 1. Calculate positions for every neuron in every assembly
         # input
-        x_base = cols['input']
+        x_offset = cols['input']
 
         print("Draw input_assemblies")
         for a, assembly in enumerate(network.input_assemblies):
@@ -54,7 +60,8 @@ class NetworkVisualizer(PixelVisualizer):
             # Layout neurons vertically within the assembly
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
             y_offset = a * sqrt_num_neurons
-            self.draw_assembly(assembly, x_base, y_offset )
+            self.draw_assembly(assembly, x_offset, y_offset )
+            self.assembly_positions[assembly.id] = x_offset+int(VISIO_SQRT_NB_NEURONS/2), y_offset+int(VISIO_SQRT_NB_NEURONS/2)
 
         # hidden
         print("Draw hidden_assemblies")
@@ -72,8 +79,10 @@ class NetworkVisualizer(PixelVisualizer):
 
             self.draw_assembly(assembly, x_offset, y_offset )
 
+            self.assembly_positions[assembly.id] = x_offset+int(SQRT_NB_NEURONS/2), y_offset+int(SQRT_NB_NEURONS/2)
+
         # output
-        x_base = cols['output']
+        x_offset = cols['output']
 
         print("Draw output_assemblies")
         for a, assembly in enumerate(network.output_assemblies):
@@ -82,7 +91,27 @@ class NetworkVisualizer(PixelVisualizer):
 
             y_offset = a * sqrt_num_neurons
 
-            self.draw_assembly(assembly, x_base, y_offset )
+            self.draw_assembly(assembly, x_offset, y_offset )
+            self.assembly_positions[assembly.id] = x_offset+int(MOTOR_SQRT_NB_NEURONS/2), y_offset+int(MOTOR_SQRT_NB_NEURONS/2)
+
+
+
+
+
+        for proj in network.projections:
+
+            pre_assembly_pos = self.assembly_positions[proj.pre_node]
+            post_assembly_pos = self.assembly_positions[proj.post_node]
+
+            if proj.nature == ProjectionNature.INHIBITORY:
+                color = (255, 0, 0) # blue
+
+            elif proj.nature == ProjectionNature.EXCITATORY:
+                color = (0, 0, 255) # red
+            else:
+                print(f"Error with proj {proj.nature}")
+
+            self.draw_line(pre_assembly_pos, post_assembly_pos, color, target_buffer = self.background, neuron_mask=self.neuron_mask)
 
         self.setup_topology()
 #
@@ -98,8 +127,6 @@ class NetworkVisualizer(PixelVisualizer):
 #                 self.background[y, x, :3] =(40, 40, 60)
 
     def setup_topology(self):
-        """Draw all neurons as DIM dots in the background."""
-        self.set_background_color(0)
 
         for x, y in list(self.neuron_positions.values()):
             self.set_pattern(y*self.neuron_mask.shape[1], x*self.neuron_mask.shape[0], self.neuron_mask, (60, 60, 60), target_buffer=self.background)

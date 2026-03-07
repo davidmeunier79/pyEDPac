@@ -77,10 +77,12 @@ class EvoNetwork(EDNetwork):
                 nature = ProjectionNature.INHIBITORY
 
 
-            self.create_projection(
+            projection = self.create_projection(
                 pre_assembly,
                 post_assembly,
                 connection_ratio=1.0,  # Utiliser weight pour ratio
                 nature=nature,
                 synapse_config=SynapseConfig()
             )
+
+            self.projections.append(projection)

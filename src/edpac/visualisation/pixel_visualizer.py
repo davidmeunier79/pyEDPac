@@ -54,6 +54,36 @@ class PixelVisualizer(QtWidgets.QMainWindow):
 
         dest[target_rows[valid], target_cols[valid]] = color
 
+    def draw_line(self, start_pos, end_pos, color, target_buffer=None, neuron_mask=np.ones(shape=(1,1))):
+
+        dest = self.buffer if target_buffer is None else target_buffer
+
+        x1, y1 = int(start_pos[0])*neuron_mask.shape[0], int(start_pos[1]*neuron_mask.shape[0])
+        x2, y2 = int(end_pos[0])*neuron_mask.shape[1], int(end_pos[1])*neuron_mask.shape[1]
+
+        # Bresenham's Algorithm
+        dx = abs(x2 - x1)
+        dy = -abs(y2 - y1)
+        sx = 1 if x1 < x2 else -1
+        sy = 1 if y1 < y2 else -1
+        err = dx + dy
+
+        while True:
+            # Boundary Check: Only draw if within buffer limits
+            if 0 <= x1 < self.width and 0 <= y1 < self.height:
+                dest[y1, x1] = color
+
+            if x1 == x2 and y1 == y2:
+                break
+
+            e2 = 2 * err
+            if e2 >= dy:
+                err += dy
+                x1 += sx
+            if e2 <= dx:
+                err += dx
+                y1 += sy
+
     def update_display(self):
         """Push buffer to GPU."""
         self.img.setImage(self.buffer, autoLevels=False)
