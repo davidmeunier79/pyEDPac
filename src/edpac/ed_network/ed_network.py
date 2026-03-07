@@ -92,11 +92,14 @@ class EDNetwork(Network):
         """
         time = 0
 
+        spike_neuron_ids = []
         for i in range(NB_VISIO_INPUTS):
 
             input_pattern = np.ones(shape = (VISIO_SQRT_NB_NEURONS,VISIO_SQRT_NB_NEURONS))
 
-            self.inject_input(assembly_idx = i,  time = time , pattern = input_pattern.reshape(-1,1))
+            spike_neuron_ids.extend(self.inject_input(assembly_idx = i,  time = time , pattern = input_pattern.reshape(-1,1)))
+
+        return spike_neuron_ids
 
     def integrate_inputs(self, sensory_patterns):
         """
@@ -110,13 +113,17 @@ class EDNetwork(Network):
 
         time = EDSynapse.event_manager.get_time()
 
+
+        spike_neuron_ids = []
         for i, pattern in enumerate(sensory_patterns):
             if pattern is None:
                 continue
 
             assert pattern.shape == (VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS)
 
-            self.inject_input(assembly_idx = i,  time = time , pattern = pattern.reshape(-1,1))
+            spike_neuron_ids.extend(self.inject_input(assembly_idx = i,  time = time , pattern = pattern.reshape(-1,1)))
+
+        return spike_neuron_ids
 
     def inject_input(self, assembly_idx: int, time: int, pattern: np.ndarray):
         """
@@ -135,12 +142,17 @@ class EDNetwork(Network):
         if len(pattern) != assembly.get_nb_neurons():
             raise ValueError(f"Pattern size {len(pattern)} != assembly size {assembly.get_nb_neurons()}")
 
+        spike_neuron_ids = []
+
         # Injecter stochastiquement selon le pattern
         for i, activation in enumerate(pattern):
             if np.random.rand() < activation:
                 neuron = assembly.neurons[i]
                 #print("Input spike in neuron ", i)
                 neuron.emit_spike(time)
+                spike_neuron_ids.append(neuron.id)
+
+        return spike_neuron_ids
 
     def simulate(self, duration: int) -> Dict:
         """

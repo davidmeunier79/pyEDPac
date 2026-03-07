@@ -9,17 +9,18 @@ from .pixel_visualizer import PixelVisualizer
 class NetworkVisualizer(PixelVisualizer):
     def __init__(self, title="Neural Activity", scale=1):
 
-        width = VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY) + GAP_OUTPUT_ASSEMBLY+MOTOR_SQRT_NB_NEURONS
+        self.neuron_mask = np.ones((2, 2), dtype=np.uint8) # 1x1 pixel or larger
+
+        width = (VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY) + GAP_OUTPUT_ASSEMBLY+MOTOR_SQRT_NB_NEURONS)*self.neuron_mask.shape[0]
 
         height = max((VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY)*NB_INPUT_ASSEMBLIES,
                      SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY),
-                     (MOTOR_SQRT_NB_NEURONS+GAP_OUTPUT_ASSEMBLY)*NB_OUTPUT_ASSEMBLIES)
+                     (MOTOR_SQRT_NB_NEURONS+GAP_OUTPUT_ASSEMBLY)*NB_OUTPUT_ASSEMBLIES)*self.neuron_mask.shape[1]
 
 
         super().__init__( height=height, width=width,title=title, scale=scale)
 
         self.neuron_positions = {}
-        self.neuron_mask = np.ones((1, 1), dtype=np.uint8) # 1x1 pixel or larger
 
     def draw_assembly(self, assembly, x_offset, y_offset ):
 
@@ -83,25 +84,26 @@ class NetworkVisualizer(PixelVisualizer):
 
             self.draw_assembly(assembly, x_base, y_offset )
 
-        self.create_template()
-
-    def create_template(self):
-        """Call this ONCE when the network is loaded."""
-        self.background.fill(0) # Start Black
-
-        for x, y in list(self.neuron_positions.values()):
-            # Draw static neurons in a dim color
-            # Draw a dim gray pixel for every neuron
-            if 0 <= x and x < self.width and 0 <= y and y < self.height:
-                self.background[y, x, :3] = [40, 40, 60]
+        self.setup_topology()
+#
+#     def create_template(self):
+#         """Call this ONCE when the network is loaded."""
+#         self.background.fill(0) # Start Black
+#
+#         for x, y in list(self.neuron_positions.values()):
+#             # Draw static neurons in a dim color
+#             # Draw a dim gray pixel for every neuron
+#
+#             if 0 <= x and x < self.width and 0 <= y and y < self.height:
+#                 self.background[y, x, :3] =(40, 40, 60)
 
     def setup_topology(self):
         """Draw all neurons as DIM dots in the background."""
-        self.set_background_color((10, 10, 20))
-        for x, y in list(self.neuron_positions.values()):
-            self.set_pattern(y, x, self.neuron_mask, (60, 60, 60), target_buffer=self.background)
+        self.set_background_color(0)
 
-        self.update_display()
+        for x, y in list(self.neuron_positions.values()):
+            self.set_pattern(y*self.neuron_mask.shape[1], x*self.neuron_mask.shape[0], self.neuron_mask, (60, 60, 60), target_buffer=self.background)
+
 
     def display_spikes(self, spike_indices):
         """
@@ -113,8 +115,6 @@ class NetworkVisualizer(PixelVisualizer):
         for idx in spike_indices:
             if idx in self.neuron_positions.keys():
                 x, y = self.neuron_positions[idx]
-                self.set_pattern(y, x, self.neuron_mask, (255, 255, 0))
+                self.set_pattern(y*self.neuron_mask.shape[1], x*self.neuron_mask.shape[0], self.neuron_mask, (255, 255, 0))
             else:
                 print(f"Error, could not find {idx} in neuron_positions {list(self.neuron_positions.keys())}")
-
-        self.update_display()
