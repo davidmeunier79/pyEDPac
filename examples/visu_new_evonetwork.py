@@ -150,7 +150,7 @@ def main():
 
             if spike_neuron_ids is not None:
 
-                print(spike_neuron_ids)
+                #print(spike_neuron_ids)
                 #print("Nb spikes: ", len(spike_neuron_ids))
 
 

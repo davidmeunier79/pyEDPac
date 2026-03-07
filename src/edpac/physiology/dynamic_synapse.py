@@ -31,15 +31,15 @@ class DynamicSynapse(Synapse):
     def _initialize_weight(self) -> float:
         """Initialiser le poids"""
 #         #TODO
-#         if self.config.INITIAL_WEIGHT_MODE == "fixed":
-#             return self.config.WEIGHT
-#         elif self.config.INITIAL_WEIGHT_MODE == "random":
-#             sign = np.random.choice([-1, 1])
-#             return self.config.WEIGHT * (1.0 + sign * np.random.random())
-#         else:
-#
-        return self.config.WEIGHT
-    
+        if self.config.INITIAL_WEIGHT_MODE == "fixed":
+            return self.config.WEIGHT
+        elif self.config.INITIAL_WEIGHT_MODE == "random":
+            sign = np.random.choice([-1, 1])
+            return self.config.WEIGHT * (1.0 + sign * np.random.random())
+        else:
+            print(f"Error with {self.config.INITIAL_WEIGHT_MODE}")
+            return 0.0
+
     def _initialize_delay(self) -> int:
         """Initialiser le délai de transmission"""
 #
@@ -63,22 +63,22 @@ class DynamicSynapse(Synapse):
     def update_last_time_of_pre_spike(self, new_time: int):
         """Mettre à jour le temps du dernier spike pré-synaptique"""
         self.last_time_of_pre_spike = new_time + self.delay
-        if self.config.ONLINE_LEARNING:
-            self.compute_new_weight()
     
     def update_last_time_of_post_spike(self, new_time: int):
         """Mettre à jour le temps du dernier spike post-synaptique"""
         self.last_time_of_post_spike = new_time
+
         if self.config.ONLINE_LEARNING:
+            #print("ONLINE_LEARNING")
             self.compute_new_weight()
     
     def compute_new_weight(self):
         """
         Calculer le nouveau poids selon STDP
-        
+
         Implémentation virtuelle - à overrider par sous-classes
         """
         raise NotImplementedError("Subclasses must implement compute_new_weight")
-    
+
     def __repr__(self):
         return f"DynamicSynapse(w={self.weight:.3f}, d={self.delay})"

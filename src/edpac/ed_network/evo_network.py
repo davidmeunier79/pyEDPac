@@ -76,7 +76,6 @@ class EvoNetwork(EDNetwork):
             elif proj_nature==1:
                 nature = ProjectionNature.INHIBITORY
 
-
             projection = self.create_projection(
                 pre_assembly,
                 post_assembly,
@@ -85,4 +84,5 @@ class EvoNetwork(EDNetwork):
                 synapse_config=SynapseConfig()
             )
 
-            self.projections.append(projection)
+            if projection is not None:
+                self.projections.append(projection)

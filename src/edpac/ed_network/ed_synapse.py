@@ -67,16 +67,37 @@ class EDSynapse(DynamicSynapse):
         if self.post_node.compute_psp_impact(time_of_emission, self.get_weight()):
             self.update_last_time_of_post_spike(time_of_emission)
     
-    def compute_bpsike_impact(self, time_of_bpsike: int):
+    def compute_new_weight(self):
         """
-        Traiter l'impact d'un backpropagated spike (pour STDP)
-        
-        Args:
-            time_of_bpsike: Temps du spike rétropropagé (ms)
+        Calculer le nouveau poids selon STDP
+
         """
-        # Mise à jour STDP via rétropropagation
-        self.update_last_time_of_post_spike(time_of_bpsike)
-    
+
+        if self.last_time_of_post_spike == -1 or self.last_time_of_pre_spike == -1:
+            #print("Synapse not implemented: ", self.last_time_of_post_spike, ", ", self.last_time_of_pre_spike)
+            return
+
+        diff_time = self.last_time_of_post_spike - self.last_time_of_pre_spike
+
+        # modif pour les synapes inhib
+        if self.weight < 0:
+
+            #print("Inhib weight before: ", self.weight)
+            if abs(diff_time) < self.config.INHIB_TIME_WINDOW:
+                self.weight = self.weight - (self.weight + 1.0) * self.config.INHIB_ALPHA
+            else:
+                self.weight = self.weight * self.config.INHIB_ALPHA
+            #print("Inhib weight after: ", self.weight)
+
+        elif self.weight > 0:
+
+            if diff_time < 0:
+                self.weight = self.weight - (self.weight - 0)*1.0/float(np.abs(diff_time))*self.config.EXCIT_ALPHA
+            elif 0 < diff_time:
+                self.weight = self.weight + (1.0 - self.weight)*(1.0/float(diff_time))*self.config.EXCIT_ALPHA
+            elif diff_time == 0:
+                self.weight = self.weight + (1.0 - self.weight)*self.config.EXCIT_ALPHA
+
     def __repr__(self):
         return (f"EDSynapse(pre={self.pre_node.id}, post={self.post_node.id}, "
                 f"w={self.weight:.3f}, d={self.delay})")
