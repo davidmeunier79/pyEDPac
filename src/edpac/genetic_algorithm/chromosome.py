@@ -29,10 +29,8 @@ class Chromosome:
         self.config = config or ChromosomeConfig()
         
         if genes is not None:
-            if self.config.RELATIVE_ENCODING:
-                self.genes = np.array(genes, dtype=np.float32)
-            else:
-                self.genes = np.array(genes, dtype=np.int32)
+            self.genes = np.array(genes, dtype=np.float32)
+
         else:
             # Générer aléatoirement
             self.genes = self._initialize_random_genes()
@@ -44,23 +42,8 @@ class Chromosome:
     
     def _initialize_random_genes(self) -> np.ndarray:
         """Générer des gènes aléatoires"""
-        if self.config.RELATIVE_ENCODING:
-            genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
-            return genes
-        else:
-
-            list_genes = [
-                np.random.randint(low = 0, high = NB_IN_ASSEMBLIES,
-                                size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
-
-                np.random.randint(low =0 , high = 2,
-                                size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
-
-                np.random.randint(low = 0, high = NB_OUT_ASSEMBLIES,
-                                size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME)
-                ]
-
-            return(np.concatenate(np.array(list_genes, dtype = int).T, axis = 0))
+        genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
+        return genes
 
     def get_genes(self) -> np.ndarray:
         """Retourner les gènes"""

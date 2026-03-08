@@ -24,39 +24,44 @@ class MutationMode(Enum):
 class ChromosomeConfig:
     """Configuration du chromosome"""
     # Encodage par projections
-    #PROJECTION_ENCODING: bool = False # TODO Not used, so far always the case
+    PROJECTION_ENCODING: bool = True # TODO Not used, so far always the case
 
-    VARIABLE_LENGTH_CHROMOSOME : bool = True
-    NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 5 # if VARIABLE_LENGTH_CHROMOSOME=False and RELATIVE_ENCODING=True
-    
+    if PROJECTION_ENCODING:
+
+        NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
+
+    VARIABLE_LENGTH_CHROMOSOME : bool = False
+
     # Nombre de gènes
-    NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
-    NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
-    NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
+    if VARIABLE_LENGTH_CHROMOSOME:
+        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 5 # if VARIABLE_LENGTH_CHROMOSOME=False
+        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*20
+    else:
+        NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
+        NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 
     # Validation
 
-    RELATIVE_ENCODING: bool = True
     MIN_GENE_VALUE: float = 0.0
     MAX_GENE_VALUE: float = 1.0
 
 @dataclass
 class PopulationConfig:
     """Configuration de la population"""
-    # # # Taille population
-    POPULATION_SIZE: int = 100
-    ELITE_SIZE: int = 10         # Meilleurs individus conservés
-
-    # Génération
-    NB_GENERATIONS: int = 30
-
-    #
-    #     # Taille population
-    # POPULATION_SIZE: int = 5
-    # ELITE_SIZE: int = 1        # Meilleurs individus conservés
+    # # # # Taille population
+    # POPULATION_SIZE: int = 100
+    # ELITE_SIZE: int = 10         # Meilleurs individus conservés
     #
     # # Génération
-    # NB_GENERATIONS: int = 1
+    # NB_GENERATIONS: int = 30
+
+
+        # Taille population
+    POPULATION_SIZE: int = 5
+    ELITE_SIZE: int = 1        # Meilleurs individus conservés
+
+    # Génération
+    NB_GENERATIONS: int = 1
 
 
 
@@ -68,7 +73,8 @@ class SelectionConfig:
     
     # Tournoi
     #TOURNAMENT_SIZE: int = 2       # Nombre d'individus dans tournoi
-    TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
+    TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
+    #TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
     
     # Roulette
     ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus

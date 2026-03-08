@@ -151,31 +151,37 @@ class Population:
         if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
 
             # One-point crossover
-            crossover_point1 = np.random.choice(
-                    int(len(genes1)/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+
+            print(float(len(genes1))/self.chromosome_config.NB_GENES_EACH_PROJECTION)
+            print(int(float(len(genes1))/self.chromosome_config.NB_GENES_EACH_PROJECTION))
+
+            crossover_point1 = np.random.choice(len(genes1),
                     1,
                     replace=False)
-            crossover_point1 = int(crossover_point1[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
+
+            crossover_point1 = int(crossover_point1[0] // self.chromosome_config.NB_GENES_EACH_PROJECTION)*self.chromosome_config.NB_GENES_EACH_PROJECTION
+
+            print(crossover_point1)
 
             crossover_point2 = np.random.choice(
-                    int(len(genes2)/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+                    int(float(len(genes2))/self.chromosome_config.NB_GENES_EACH_PROJECTION),
                     1,
                     replace=False)
 
             crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
 
-            #print(f"crossover_point1: {crossover_point1}")
-            #print(f"crossover_point2: {crossover_point2}")
+            print(f"crossover_point1: {crossover_point1}")
+            print(f"crossover_point2: {crossover_point2}")
 
             part1 = genes1[:crossover_point1]
             part2 = genes2[crossover_point2:]
 
-            #print("part1: ", part1.shape)
-            #print("part2: ", part2.shape)
+            print("part1: ", part1.shape)
+            print("part2: ", part2.shape)
 
             offspring_genes = np.concatenate((part1, part2), axis = 0)
-            #print("offspring_genes: ", offspring_genes.shape)
+            print("offspring_genes: ", offspring_genes.shape)
             #print(offspring_genes)
 
         else:
@@ -185,9 +191,9 @@ class Population:
                     1,
                     replace=False)
 
+            crossover_point = int(crossover_point[0])
             offspring_genes = genes1.copy()
-            for i, point in enumerate(crossover_points):
-                offspring_genes[point:] = genes2[point:]
+            offspring_genes[crossover_point:] = genes2[crossover_point:]
 
 #
 #         print("Offspring: ")
@@ -204,30 +210,10 @@ class Population:
             individual: Individu à muter
         """
         genes = individual.chromosome.get_genes()
-        
+        mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
+        genes[mask] = np.random.rand(len(genes))[mask]
 
-        if self.chromosome_config.RELATIVE_ENCODING:
-
-            mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
-
-            genes[mask] = np.random.rand(len(genes))[mask]
-
-        else:
-
-            max_val = np.array([NB_IN_ASSEMBLIES, 2,
-                                NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME,
-            dtype = int)
-
-            mutation_rate = self.mutation_config.MUTATION_RATE
-        
-            mask = np.random.rand(len(genes)) < mutation_rate
-
-            genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-
-
-        # Clamp to [0, 1]
-        #genes = np.clip(genes, 0.0, 1.0)
-        
+        # reinit
         individual.chromosome.set_genes(genes)
         individual.fitness_evaluated = False
         individual.fitness = -float("inf")
@@ -283,7 +269,7 @@ class Population:
         # Générer offspring
         while len(new_pop) < self.size:
             if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
-                #print("Crossing Over")
+                print("Crossing Over")
                 # Crossover
                 parent1 = self.select_parent()
                 parent2 = self.select_parent()
