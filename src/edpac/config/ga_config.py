@@ -30,7 +30,7 @@ class ChromosomeConfig:
 
         NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
 
-    VARIABLE_LENGTH_CHROMOSOME : bool = False
+    VARIABLE_LENGTH_CHROMOSOME : bool = True
 
     # Nombre de gènes
     if VARIABLE_LENGTH_CHROMOSOME:
