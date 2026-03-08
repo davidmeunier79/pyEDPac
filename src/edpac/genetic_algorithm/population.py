@@ -62,6 +62,9 @@ class Population:
         self.fitness_history = []
 
         self.previous_populations = {}
+
+        self.set_chromosome_lengths()
+        print(self.lengths)
     
     def clean_population(self):
 
@@ -254,6 +257,7 @@ class Population:
 
         self.fitness_history.append({
             'generation': self.generation,
+            'mean length ': np.mean(self.lengths),
             'best': max(fitnesses),
             'worst': min(fitnesses),
             'mean': np.mean(fitnesses),
@@ -295,9 +299,15 @@ class Population:
         self.previous_populations[self.generation] = self.individuals
         self.individuals = new_pop
         self.generation += 1
+
+        self.set_chromosome_lengths()
         self.set_indivual_ages()
 
         return self.best_individual
+
+    def set_chromosome_lengths(self):
+
+        self.lengths = [indiv.chromosome.genes.shape[0] for indiv in self.individuals]
 
     def set_fitnesses(self, list_fitnesses):
 

@@ -34,8 +34,8 @@ class ChromosomeConfig:
 
     # Nombre de gènes
     if VARIABLE_LENGTH_CHROMOSOME:
-        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 5 # if VARIABLE_LENGTH_CHROMOSOME=False
-        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*20
+        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 3 # if VARIABLE_LENGTH_CHROMOSOME=False
+        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*50
     else:
         NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
         NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
@@ -57,7 +57,7 @@ class PopulationConfig:
 
     #
     #     # Taille population
-    # POPULATION_SIZE: int = 5
+    # POPULATION_SIZE: int = 2
     # ELITE_SIZE: int = 1        # Meilleurs individus conservés
     #
     # # Génération
