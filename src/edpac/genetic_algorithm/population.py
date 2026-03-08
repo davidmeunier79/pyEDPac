@@ -38,6 +38,10 @@ class Population:
             crossover_config: Configuration de crossover
             mutation_config: Configuration de mutation
         """
+
+
+        np.random.seed(1)
+
         self.size = pop_config.POPULATION_SIZE
 
         self.chromosome_config = chromosome_config or ChromosomeConfig()
@@ -76,10 +80,10 @@ class Population:
         """
         for ind in self.individuals:
             if not ind.fitness_evaluated:
-                #print("Evaluate fitness for indiv", ind)
                 ind.evaluate(eval_func)
-            #else:
-                #print("fitness already evaluated for indiv", ind)
+                print("Evaluate fitness for indiv", ind)
+            else:
+                print("fitness already evaluated for indiv", ind)
     
     def select_parent(self) -> Individual:
         """
@@ -143,21 +147,47 @@ class Population:
         genes1 = parent1.chromosome.get_genes().copy()
         genes2 = parent2.chromosome.get_genes().copy()
 
-        # One-point or multi-point crossover
-        crossover_points = np.sort(
-            np.random.choice(
-                len(genes1),
-                self.crossover_config.CROSSOVER_POINTS,
-                replace=False
-            )
-        )
 
-        offspring_genes = genes1.copy()
-        for i, point in enumerate(crossover_points):
-            if i % 2 == 1:
+        if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
+
+            # One-point crossover
+            crossover_point1 = np.random.choice(
+                    int(len(genes1)/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+                    1,
+                    replace=False)
+            crossover_point1 = int(crossover_point1[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
+
+            crossover_point2 = np.random.choice(
+                    int(len(genes2)/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+                    1,
+                    replace=False)
+
+            crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
+
+
+            #print(f"crossover_point1: {crossover_point1}")
+            #print(f"crossover_point2: {crossover_point2}")
+
+            part1 = genes1[:crossover_point1]
+            part2 = genes2[crossover_point2:]
+
+            #print("part1: ", part1.shape)
+            #print("part2: ", part2.shape)
+
+            offspring_genes = np.concatenate((part1, part2), axis = 0)
+            #print("offspring_genes: ", offspring_genes.shape)
+            #print(offspring_genes)
+
+        else:
+            # One-point crossover
+            crossover_point = np.random.choice(
+                    len(genes1),
+                    1,
+                    replace=False)
+
+            offspring_genes = genes1.copy()
+            for i, point in enumerate(crossover_points):
                 offspring_genes[point:] = genes2[point:]
-            else:
-                offspring_genes[point:] = genes1[point:]
 
 #
 #         print("Offspring: ")
@@ -175,14 +205,25 @@ class Population:
         """
         genes = individual.chromosome.get_genes()
         
-        max_val = np.array([NB_IN_ASSEMBLIES, 2, NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
 
-        mutation_rate = self.mutation_config.MUTATION_RATE
+        if self.chromosome_config.RELATIVE_ENCODING:
+
+            mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
+
+            genes[mask] = np.random.rand(len(genes))[mask]
+
+        else:
+
+            max_val = np.array([NB_IN_ASSEMBLIES, 2,
+                                NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME,
+            dtype = int)
+
+            mutation_rate = self.mutation_config.MUTATION_RATE
         
-        mask = np.random.rand(len(genes)) < mutation_rate
-        #print("Mask mutation: ", mask)
-        genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-        #print("Genes after mutation: ", genes)
+            mask = np.random.rand(len(genes)) < mutation_rate
+
+            genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
+
 
         # Clamp to [0, 1]
         #genes = np.clip(genes, 0.0, 1.0)
@@ -242,13 +283,13 @@ class Population:
         # Générer offspring
         while len(new_pop) < self.size:
             if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
-                print("Crossing Over")
+                #print("Crossing Over")
                 # Crossover
                 parent1 = self.select_parent()
                 parent2 = self.select_parent()
                 offspring = self.crossover(parent1, parent2)
             else:
-                print("No Crossing Over")
+                #print("No Crossing Over")
                 # Mutation seule
                 parent = self.select_parent()
                 offspring = parent.clone()
@@ -269,6 +310,8 @@ class Population:
         self.individuals = new_pop
         self.generation += 1
         self.set_indivual_ages()
+
+        return self.best_individual
 
     def set_fitnesses(self, list_fitnesses):
 

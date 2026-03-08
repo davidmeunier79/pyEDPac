@@ -5,6 +5,8 @@ Orchestrate l'évolution de la population
 """
 
 import numpy as np
+import time
+
 from typing import Callable, List, Dict, Optional
 import json
 from datetime import datetime
@@ -37,7 +39,6 @@ class GeneticAlgorithm:
         
         # Créer population
         self.population = Population(
-            size=config.population_config.POPULATION_SIZE,
             chromosome_config=config.chromosome_config,
             selection_config=config.selection_config,
             crossover_config=config.crossover_config,
@@ -69,15 +70,12 @@ class GeneticAlgorithm:
         # Évaluer la population initiale
         for gen in range(num_generations):
             #
-            # self.population.evaluate(self.eval_func)
-            # print("After evaluation ", gen)
+            self.population.evaluate(self.eval_func)
+            print("After evaluation ", gen)
 
             # Évoluer une génération
-            best = self.population.evolve_generation(
-                self.eval_func,
-                elite_size=self.config.population_config.ELITE_SIZE
-            )
-            
+            best = self.population.evolve_generation()
+
             # Enregistrer le meilleur
             #best = self.population.get_best()
             self.best_individuals.append(best.clone())
@@ -91,6 +89,9 @@ class GeneticAlgorithm:
                       f"best={stats['best']:.3f}, "
                       f"mean={stats['mean']:.3f}, "
                       f"std={stats['std']:.3f}")
+
+
+            time.sleep(3.0)
         
         if self.config.VERBOSE:
             print(f"GA completed!")

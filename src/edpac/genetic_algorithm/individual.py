@@ -64,21 +64,21 @@ class Individual():
 
         if self.chromosome:
             return self.chromosome
-#
-#     def evaluate(self, eval_func) -> float:
-#         """
-#         Évaluer l'individu
-#
-#         Args:
-#             eval_func: Fonction d'évaluation(individual) -> fitness
-#
-#         Returns:
-#             Fitness calculée
-#         """
-#         self.fitness = eval_func(self)
-#         self.fitness_evaluated = True
-#         return self.fitness
-#
+
+    def evaluate(self, eval_func) -> float:
+        """
+        Évaluer l'individu
+
+        Args:
+            eval_func: Fonction d'évaluation(individual) -> fitness
+
+        Returns:
+            Fitness calculée
+        """
+        self.fitness = eval_func(self)
+        self.fitness_evaluated = True
+        return self.fitness
+
 #
     def set_fitness(self, fitness_value) -> float:
 

@@ -68,9 +68,16 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     # initilisation
 
-    net_viz.init_network(net)
-    net_viz.setup_topology()
+    net_viz.set_background_color(0)
+    net_viz.init_assemblies(net)
+    net_viz.draw_projections(net)
+    net_viz.draw_assemblies()
     net_viz.show()
+
+
+    net_viz.refresh_from_background()
+    net_viz.update_display()
+    QtWidgets.QApplication.processEvents()
 
     # input_viz
     input_viz.draw_background()
@@ -123,7 +130,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
             if spike_neuron_ids is not None:
 
-                print(spike_neuron_ids)
+                #print(spike_neuron_ids)
                 #print("Nb spikes: ", len(spike_neuron_ids))
 
 
@@ -136,8 +143,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
             else:
                 print("No more events in event manager, breaking")
 
-                net_viz.refresh_from_background()()
-
+                net_viz.refresh_from_background()
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
