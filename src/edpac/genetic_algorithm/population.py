@@ -237,6 +237,12 @@ class Population:
             reverse=True
         )
         
+        for ind, indiv in enumerate(sorted_inds):
+            print(f"saving Chromosome_{self.generation}_{ind}.txt")
+            npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
+            print(npy_file)
+            np.save(npy_file, indiv.chromosome.get_genes())
+
         print("******************* After gen ", self.generation)
         print(sorted_inds)
 
@@ -290,8 +296,6 @@ class Population:
 
         #print(new_pop)
 
-        self.save_individuals()
-
         self.individuals = new_pop
         self.generation += 1
 
@@ -317,14 +321,6 @@ class Population:
         for indiv in self.individuals:
 
             indiv.set_age(self.generation)
-
-    def save_individuals(self):
-
-        for ind, indiv in enumerate(self.individuals):
-            print(f"saving Chromosome_{self.generation}_{ind}.txt")
-            npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
-            print(npy_file)
-            np.save(npy_file, indiv.chromosome.get_genes())
 
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""
