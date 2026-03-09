@@ -96,12 +96,14 @@ class EvoNetwork(EDNetwork):
 
                     else:
                         print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
+                        print(f"(Already {len(self.projections)} projections stored)")
 
                     if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES :
                         nb_out_assemblies=nb_out_assemblies+1
 
                     else:
                         print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}")
+                        print(f"(Already {len(self.projections)} projections stored)")
 
                 # Mapper les indices aux assemblées
                 if pre_id < NB_INPUT_ASSEMBLIES:

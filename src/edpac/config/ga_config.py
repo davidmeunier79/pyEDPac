@@ -24,26 +24,20 @@ class MutationMode(Enum):
 class ChromosomeConfig:
     """Configuration du chromosome"""
     # Encodage par projections
-    PROJECTION_ENCODING: bool = True # TODO Not used, so far always the case
+    PROJECTION_ENCODING: bool = True # TODO Not used except for NB_GENES_EACH_PROJECTION, so far always the case
 
     if PROJECTION_ENCODING:
-
         NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
 
     VARIABLE_LENGTH_CHROMOSOME : bool = True
 
     # Nombre de gènes
     if VARIABLE_LENGTH_CHROMOSOME:
-        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 3 # if VARIABLE_LENGTH_CHROMOSOME=False
-        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*50 # corresponds to initial value
+        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 5 # if VARIABLE_LENGTH_CHROMOSOME=False
+        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*30 # corresponds to initial value
     else:
         NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
         NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
-
-    # Validation
-
-    MIN_GENE_VALUE: float = 0.0
-    MAX_GENE_VALUE: float = 1.0
 
 @dataclass
 class PopulationConfig:
