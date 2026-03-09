@@ -130,24 +130,21 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
             if spike_neuron_ids is not None:
 
-                #print(spike_neuron_ids)
-                #print("Nb spikes: ", len(spike_neuron_ids))
-
-
-
                 net_viz.display_spikes(spike_neuron_ids)
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
 
             else:
-                print("No more events in event manager, breaking")
-
+                print("No spikes in event manager")
                 net_viz.refresh_from_background()
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
 
+            if EDSynapse.event_manager.get_nb_events() == 0:
+                print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()

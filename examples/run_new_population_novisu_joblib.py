@@ -62,7 +62,7 @@ def evaluate_individual(indiv):
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
-            if EDSynapse.event_manager.get_events() == 0:
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
                 zoo.pacman.life_points = -100
                 break

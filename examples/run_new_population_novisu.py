@@ -63,12 +63,11 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            #net_viz.display_empty_network()
-
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
-            if spike_neuron_ids is None:
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()
