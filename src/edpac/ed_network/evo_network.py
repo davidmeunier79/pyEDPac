@@ -91,13 +91,15 @@ class EvoNetwork(EDNetwork):
 
                 if len(self.projections) % self.chromosome.config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
 
-                    if (nb_in_assemblies+1) < NB_IN_ASSEMBLIES:
+                    if (nb_in_assemblies+1) < NB_IN_ASSEMBLIES :
                         nb_in_assemblies=nb_in_assemblies+1
+
                     else:
                         print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}"
 
-                    if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES:
+                    if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES :
                         nb_out_assemblies=nb_out_assemblies+1
+
                     else:
                         print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}"
 
