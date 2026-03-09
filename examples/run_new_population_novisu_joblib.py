@@ -96,7 +96,7 @@ def evaluate_individual(indiv):
 def run_parallel_evolution(population):
     # n_jobs=-1 uses all available cores
     # backend="multiprocessing" is safest for NumPy-heavy code
-    results = Parallel(n_jobs=-1, backend="multiprocessing")(
+    results = Parallel(n_jobs=50, backend="multiprocessing")(
         delayed(evaluate_individual)(ind) for ind in population.individuals
     )
     return results
