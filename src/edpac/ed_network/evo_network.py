@@ -95,13 +95,13 @@ class EvoNetwork(EDNetwork):
                         nb_in_assemblies=nb_in_assemblies+1
 
                     else:
-                        print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}"
+                        print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
 
                     if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES :
                         nb_out_assemblies=nb_out_assemblies+1
 
                     else:
-                        print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}"
+                        print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}")
 
                 # Mapper les indices aux assemblées
                 if pre_id < NB_INPUT_ASSEMBLIES:
