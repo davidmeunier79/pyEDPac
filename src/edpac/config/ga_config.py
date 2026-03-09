@@ -43,19 +43,19 @@ class ChromosomeConfig:
 class PopulationConfig:
     """Configuration de la population"""
     # # # # Taille population
-    # POPULATION_SIZE: int = 100
-    # ELITE_SIZE: int = 10         # Meilleurs individus conservés
-    #
-    # # Génération
-    # NB_GENERATIONS: int = 30
-
-
-        # Taille population
-    POPULATION_SIZE: int = 2
-    ELITE_SIZE: int = 1        # Meilleurs individus conservés
+    POPULATION_SIZE: int = 100
+    ELITE_SIZE: int = 10         # Meilleurs individus conservés
 
     # Génération
-    NB_GENERATIONS: int = 2
+    NB_GENERATIONS: int = 30
+
+    #
+    #     # Taille population
+    # POPULATION_SIZE: int = 2
+    # ELITE_SIZE: int = 1        # Meilleurs individus conservés
+    #
+    # # Génération
+    # NB_GENERATIONS: int = 2
 
 
 
@@ -66,9 +66,9 @@ class SelectionConfig:
     SELECTION_MODE: SelectionMode = SelectionMode.TOURNAMENT ##Autre choix, ROULETTE_WHEEL
     
     # Tournoi
-    TOURNAMENT_SIZE: int = 2       # Nombre d'individus dans tournoi
+    #TOURNAMENT_SIZE: int = 2       # Nombre d'individus dans tournoi
     #TOURNAMENT_SIZE: int = 3       # Nombre d'individus dans tournoi
-    #TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
+    TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
     
     # Roulette
     ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus

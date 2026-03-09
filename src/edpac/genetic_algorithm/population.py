@@ -321,12 +321,10 @@ class Population:
     def save_individuals(self):
 
         for ind, indiv in enumerate(self.individuals):
-
             print(f"saving Chromosome_{self.generation}_{ind}.txt")
             npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
             print(npy_file)
             np.save(npy_file, indiv.chromosome.get_genes())
-
 
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""
