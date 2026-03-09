@@ -90,15 +90,16 @@ class EvoNetwork(EDNetwork):
                 # print("post_id ", post_id)
 
                 if len(self.projections) % self.chromosome.config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
-                    nb_in_assemblies=nb_in_assemblies+1
-                    nb_out_assemblies=nb_out_assemblies+1
-                    #
-                    # print(f"Gene {gene_id}, {len(self.projections)} projections, adding a new assembly to project")
-                    # print(f"nb_in_assemblies = {nb_in_assemblies}, nb_out_assemblies = {nb_out_assemblies}")
 
+                    if (nb_in_assemblies+1) < NB_IN_ASSEMBLIES:
+                        nb_in_assemblies=nb_in_assemblies+1
+                    else:
+                        print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}"
 
-                    assert nb_in_assemblies <= NB_IN_ASSEMBLIES, f"Error , too many nb_in_assemblies = {nb_in_assemblies}"
-                    assert nb_out_assemblies <= NB_IN_ASSEMBLIES, f"Error , too many nb_in_assemblies = {nb_out_assemblies}"
+                    if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES:
+                        nb_out_assemblies=nb_out_assemblies+1
+                    else:
+                        print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}"
 
                 # Mapper les indices aux assemblées
                 if pre_id < NB_INPUT_ASSEMBLIES:
