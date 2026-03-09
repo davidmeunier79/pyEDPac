@@ -2,6 +2,7 @@
 Population.py - Gestion de la population GA
 """
 
+import os
 import numpy as np
 from typing import List, Callable, Tuple
 from .individual import Individual
@@ -60,8 +61,6 @@ class Population:
         self.generation = 0
         self.best_individual = None
         self.fitness_history = []
-
-        self.previous_populations = {}
 
         self.set_chromosome_lengths()
         print(self.lengths)
@@ -155,16 +154,11 @@ class Population:
 
             # One-point crossover
 
-            print(float(len(genes1))/self.chromosome_config.NB_GENES_EACH_PROJECTION)
-            print(int(float(len(genes1))/self.chromosome_config.NB_GENES_EACH_PROJECTION))
-
             crossover_point1 = np.random.choice(len(genes1),
                     1,
                     replace=False)
 
             crossover_point1 = int(crossover_point1[0] // self.chromosome_config.NB_GENES_EACH_PROJECTION)*self.chromosome_config.NB_GENES_EACH_PROJECTION
-
-            print(crossover_point1)
 
             crossover_point2 = np.random.choice(
                     int(float(len(genes2))/self.chromosome_config.NB_GENES_EACH_PROJECTION),
@@ -174,14 +168,14 @@ class Population:
             crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
 
-            print(f"crossover_point1: {crossover_point1}")
-            print(f"crossover_point2: {crossover_point2}")
+            # print(f"crossover_point1: {crossover_point1}")
+            # print(f"crossover_point2: {crossover_point2}")
 
             part1 = genes1[:crossover_point1]
             part2 = genes2[crossover_point2:]
 
-            print("part1: ", part1.shape)
-            print("part2: ", part2.shape)
+            # print("part1: ", part1.shape)
+            #print("part2: ", part2.shape)
 
             offspring_genes = np.concatenate((part1, part2), axis = 0)
             print("offspring_genes: ", offspring_genes.shape)
@@ -296,7 +290,8 @@ class Population:
 
         #print(new_pop)
 
-        self.previous_populations[self.generation] = self.individuals
+        self.save_individuals()
+
         self.individuals = new_pop
         self.generation += 1
 
@@ -322,6 +317,15 @@ class Population:
         for indiv in self.individuals:
 
             indiv.set_age(self.generation)
+
+    def save_individuals(self):
+
+        for ind, indiv in enumerate(self.individuals):
+
+            print(f"saving Chromosome_{self.generation}_{ind}.txt")
+            npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
+            print(npy_file)
+            np.save(npy_file, indiv.chromosome.get_genes())
 
 
     def get_best(self) -> Individual:

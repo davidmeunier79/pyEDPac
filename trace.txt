@@ -1,4 +1,9 @@
- I am now running two settings of the program, one with visualisation:
+# 09/03/2026 Interaction with Gemini
+
+###################################################################################################################################################
+
+
+I am now running two settings of the program, one with visualisation:
 
 https://github.com/davidmeunier79/pyEDPac/blob/main/examples/visu_new_population.py
 

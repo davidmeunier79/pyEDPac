@@ -3,7 +3,7 @@ Chromosome.py - Représentation du chromosome (génome)
 
 Un chromosome code pour les connexions du réseau (projections, poids)
 """
-
+import os
 import numpy as np
 from typing import List, Tuple
 from copy import deepcopy
@@ -78,7 +78,7 @@ class Chromosome:
         genes_slice = self.genes[start_idx:start_idx + 3]
         
         return genes_slice
-    
+
     def clone(self) -> 'Chromosome':
         """Cloner le chromosome"""
         return Chromosome(self.config, self.genes.copy())

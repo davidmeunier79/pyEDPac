@@ -72,8 +72,8 @@ class NetworkVisualizer(PixelVisualizer):
 
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
 
-            x_a = a % SQRT_NB_ASSEMBLIES
-            y_a = a // SQRT_NB_ASSEMBLIES
+            x_a = a // SQRT_NB_ASSEMBLIES
+            y_a = a % SQRT_NB_ASSEMBLIES
 
             x_offset = x_base + x_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
             y_offset = y_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
