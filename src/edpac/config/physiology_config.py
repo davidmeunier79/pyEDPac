@@ -16,18 +16,21 @@ class SynapseConfig:
     
     # Poids initial
     WEIGHT: float = 0.5          # Poids moyen
-    #INITIAL_WEIGHT_MODE: str = "fixed"  # "fixed" ou "random"
+    INITIAL_WEIGHT_MODE: str = "fixed"  # "fixed" ou "random"
     
     # Modes
-    #NO_AUTO_CONNEXIONS: bool = True  # Pas d'autosynapses
+    NO_AUTO_CONNEXIONS: bool = True  # Pas d'autosynapses
     #TOPOLOGICAL_DELAY: bool = False   # Délai basé topologie
     
     # STDP (Spike-Timing-Dependent Plasticity)
-    ONLINE_LEARNING: bool = False
-    EXCIT_ALPHA: float = 0.01    # Coefficient apprentissage excitateur
-    INHIB_ALPHA: float = 0.01    # Coefficient apprentissage inhibiteur
-    EXCIT_MULTIPLICATIVE: bool = True
-    INHIB_MULTIPLICATIVE: bool = True
+    ONLINE_LEARNING: bool = True
+
+
+    EXCIT_ALPHA: float = 0.5    # Coefficient apprentissage excitateur
+
+    INHIB_TIME_WINDOW: int = 10
+    INHIB_ALPHA: float = 0.5    # Coefficient apprentissage inhibiteur
+
 
     TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
 
@@ -38,11 +41,10 @@ class NeuronConfig:
     RESTING_POTENTIAL: float = 0.0  # mV
 
     MEMBRANE_TIME_CONSTANT = 5.0  # ms (tau)
-    #SYNAPSE_TIME_CONSTANT = 10.0   # ms
 
     # Seuil
     #NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
-    THRESHOLD_REF: float = 20     # Seuil de référence
+    THRESHOLD_REF: float = 20.0     # Seuil de référence
     
     # Refractory periods
     ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)

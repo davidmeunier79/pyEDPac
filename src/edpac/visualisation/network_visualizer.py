@@ -94,10 +94,7 @@ class NetworkVisualizer(PixelVisualizer):
             self.draw_assembly(assembly, x_offset, y_offset )
             self.assembly_positions[assembly.id] = x_offset+int(MOTOR_SQRT_NB_NEURONS/2), y_offset+int(MOTOR_SQRT_NB_NEURONS/2)
 
-
-
-
-
+        # draw projections
         for proj in network.projections:
 
             pre_assembly_pos = self.assembly_positions[proj.pre_node]
