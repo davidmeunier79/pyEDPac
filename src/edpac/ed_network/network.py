@@ -110,6 +110,10 @@ class Network:
             distance = pre_assembly.get_distance_to(post_assembly)
             topological_delay = max(0, int(distance * 5))  # 5ms par unité
 
+        if synapse_config.NO_AUTO_CONNEXIONS:
+            if pre_assembly==post_assembly:
+                return None
+
         # Sélectionner les connexions
         nb_pre = pre_assembly.get_nb_neurons()
         nb_post = post_assembly.get_nb_neurons()
@@ -122,6 +126,7 @@ class Network:
 
             if random.random() > connection_ratio:
                 continue
+
 
             pre_neuron = pre_assembly.get_neuron(pre_idx)
             post_neuron = post_assembly.get_neuron(post_idx)

@@ -38,7 +38,7 @@ class NetworkVisualizer(PixelVisualizer):
             y =  int(y_offset + (i // sqrt_num_neurons))
             self.neuron_positions[neuron_id] = (x, y)
 
-    def init_network(self, network: Network):
+    def init_assemblies(self, network: Network):
         """Processes the Network object and lays it out in columns."""
         #self.clear()
 
@@ -52,7 +52,7 @@ class NetworkVisualizer(PixelVisualizer):
         # input
         x_offset = cols['input']
 
-        print("Draw input_assemblies")
+        #print("Draw input_assemblies")
         for a, assembly in enumerate(network.input_assemblies):
             # Determine column based on assembly name or attribute
             # Adjust this logic if you have a specific 'type' attribute
@@ -64,15 +64,16 @@ class NetworkVisualizer(PixelVisualizer):
             self.assembly_positions[assembly.id] = x_offset+int(VISIO_SQRT_NB_NEURONS/2), y_offset+int(VISIO_SQRT_NB_NEURONS/2)
 
         # hidden
-        print("Draw hidden_assemblies")
+        #print("Draw hidden_assemblies")
         x_base = cols['hidden']
+
 
         for a, assembly in enumerate(network.hidden_assemblies):
 
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
 
-            x_a = a % SQRT_NB_ASSEMBLIES
-            y_a = a // SQRT_NB_ASSEMBLIES
+            x_a = a // SQRT_NB_ASSEMBLIES
+            y_a = a % SQRT_NB_ASSEMBLIES
 
             x_offset = x_base + x_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
             y_offset = y_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
@@ -84,7 +85,7 @@ class NetworkVisualizer(PixelVisualizer):
         # output
         x_offset = cols['output']
 
-        print("Draw output_assemblies")
+        #print("Draw output_assemblies")
         for a, assembly in enumerate(network.output_assemblies):
 
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
@@ -94,10 +95,14 @@ class NetworkVisualizer(PixelVisualizer):
             self.draw_assembly(assembly, x_offset, y_offset )
             self.assembly_positions[assembly.id] = x_offset+int(MOTOR_SQRT_NB_NEURONS/2), y_offset+int(MOTOR_SQRT_NB_NEURONS/2)
 
+    def draw_assemblies(self):
 
+        for x, y in list(self.neuron_positions.values()):
+            self.set_pattern(y*self.neuron_mask.shape[1], x*self.neuron_mask.shape[0], self.neuron_mask, (60, 60, 60), target_buffer=self.background)
 
+    def draw_projections(self, network: Network):
 
-
+        # draw projections
         for proj in network.projections:
 
             pre_assembly_pos = self.assembly_positions[proj.pre_node]
@@ -112,24 +117,6 @@ class NetworkVisualizer(PixelVisualizer):
                 print(f"Error with proj {proj.nature}")
 
             self.draw_line(pre_assembly_pos, post_assembly_pos, color, target_buffer = self.background, neuron_mask=self.neuron_mask)
-
-        self.setup_topology()
-#
-#     def create_template(self):
-#         """Call this ONCE when the network is loaded."""
-#         self.background.fill(0) # Start Black
-#
-#         for x, y in list(self.neuron_positions.values()):
-#             # Draw static neurons in a dim color
-#             # Draw a dim gray pixel for every neuron
-#
-#             if 0 <= x and x < self.width and 0 <= y and y < self.height:
-#                 self.background[y, x, :3] =(40, 40, 60)
-
-    def setup_topology(self):
-
-        for x, y in list(self.neuron_positions.values()):
-            self.set_pattern(y*self.neuron_mask.shape[1], x*self.neuron_mask.shape[0], self.neuron_mask, (60, 60, 60), target_buffer=self.background)
 
 
     def display_spikes(self, spike_indices):

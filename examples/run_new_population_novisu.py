@@ -20,7 +20,7 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfig
 
@@ -63,12 +63,11 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            #net_viz.display_empty_network()
-
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
-            if spike_neuron_ids is None:
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()
@@ -100,7 +99,7 @@ def main():
 
     #################################### Zoo ######################################
     # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
+    zoo = Zoo()
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
     # Create objects
@@ -124,4 +123,7 @@ def main():
     print(population.fitness_history)
 
 if __name__ == "__main__":
+    import time
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))

@@ -3,7 +3,7 @@ Chromosome.py - Représentation du chromosome (génome)
 
 Un chromosome code pour les connexions du réseau (projections, poids)
 """
-
+import os
 import numpy as np
 from typing import List, Tuple
 from copy import deepcopy
@@ -29,29 +29,21 @@ class Chromosome:
         self.config = config or ChromosomeConfig()
         
         if genes is not None:
-            self.genes = np.array(genes, dtype=np.int32)
+            self.genes = np.array(genes, dtype=np.float32)
+
         else:
             # Générer aléatoirement
             self.genes = self._initialize_random_genes()
         
         # Valider la taille
-        assert len(self.genes) == self.config.NB_GENES_EACH_CHROMOSOME, \
-            f"Chromosome size mismatch: {len(self.genes)} != {self.config.NB_GENES_EACH_CHROMOSOME}"
+        if not self.config.VARIABLE_LENGTH_CHROMOSOME:
+            assert len(self.genes) == self.config.NB_GENES_EACH_CHROMOSOME, \
+                f"Chromosome size mismatch: {len(self.genes)} != {self.config.NB_GENES_EACH_CHROMOSOME}"
     
     def _initialize_random_genes(self) -> np.ndarray:
         """Générer des gènes aléatoires"""
-        list_genes = [
-            np.random.randint(low = 0, high = NB_IN_ASSEMBLIES,
-                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
-
-            np.random.randint(low =0 , high = 2,
-                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME),
-
-            np.random.randint(low = 0, high = NB_OUT_ASSEMBLIES,
-                            size = self.config.NB_PROJECTIONS_EACH_CHROMOSOME)
-            ]
-
-        return(np.concatenate(np.array(list_genes, dtype = int).T, axis = 0))
+        genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
+        return genes
 
     def get_genes(self) -> np.ndarray:
         """Retourner les gènes"""
@@ -59,7 +51,10 @@ class Chromosome:
     
     def set_genes(self, genes: np.ndarray):
         """Définir les gènes"""
-        assert len(genes) == self.config.NB_GENES_EACH_CHROMOSOME
+
+        if not self.config.VARIABLE_LENGTH_CHROMOSOME:
+            assert len(genes) == self.config.NB_GENES_EACH_CHROMOSOME
+
         self.genes = genes
     
     def get_projection(self, projection_idx: int) -> Tuple[int, int, float]:
@@ -83,7 +78,7 @@ class Chromosome:
         genes_slice = self.genes[start_idx:start_idx + 3]
         
         return genes_slice
-    
+
     def clone(self) -> 'Chromosome':
         """Cloner le chromosome"""
         return Chromosome(self.config, self.genes.copy())

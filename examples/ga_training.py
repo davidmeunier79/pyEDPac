@@ -6,6 +6,8 @@ Exemple d'utilisation du Genetic Algorithm
 
 import sys
 sys.path.insert(0, '../src')
+import random
+from datetime import datetime
 
 import numpy as np
 from edpac.genetic_algorithm.ga import GeneticAlgorithm
@@ -45,11 +47,32 @@ def sphere_fitness_function(individual: Individual) -> float:
 
 def main():
     """Démonstration du GA"""
-    
+    random.seed(datetime.now().timestamp())
+    np.random.seed(int(datetime.now().timestamp()))
+
     print("=" * 60)
     print("EDPac Genetic Algorithm Demo")
     print("=" * 60)
-    
+#
+#     #Configuration
+#     config = GAConfig(
+#         population_config=PopulationConfig(
+#             POPULATION_SIZE=5,
+#             ELITE_SIZE=1,
+#             NB_GENERATIONS=1
+#         ),
+#         selection_config=SelectionConfig(
+#             SELECTION_MODE=SelectionMode.TOURNAMENT,
+#             TOURNAMENT_SIZE=2
+#         ),
+#         crossover_config=CrossoverConfig(
+#             CROSSOVER_RATE=0.8
+#         ),
+#         mutation_config=MutationConfig(
+#             MUTATION_RATE=0.02,
+#         ),
+#         VERBOSE=True
+#     )
     # Configuration
     config = GAConfig(
         population_config=PopulationConfig(
@@ -59,18 +82,16 @@ def main():
         ),
         selection_config=SelectionConfig(
             SELECTION_MODE=SelectionMode.TOURNAMENT,
-            TOURNAMENT_SIZE=3
+            TOURNAMENT_SIZE=10
         ),
         crossover_config=CrossoverConfig(
-            CROSSOVER_RATE=0.8,
-            CROSSOVER_POINTS=1
+            CROSSOVER_RATE=0.8
         ),
         mutation_config=MutationConfig(
             MUTATION_RATE=0.02,
         ),
         VERBOSE=True
     )
-    
     print("\nConfiguration:")
     print(f"  Population size: {config.population_config.POPULATION_SIZE}")
     print(f"  Generations: {config.population_config.NB_GENERATIONS}")

@@ -87,8 +87,9 @@ def main():
 
     # initilisation
 
-    net_viz.init_network(net)
-    net_viz.setup_topology()
+    net_viz.init_assemblies(net)
+    net_viz.draw_projections(net)
+    net_viz.draw_assemblies()
     net_viz.show()
 
     # input_viz
@@ -150,7 +151,7 @@ def main():
 
             if spike_neuron_ids is not None:
 
-                print(spike_neuron_ids)
+                #print(spike_neuron_ids)
                 #print("Nb spikes: ", len(spike_neuron_ids))
 
 

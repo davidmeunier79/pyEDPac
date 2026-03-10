@@ -14,7 +14,7 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfig
 
@@ -23,7 +23,7 @@ def evaluate_individual(indiv):
 
     #################################### Zoo ######################################
     # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
+    zoo = Zoo()
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
 
@@ -62,8 +62,9 @@ def evaluate_individual(indiv):
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
-            if spike_neuron_ids is None:
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()
@@ -96,7 +97,7 @@ def evaluate_individual(indiv):
 def run_parallel_evolution(population):
     # n_jobs=-1 uses all available cores
     # backend="multiprocessing" is safest for NumPy-heavy code
-    results = Parallel(n_jobs=-1, backend="multiprocessing")(
+    results = Parallel(n_jobs=50, backend="multiprocessing")(
         delayed(evaluate_individual)(ind) for ind in population.individuals
     )
     return results
@@ -125,4 +126,7 @@ def main():
     print(population.fitness_history)
 
 if __name__ == "__main__":
+    import time
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
