@@ -34,12 +34,12 @@ class Individual():
         Individual._individual_count += 1
         
         self.config = config or ChromosomeConfig()
-        
+
         if chromosome is None:
             self.chromosome = Chromosome(self.config)
         else:
             self.chromosome = chromosome
-        
+
         super().__init__()
 
 
@@ -53,13 +53,13 @@ class Individual():
         self.birth_generation = 0
         
 
-    
+
     def set_chromosome(self, chromosome: Chromosome):
         """Définir le chromosome"""
         self.chromosome = chromosome
         self.fitness_evaluated = False
         self.fitness = -float('inf')
-    
+
     def get_chromosome(self):
 
         if self.chromosome:
