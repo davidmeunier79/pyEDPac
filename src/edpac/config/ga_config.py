@@ -49,14 +49,15 @@ class PopulationConfig:
     # Génération
     NB_GENERATIONS: int = 30
 
+
     #
     #     # Taille population
-    # POPULATION_SIZE: int = 2
+    # POPULATION_SIZE: int = 5
     # ELITE_SIZE: int = 1        # Meilleurs individus conservés
     #
     # # Génération
-    # NB_GENERATIONS: int = 2
-
+    # NB_GENERATIONS: int = 3
+    #
 
 
 @dataclass
