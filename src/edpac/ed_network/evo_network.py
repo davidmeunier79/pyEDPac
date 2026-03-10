@@ -65,6 +65,7 @@ class EvoNetwork(EDNetwork):
 
                 # print("Gene: ", gene_id)
 
+
                 if gene_id %3 == 0:
                     projection_complete = False
 
