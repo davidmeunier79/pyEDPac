@@ -48,41 +48,155 @@ class EvoNetwork(EDNetwork):
         
         print(self.chromosome)
 
-        # Pour chaque projection codée
-        for proj_idx in range(self.chromosome.config.NB_PROJECTIONS_EACH_CHROMOSOME):
-            #print("Projection: ", proj_idx)
-            pre_idx, proj_nature, post_idx  = self.chromosome.get_projection(proj_idx)
-            #print("Gene values: ", pre_idx, " ", proj_nature," ", post_idx)
+        if self.chromosome.config.VARIABLE_LENGTH_CHROMOSOME:
 
-            # Mapper les indices aux assemblées
-            if pre_idx < NB_INPUT_ASSEMBLIES:
-                pre_assembly = self.input_assemblies[pre_idx]
+            # Pour chaque projection codée
+            projection_complete = False
 
-            else:
-                pre_idx = pre_idx - NB_INPUT_ASSEMBLIES
-                pre_assembly = self.hidden_assemblies[pre_idx]
+            pre_id= -1
+            proj_nature = -1
+            post_id=-1
 
-            if post_idx < NB_OUTPUT_ASSEMBLIES:
-                post_assembly = self.output_assemblies[post_idx]
+            nb_in_assemblies = NB_INPUT_ASSEMBLIES
+            nb_out_assemblies = NB_OUTPUT_ASSEMBLIES
 
-            else:
-                post_idx = post_idx - NB_OUTPUT_ASSEMBLIES
-                post_assembly = self.hidden_assemblies[post_idx]
 
-            # Déterminer le type (excitatory par défaut)
-            if proj_nature==0:
-                nature = ProjectionNature.EXCITATORY
+            for gene_id, gene in enumerate(self.chromosome.get_genes()):
 
-            elif proj_nature==1:
-                nature = ProjectionNature.INHIBITORY
+                # print("Gene: ", gene_id)
 
-            projection = self.create_projection(
-                pre_assembly,
-                post_assembly,
-                connection_ratio=1.0,  # Utiliser weight pour ratio
-                nature=nature,
-                synapse_config=SynapseConfig()
-            )
 
-            if projection is not None:
-                self.projections.append(projection)
+                if gene_id %3 == 0:
+                    projection_complete = False
+
+                    pre_id=int(gene*nb_in_assemblies)
+                    proj_nature = -1
+                    post_id = -1
+
+                elif gene_id %3 == 1:
+                    proj_nature = (gene < 0.5 )
+
+                elif gene_id %3 == 2:
+                    post_id = int(gene*nb_out_assemblies)
+
+                if pre_id == -1 or proj_nature == -1 or post_id == -1:
+                    projection_complete = False
+                    continue
+
+                projection_complete = True
+                #
+                # print("*** projection_complete ** ")
+                # print("pre_id ", pre_id )
+                # print("proj_nature ", proj_nature )
+                # print("post_id ", post_id)
+
+                if len(self.projections) % self.chromosome.config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
+
+                    if (nb_in_assemblies+1) < NB_IN_ASSEMBLIES :
+                        nb_in_assemblies=nb_in_assemblies+1
+
+                    else:
+                        print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
+                        print(f"(Already {len(self.projections)} projections stored)")
+
+                    if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES :
+                        nb_out_assemblies=nb_out_assemblies+1
+
+                    else:
+                        print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}")
+                        print(f"(Already {len(self.projections)} projections stored)")
+
+                # Mapper les indices aux assemblées
+                if pre_id < NB_INPUT_ASSEMBLIES:
+                    pre_assembly = self.input_assemblies[pre_id]
+
+                else:
+                    pre_id = pre_id - NB_INPUT_ASSEMBLIES
+                    pre_assembly = self.hidden_assemblies[pre_id]
+
+                if post_id < NB_OUTPUT_ASSEMBLIES:
+                    post_assembly = self.output_assemblies[post_id]
+
+                else:
+                    post_id = post_id - NB_OUTPUT_ASSEMBLIES
+                    post_assembly = self.hidden_assemblies[post_id]
+
+                # Déterminer le type (excitatory par défaut)
+                if proj_nature:
+                    nature = ProjectionNature.EXCITATORY
+
+                else:
+                    nature = ProjectionNature.INHIBITORY
+
+                projection = self.create_projection(
+                    pre_assembly,
+                    post_assembly,
+                    connection_ratio=1.0,  # Utiliser weight pour ratio
+                    nature=nature,
+                    synapse_config=SynapseConfig()
+                )
+
+                if projection is not None:
+                    self.projections.append(projection)
+        else:
+
+            # Pour chaque projection codée
+            projection_complete = False
+
+            pre_id= -1
+            proj_nature = -1
+            post_id=-1
+
+            for gene_id, gene in enumerate(self.chromosome.get_genes()):
+
+                if gene_id %3 == 0:
+                    projection_complete = False
+
+                    pre_id=int(gene*NB_IN_ASSEMBLIES)
+                    proj_nature = -1
+                    post_id = -1
+
+                elif gene_id %3 == 1:
+                    proj_nature = (gene < 0.5 )
+
+                elif gene_id %3 == 2:
+                    post_id = int(gene*NB_OUT_ASSEMBLIES)
+
+                if pre_id == -1 or proj_nature == -1 or post_id == -1:
+                    projection_complete = False
+                    continue
+
+                projection_complete = True
+
+                # Mapper les indices aux assemblées
+                if pre_id < NB_INPUT_ASSEMBLIES:
+                    pre_assembly = self.input_assemblies[pre_id]
+
+                else:
+                    pre_id = pre_id - NB_INPUT_ASSEMBLIES
+                    pre_assembly = self.hidden_assemblies[pre_id]
+
+                if post_id < NB_OUTPUT_ASSEMBLIES:
+                    post_assembly = self.output_assemblies[post_id]
+
+                else:
+                    post_id = post_id - NB_OUTPUT_ASSEMBLIES
+                    post_assembly = self.hidden_assemblies[post_id]
+
+                # Déterminer le type (excitatory par défaut)
+                if proj_nature:
+                    nature = ProjectionNature.EXCITATORY
+
+                else:
+                    nature = ProjectionNature.INHIBITORY
+
+                projection = self.create_projection(
+                    pre_assembly,
+                    post_assembly,
+                    connection_ratio=1.0,  # Utiliser weight pour ratio
+                    nature=nature,
+                    synapse_config=SynapseConfig()
+                )
+
+                if projection is not None:
+                    self.projections.append(projection)

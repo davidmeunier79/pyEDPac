@@ -62,8 +62,9 @@ def evaluate_individual(indiv):
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
-            if spike_neuron_ids is None:
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()
@@ -96,7 +97,7 @@ def evaluate_individual(indiv):
 def run_parallel_evolution(population):
     # n_jobs=-1 uses all available cores
     # backend="multiprocessing" is safest for NumPy-heavy code
-    results = Parallel(n_jobs=-1, backend="multiprocessing")(
+    results = Parallel(n_jobs=50, backend="multiprocessing")(
         delayed(evaluate_individual)(ind) for ind in population.individuals
     )
     return results

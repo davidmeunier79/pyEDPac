@@ -65,7 +65,7 @@ def main():
 
     # initilisation
     #viz_net.init_network(network=net)
-    viz_net.setup_topology()
+    viz_net.draw_assemblies()
     viz_net.update_display()
     #
     # 0/0

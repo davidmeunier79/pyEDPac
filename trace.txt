@@ -1,0 +1,301 @@
+# 09/03/2026 Interaction with Gemini
+
+###################################################################################################################################################
+
+
+I am now running two settings of the program, one with visualisation:
+
+https://github.com/davidmeunier79/pyEDPac/blob/main/examples/visu_new_population.py
+
+and the other one with parallel computing on a computing cluster:
+
+https://github.com/davidmeunier79/pyEDPac/blob/main/examples/run_new_population_novisu_joblib.py
+
+I would like to a simulation where all "animals" now have a EvoNetwork, with 2 populations , one where all animals are prey, one where all animals are predators, and they reproduce as the interact between individuals within the same population. The total number of individuals within the simulation is driven by the number of cores within the node of the cluster, lets say 64.
+Gemini a dit
+
+
+
+###################################################################################################################################################
+
+
+This is a classic "Artificial Life" (ALife) or Co-evolution setup. Moving from a single Pacman to a population of 64 autonomous agents (32 Preys vs. 32 Predators) requires a shift in how you handle the simulation loop. Instead of one network controlling one entity, you now have a "Multi-Agent System" where each entity owns its own EvoNetwork instance.
+1. The Architectural Shift
+
+To run this on a 64-core cluster node, you will treat each Individual as a standalone object that encapsulates both its physical state (position in the Zoo) and its mental state (its EvoNetwork).
+The Agent Container
+
+First, create a wrapper that links the Animal to its "Brain":
+Python
+
+class Agent:
+    def __init__(self, x, y, zoo, genome, species="prey"):
+        self.animal = Animal(x, y, zoo)
+        self.brain = EvoNetwork(genome)
+        self.species = species
+        self.alive = True
+        self.fitness = 0
+
+    def update(self):
+        if not self.alive: return
+        # 1. Sense: Get local vision from the zoo
+        obs = self.animal.get_vision()
+        # 2. Think: Pass to EvoNetwork
+        action = self.brain.compute(obs)
+        # 3. Act: Move animal based on output
+        self.animal.move(action)
+
+2. Parallelization Strategy: "Island" vs. "Single-World"
+
+There are two ways to interpret "using 64 cores":
+
+    Option A: 64 Independent Worlds (Parallel) You run 64 different Zoo instances. Each core handles 1 Prey vs 1 Predator in their own private map. This is what joblib does best.
+
+    Option B: 1 Massive World (Synchronous)
+    All 64 agents are in one large Zoo. You cannot easily use joblib inside a single world step because agents interact (Prey A gets eaten by Predator B).
+
+For a Cluster/Joblib setup, Option A is the way to go. You evaluate "duels" or "small groups" in parallel.
+3. Implementation (Joblib Workflow)
+
+In your run_new_population_novisu_joblib.py, you will modify the worker function to evaluate a "Match":
+Python
+
+def evaluate_match(prey_genome, pred_genome):
+    zoo = Zoo()
+    zoo.load_everything()
+
+    # Initialize agents
+    prey = Agent(x1, y1, zoo, prey_genome, "prey")
+    pred = Agent(x2, y2, zoo, pred_genome, "predator")
+
+    for _ in range(MAX_STEPS):
+        prey.update()
+        pred.update()
+
+        # Interaction Logic
+        if dist(prey.animal, pred.animal) < 1:
+            prey.alive = False
+            pred.fitness += 100 # Predator reward
+            break
+
+        prey.fitness += 1 # Survival reward
+
+    return prey.fitness, pred.fitness
+
+# Parallel Execution
+results = Parallel(n_jobs=64)(
+    delayed(evaluate_match)(prey_pop[i], pred_pop[i]) for i in range(32)
+)
+
+4. Reproduction & Population Dynamics
+
+After the parallel evaluations finish, you perform selection within each species:
+
+    Collect Fitness: Get all Prey scores and all Predator scores.
+
+    Selection: The top 10 Preys reproduce to create 32 new offspring. The top 10 Predators do the same.
+
+    Crossover/Mutation: Apply your existing EvoNetwork genetic operators to the genomes.
+
+    Loop: Start the next generation with the new populations.
+
+5. Handling Visualization
+
+In visu_new_population.py, your draw_zoo method must now loop through both populations:
+Python
+
+def draw_zoo(self, prey_list, pred_list):
+    self.refresh_from_background()
+
+    # Draw Preys (Green)
+    for p in prey_list:
+        if p.alive:
+            self.set_pattern(p.animal.y * cs, p.animal.x * cs, sprite, (0, 255, 0))
+
+    # Draw Predators (Red)
+    for p in pred_list:
+        if p.alive:
+            self.set_pattern(p.animal.y * cs, p.animal.x * cs, sprite, (255, 0, 0))
+
+    self.update_display()
+
+Insights for the Cluster
+
+    Load Balancing: If some matches end in 10 steps (Prey dies fast) and others take 1000, joblib handles this efficiently by giving a new match to a finished core immediately.
+
+    Data Size: 64 EvoNetwork instances are small, but if your Zoo grid is huge, avoid passing the Zoo object into the worker. Re-load the Zoo inside the worker to save memory bandwidth.
+
+Would you like me to help you write the selection logic that handles these two separate populations (Prey and Predator) simultaneously?
+Vous avez dit
+
+
+###################################################################################################################################################
+
+
+I would like option B, with one "node" being the Zoo itself, handling interaction between all remaning agents, sending inputs, collecting outputs, etc
+
+My main concern is about the priority queue: It seems possible to have it orchastrate all EvoNetworks , if PSPEvent contains information about individual ID as well . Please provide some suggestions
+Gemini a dit
+
+This is a sophisticated "System-on-Chip" approach to neural simulation. By using a single Global Event Manager to orchestrate 64 different EvoNetwork instances, you effectively treat the entire Zoo as one massive, heterogeneous asynchronous circuit.
+
+To make Option B work with a priority queue, you need to "Tag" every event with an Agent ID. This allows the Event Manager to route Post-Synaptic Potentials (PSPs) to the correct neuron in the correct brain.
+1. The Global Event Manager Structure
+
+Your PSPEvent needs to be extended. Instead of just (time, neuron_id, weight), it should follow a hierarchical addressing scheme: Agent ID → Population ID → Neuron ID.
+Python
+
+# Modified Event Structure
+class GlobalPSPEvent:
+    def __init__(self, time, agent_id, pop_id, neuron_id, weight):
+        self.time = time
+        self.agent_id = agent_id  # Which prey/predator
+        self.pop_id = pop_id      # e.g., 0 for Sensory, 1 for Interneuron, 2 for Motor
+        self.neuron_id = neuron_id
+        self.weight = weight
+
+    def __lt__(self, other):
+        return self.time < other.time
+
+2. Orchestration Logic: The "Tickless" Loop
+
+In this setup, the "Zoo" doesn't just loop through agents; it acts as an I/O Bridge. It injects "Sensory Events" into the queue and listens for "Motor Events" coming out.
+
+The Simulation Heartbeat:
+
+    Sense: The Zoo scans the environment for all 64 agents. It generates PSPEvents for the Sensory Neurons of each agent and pushes them into the global Priority Queue.
+
+    Process: The Event Manager runs until a specific SYNC_TIME (the motor integration window).
+
+    Act: Any spikes that occurred in the "Motor Population" of an agent are collected. The Zoo translates these spikes into physical displacement (Up, Down, Left, Right).
+
+    Resolve: The Zoo checks for collisions (Predator eats Prey). Dead agents are flagged, and their events are purged from the queue.
+
+3. Handling Multiple Brains in one Queue
+
+To implement this, you should modify your EvoNetwork to be "stateless" regarding time, or pass the Global Event Manager into the network's spike method.
+Python
+
+def process_global_queue(event_manager, agents, sync_step=1.0):
+    """
+    Processes all neural activity for all 64 agents
+    up to the next physical world tick.
+    """
+    target_time = event_manager.get_time() + sync_step
+
+    while not event_manager.empty() and event_manager.peek_time() < target_time:
+        event = event_manager.pop()
+
+        # Route the event to the specific brain
+        agent = agents[event.agent_id]
+        if agent.alive:
+            # The brain processes the PSP and potentially
+            # schedules NEW events into the global event_manager
+            agent.brain.receive_psp(event)
+
+4. Selection & Reproduction (The Evolution)
+
+Since they are all in one world, you need a way to track fitness "on the fly."
+
+    Prey Fitness: Increments every sync_step they remain alive.
+
+    Predator Fitness: Large bonus when they trigger a collision with a Prey.
+
+When the simulation ends (e.g., after 5000 ticks or when all Preys are gone), you extract the genomes from the agents list, sort them by the accumulated fitness, and perform your genetic crossovers to generate the next generation's 64 brains.
+5. Bottleneck Warning: The "Serial" Queue
+
+The main challenge with Option B is that a Priority Queue is inherently serial. Even on 64 cores, the Event Manager usually runs on one core because the order of events must be strictly maintained.
+
+How to exploit your 64 cores in Option B:
+
+    Parallel Sensory Processing: Use joblib/multiprocessing to calculate the "Vision" (ray-casting/grid scanning) for all 64 agents in parallel. This is usually the most expensive CPU task.
+
+    Parallel Brain Update: If your neural model allows for small synchronization delays, you can partition the Event Manager into 64 "Sub-Queues" (one per agent) and run them on 64 cores, synchronizing only at the sync_step.
+
+Would you like me to help you modify the EvoNetwork.compute method to accept a GlobalPSPEvent and return spikes to a shared output buffer?
+Vous avez dit
+
+
+###################################################################################################################################################
+
+
+Selection and Reproduction is over: It happens only on contacts between two individual of the same population (prey or predator)
+Gemini a dit
+
+
+
+###################################################################################################################################################
+
+
+This shifts the simulation from a Generational GA (where everyone is evaluated and then a new batch is born) to a Steady-State Co-evolutionary model. In this setup, the "Genetic Algorithm" happens inside the live simulation.
+
+When two individuals of the same species occupy adjacent cells (or the same cell), a "Mating Event" is triggered. This requires your Zoo and Agent logic to handle real-time genome crossover and "Spawning."
+1. The Mating Trigger Logic
+
+Within your live_one_step or check_collisions method, you need a secondary check for intra-species contact.
+Python
+
+def handle_interactions(self):
+    # 1. Predator vs Prey (The Hunt)
+    for pred in self.predators:
+        for prey in self.preys:
+            if self.is_touching(pred, prey):
+                prey.alive = False
+                pred.fitness += 50
+                self.remove_agent(prey)
+
+    # 2. Intra-species Contact (The Mating)
+    for pop in [self.preys, self.predators]:
+        for i, agent_a in enumerate(pop):
+            for agent_b in pop[i+1:]:
+                if self.is_touching(agent_a, agent_b):
+                    if agent_a.can_mate() and agent_b.can_mate():
+                        self.reproduce(agent_a, agent_b, pop)
+
+2. The reproduce Method
+
+When two agents mate, you perform the crossover of their EvoNetwork genomes immediately and place a new Agent into the world.
+Python
+
+def reproduce(self, parent_a, parent_b, population_list):
+    # 1. Crossover Genomes
+    child_genome = crossover(parent_a.genome, parent_b.genome)
+    child_genome = mutate(child_genome) # Keep diversity high
+
+    # 2. Create New Agent
+    # Place it near the parents
+    spawn_x, spawn_y = self.find_empty_neighbor(parent_a.x, parent_a.y)
+    child = Agent(spawn_x, spawn_y, self.zoo, child_genome, species=parent_a.species)
+
+    # 3. Add to the Global Simulation
+    population_list.append(child)
+
+    # 4. Set "Cool-down" to prevent infinite reproduction loops
+    parent_a.reset_mating_timer()
+    parent_b.reset_mating_timer()
+
+3. Managing the Population Cap (The "Node" Limit)
+
+Since you mentioned the simulation is driven by the number of cores (e.g., 64), you must prevent Population Explosion. If 64 agents keep mating, you'll eventually have 5,000 agents, and your event manager will crawl to a halt.
+
+Strategies for Steady-State Balance:
+
+    Death by Age: Give every agent a max_lifespan. This ensures "Old" genomes eventually clear space for "New" ones.
+
+    Energy/Hunger: Predators must eat a Prey within X ticks or they die. Preys must find "Dots" (grass) or they die.
+
+    Hard Cap: If len(all_agents) >= 64, mating events simply fail.
+
+4. Integrating with the Priority Queue
+
+This is where it gets interesting. When a child is born, you don't need to restart the simulation. You simply:
+
+    Assign the child a new unique agent_id.
+
+    The next time the Zoo "Senses" for all agents, the child will generate its own sensory PSPEvents.
+
+    The Priority Queue naturally incorporates the new child's neural activity alongside the parents.
+
+5. Data Tracking for Evolution
+
+Because there is no "Generation 1, Generation 2," you should log the "Mean Genome Complexity" or "Average Lifespan" over time. This will allow you to see if the Preys are actually evolving better evasion networks or if the Predators are getting more efficient.

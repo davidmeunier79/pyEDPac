@@ -2,6 +2,7 @@
 Population.py - Gestion de la population GA
 """
 
+import os
 import numpy as np
 from typing import List, Callable, Tuple
 from .individual import Individual
@@ -38,6 +39,10 @@ class Population:
             crossover_config: Configuration de crossover
             mutation_config: Configuration de mutation
         """
+
+
+        np.random.seed(1)
+
         self.size = pop_config.POPULATION_SIZE
 
         self.chromosome_config = chromosome_config or ChromosomeConfig()
@@ -57,7 +62,8 @@ class Population:
         self.best_individual = None
         self.fitness_history = []
 
-        self.previous_populations = {}
+        self.set_chromosome_lengths()
+        print(self.lengths)
     
     def clean_population(self):
 
@@ -76,10 +82,10 @@ class Population:
         """
         for ind in self.individuals:
             if not ind.fitness_evaluated:
-                #print("Evaluate fitness for indiv", ind)
                 ind.evaluate(eval_func)
-            #else:
-                #print("fitness already evaluated for indiv", ind)
+                print("Evaluate fitness for indiv", ind)
+            else:
+                print("fitness already evaluated for indiv", ind)
     
     def select_parent(self) -> Individual:
         """
@@ -143,21 +149,48 @@ class Population:
         genes1 = parent1.chromosome.get_genes().copy()
         genes2 = parent2.chromosome.get_genes().copy()
 
-        # One-point or multi-point crossover
-        crossover_points = np.sort(
-            np.random.choice(
-                len(genes1),
-                self.crossover_config.CROSSOVER_POINTS,
-                replace=False
-            )
-        )
 
-        offspring_genes = genes1.copy()
-        for i, point in enumerate(crossover_points):
-            if i % 2 == 1:
-                offspring_genes[point:] = genes2[point:]
-            else:
-                offspring_genes[point:] = genes1[point:]
+        if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
+
+            # One-point crossover
+
+            crossover_point1 = np.random.choice(len(genes1),
+                    1,
+                    replace=False)
+
+            crossover_point1 = int(crossover_point1[0] // self.chromosome_config.NB_GENES_EACH_PROJECTION)*self.chromosome_config.NB_GENES_EACH_PROJECTION
+
+            crossover_point2 = np.random.choice(
+                    int(float(len(genes2))/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+                    1,
+                    replace=False)
+
+            crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
+
+
+            # print(f"crossover_point1: {crossover_point1}")
+            # print(f"crossover_point2: {crossover_point2}")
+
+            part1 = genes1[:crossover_point1]
+            part2 = genes2[crossover_point2:]
+
+            # print("part1: ", part1.shape)
+            #print("part2: ", part2.shape)
+
+            offspring_genes = np.concatenate((part1, part2), axis = 0)
+            print("offspring_genes: ", offspring_genes.shape)
+            #print(offspring_genes)
+
+        else:
+            # One-point crossover
+            crossover_point = np.random.choice(
+                    len(genes1),
+                    1,
+                    replace=False)
+
+            crossover_point = int(crossover_point[0])
+            offspring_genes = genes1.copy()
+            offspring_genes[crossover_point:] = genes2[crossover_point:]
 
 #
 #         print("Offspring: ")
@@ -174,19 +207,10 @@ class Population:
             individual: Individu à muter
         """
         genes = individual.chromosome.get_genes()
-        
-        max_val = np.array([NB_IN_ASSEMBLIES, 2, NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
+        mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
+        genes[mask] = np.random.rand(len(genes))[mask]
 
-        mutation_rate = self.mutation_config.MUTATION_RATE
-        
-        mask = np.random.rand(len(genes)) < mutation_rate
-        #print("Mask mutation: ", mask)
-        genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-        #print("Genes after mutation: ", genes)
-
-        # Clamp to [0, 1]
-        #genes = np.clip(genes, 0.0, 1.0)
-        
+        # reinit
         individual.chromosome.set_genes(genes)
         individual.fitness_evaluated = False
         individual.fitness = -float("inf")
@@ -213,6 +237,12 @@ class Population:
             reverse=True
         )
         
+        for ind, indiv in enumerate(sorted_inds):
+            print(f"saving Chromosome_{self.generation}_{ind}.txt")
+            npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
+            print(npy_file)
+            np.save(npy_file, indiv.chromosome.get_genes())
+
         print("******************* After gen ", self.generation)
         print(sorted_inds)
 
@@ -227,6 +257,7 @@ class Population:
 
         self.fitness_history.append({
             'generation': self.generation,
+            'mean length ': np.mean(self.lengths),
             'best': max(fitnesses),
             'worst': min(fitnesses),
             'mean': np.mean(fitnesses),
@@ -248,7 +279,7 @@ class Population:
                 parent2 = self.select_parent()
                 offspring = self.crossover(parent1, parent2)
             else:
-                print("No Crossing Over")
+                #print("No Crossing Over")
                 # Mutation seule
                 parent = self.select_parent()
                 offspring = parent.clone()
@@ -265,10 +296,17 @@ class Population:
 
         #print(new_pop)
 
-        self.previous_populations[self.generation] = self.individuals
         self.individuals = new_pop
         self.generation += 1
+
+        self.set_chromosome_lengths()
         self.set_indivual_ages()
+
+        return self.best_individual
+
+    def set_chromosome_lengths(self):
+
+        self.lengths = [indiv.chromosome.genes.shape[0] for indiv in self.individuals]
 
     def set_fitnesses(self, list_fitnesses):
 
@@ -283,7 +321,6 @@ class Population:
         for indiv in self.individuals:
 
             indiv.set_age(self.generation)
-
 
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""
