@@ -42,7 +42,16 @@ class Chromosome:
     
     def _initialize_random_genes(self) -> np.ndarray:
         """Générer des gènes aléatoires"""
-        genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
+
+
+
+        if self.config.VARIABLE_LENGTH_CHROMOSOME:
+
+            nb_genes = np.random.uniform(size = 1)
+            nb_genes  = int(nb_genes[0]*self.config.NB_GENES_EACH_CHROMOSOME*2)
+            genes = np.random.rand(nb_genes)
+        else:
+            genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
         return genes
 
     def get_genes(self) -> np.ndarray:
