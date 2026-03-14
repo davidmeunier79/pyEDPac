@@ -43,6 +43,17 @@ class EvoNetwork(EDNetwork):
         # Décoder le chromosome et créer les projections
         self._create_projections_from_chromosome()
 
+    def get_neuron_from_id(self, neuron_id):
+
+        all_assemblies = self.input_assemblies + self.hidden_assemblies + self.output_assemblies
+        print(len(all_assemblies))
+
+        for assembly in all_assemblies:
+            for neuron in assembly.neurons:
+
+                if neuron.id == neuron_id:
+                    return neuron
+
     def _create_projections_from_chromosome(self):
         """Créer les projections en décodant le chromosome"""
         

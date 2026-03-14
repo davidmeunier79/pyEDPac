@@ -10,7 +10,7 @@ from copy import deepcopy
 from ..config.ga_config import ChromosomeConfig
 from .chromosome import Chromosome
 
-class Individual():
+class Individual(Chromosome):
     """
     Individu d'une population
     
@@ -22,7 +22,7 @@ class Individual():
     
     _individual_count = 0
     
-    def __init__(self, chromosome: Chromosome = None, config: ChromosomeConfig = None):
+    def __init__(self, config: ChromosomeConfig = None, genes: np.ndarray = None):
         """
         Créer un individu
         
@@ -33,14 +33,7 @@ class Individual():
         self.id = Individual._individual_count
         Individual._individual_count += 1
         
-        self.config = config or ChromosomeConfig()
-
-        if chromosome is None:
-            self.chromosome = Chromosome(self.config)
-        else:
-            self.chromosome = chromosome
-
-        super().__init__()
+        super().__init__(config, genes)
 
 
 
@@ -52,18 +45,6 @@ class Individual():
         self.age = 0
         self.birth_generation = 0
         
-
-
-    def set_chromosome(self, chromosome: Chromosome):
-        """Définir le chromosome"""
-        self.chromosome = chromosome
-        self.fitness_evaluated = False
-        self.fitness = -float('inf')
-
-    def get_chromosome(self):
-
-        if self.chromosome:
-            return self.chromosome
 
     def evaluate(self, eval_func) -> float:
         """

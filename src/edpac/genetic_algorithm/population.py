@@ -146,8 +146,8 @@ class Population:
         Returns:
             Offspring
         """
-        genes1 = parent1.chromosome.get_genes().copy()
-        genes2 = parent2.chromosome.get_genes().copy()
+        genes1 = parent1.get_genes().copy()
+        genes2 = parent2.get_genes().copy()
 
 
         if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
@@ -196,8 +196,8 @@ class Population:
 #         print("Offspring: ")
 #         print(offspring_genes)
 
-        chromosome = Chromosome(self.chromosome_config, offspring_genes)
-        return Individual(chromosome)
+        indiv = Individual(self.chromosome_config, offspring_genes)
+        return indiv
     
     def mutate(self, individual: Individual):
         """
@@ -206,12 +206,12 @@ class Population:
         Args:
             individual: Individu à muter
         """
-        genes = individual.chromosome.get_genes()
+        genes = individual.get_genes()
         mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
         genes[mask] = np.random.rand(len(genes))[mask]
 
         # reinit
-        individual.chromosome.set_genes(genes)
+        individual.set_genes(genes)
         individual.fitness_evaluated = False
         individual.fitness = -float("inf")
     
@@ -241,7 +241,7 @@ class Population:
             print(f"saving Chromosome_{self.generation}_{ind}.txt")
             npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
             print(npy_file)
-            np.save(npy_file, indiv.chromosome.get_genes())
+            np.save(npy_file, indiv.get_genes())
 
         print("******************* After gen ", self.generation)
         print(sorted_inds)
@@ -306,7 +306,7 @@ class Population:
 
     def set_chromosome_lengths(self):
 
-        self.lengths = [indiv.chromosome.genes.shape[0] for indiv in self.individuals]
+        self.lengths = [indiv.genes.shape[0] for indiv in self.individuals]
 
     def set_fitnesses(self, list_fitnesses):
 

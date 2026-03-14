@@ -32,7 +32,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     ################################### EvoNetwork ################################
 
-    net = EvoNetwork(indiv.get_chromosome())
+    net = EvoNetwork(indiv)
     net.initialize_inputs()
 
     print(net)
