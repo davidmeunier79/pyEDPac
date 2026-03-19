@@ -31,7 +31,6 @@ class SynapseConfig:
     INHIB_TIME_WINDOW: int = 10
     INHIB_ALPHA: float = 0.5    # Coefficient apprentissage inhibiteur
 
-
     TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
 
 @dataclass
@@ -40,11 +39,11 @@ class NeuronConfig:
     # Potentiel de repos
     RESTING_POTENTIAL: float = 0.0  # mV
 
-    MEMBRANE_TIME_CONSTANT = 5.0  # ms (tau)
+    MEMBRANE_TIME_CONSTANT = 10.0  # ms (tau)
 
     # Seuil
     #NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
-    THRESHOLD_REF: float = 20.0     # Seuil de référence
+    THRESHOLD_REF: float = 100.0     # Seuil de référence
     
     # Refractory periods
     ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
@@ -61,7 +60,3 @@ class EventManagerConfig:
     DELAY_STEP: int = 5
     PSP_EVENT_PACKAGE_SIZE: int = 10000
 
-# Instances par défaut
-DEFAULT_SYNAPSE_CONFIG = SynapseConfig()
-DEFAULT_NEURON_CONFIG = NeuronConfig()
-DEFAULT_EVENT_MANAGER_CONFIG = EventManagerConfig()

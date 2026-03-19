@@ -5,11 +5,15 @@ from math import floor
 import numpy as np
 import pathlib
 
-from edpac.config.constants import NB_LIFE_POINTS_PER_PREY, VISIO_SQRT_NB_NEURONS, NB_LIFE_POINTS_PER_PREDATOR
+from edpac.config.constants import VISIO_SQRT_NB_NEURONS
+
 
 from .pacman import Pacman
+
 class Zoo:
-    def __init__(self, cell_size=VISIO_SQRT_NB_NEURONS):
+    def __init__(self,
+                 cell_size=VISIO_SQRT_NB_NEURONS):
+
         self.cell_size = cell_size
         self.rows = 0
         self.cols = 0
@@ -311,7 +315,7 @@ class Zoo:
                     continue
 
                 if self.animals[char_contact]["danger"] == "-1":
-                    self.pacman.life_points = self.pacman.life_points - NB_LIFE_POINTS_PER_PREDATOR
+                    self.pacman.predator_contact()
                     #print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , self.pacman.life_points)
             #
             # else:

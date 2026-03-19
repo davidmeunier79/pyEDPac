@@ -57,8 +57,8 @@ class EvoNetwork(EDNetwork):
             proj_nature = -1
             post_id=-1
 
-            nb_in_assemblies = NB_INPUT_ASSEMBLIES
-            nb_out_assemblies = NB_OUTPUT_ASSEMBLIES
+            nb_in_assemblies = self.config.NB_INPUT_ASSEMBLIES
+            nb_out_assemblies = self.config.NB_OUTPUT_ASSEMBLIES
 
 
             for gene_id, gene in enumerate(self.chromosome.get_genes()):
@@ -91,14 +91,14 @@ class EvoNetwork(EDNetwork):
 
                 if len(self.projections) % self.chromosome.config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
 
-                    if (nb_in_assemblies+1) < NB_IN_ASSEMBLIES :
+                    if (nb_in_assemblies+1) < self.config.NB_IN_ASSEMBLIES :
                         nb_in_assemblies=nb_in_assemblies+1
 
                     else:
                         print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
                         print(f"(Already {len(self.projections)} projections stored)")
 
-                    if (nb_out_assemblies+1) < NB_OUT_ASSEMBLIES :
+                    if (nb_out_assemblies+1) < self.config.NB_OUT_ASSEMBLIES :
                         nb_out_assemblies=nb_out_assemblies+1
 
                     else:
@@ -106,18 +106,18 @@ class EvoNetwork(EDNetwork):
                         print(f"(Already {len(self.projections)} projections stored)")
 
                 # Mapper les indices aux assemblées
-                if pre_id < NB_INPUT_ASSEMBLIES:
+                if pre_id < self.config.NB_INPUT_ASSEMBLIES:
                     pre_assembly = self.input_assemblies[pre_id]
 
                 else:
-                    pre_id = pre_id - NB_INPUT_ASSEMBLIES
+                    pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
                     pre_assembly = self.hidden_assemblies[pre_id]
 
-                if post_id < NB_OUTPUT_ASSEMBLIES:
+                if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
                     post_assembly = self.output_assemblies[post_id]
 
                 else:
-                    post_id = post_id - NB_OUTPUT_ASSEMBLIES
+                    post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
                     post_assembly = self.hidden_assemblies[post_id]
 
                 # Déterminer le type (excitatory par défaut)
@@ -151,7 +151,7 @@ class EvoNetwork(EDNetwork):
                 if gene_id %3 == 0:
                     projection_complete = False
 
-                    pre_id=int(gene*NB_IN_ASSEMBLIES)
+                    pre_id=int(gene*self.config.NB_IN_ASSEMBLIES)
                     proj_nature = -1
                     post_id = -1
 
@@ -159,7 +159,7 @@ class EvoNetwork(EDNetwork):
                     proj_nature = (gene < 0.5 )
 
                 elif gene_id %3 == 2:
-                    post_id = int(gene*NB_OUT_ASSEMBLIES)
+                    post_id = int(gene*self.config.NB_OUT_ASSEMBLIES)
 
                 if pre_id == -1 or proj_nature == -1 or post_id == -1:
                     projection_complete = False
@@ -168,18 +168,18 @@ class EvoNetwork(EDNetwork):
                 projection_complete = True
 
                 # Mapper les indices aux assemblées
-                if pre_id < NB_INPUT_ASSEMBLIES:
+                if pre_id < self.config.NB_INPUT_ASSEMBLIES:
                     pre_assembly = self.input_assemblies[pre_id]
 
                 else:
-                    pre_id = pre_id - NB_INPUT_ASSEMBLIES
+                    pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
                     pre_assembly = self.hidden_assemblies[pre_id]
 
-                if post_id < NB_OUTPUT_ASSEMBLIES:
+                if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
                     post_assembly = self.output_assemblies[post_id]
 
                 else:
-                    post_id = post_id - NB_OUTPUT_ASSEMBLIES
+                    post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
                     post_assembly = self.hidden_assemblies[post_id]
 
                 # Déterminer le type (excitatory par défaut)
