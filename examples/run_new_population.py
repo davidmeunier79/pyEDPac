@@ -237,9 +237,9 @@ def main():
     # Create objects
     #################################### Population ######################################
 
-    population = Population(selection_config = SelectionConfigTest(), pop_config = PopulationConfigTest())
+    population = Population()
 
-    for gen in range(population.size):
+    for gen in range(population.config.NB_GENERATIONS):
 
         print(f"Starting Generation {gen}")
 

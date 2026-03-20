@@ -49,7 +49,6 @@ class NetworkConfig:
 
 @dataclass
 class NetworkVisualizerConfig:
-
     # for visio config
     GAP_INPUT_ASSEMBLY = 5 # gap in visu between assemblies
     GAP_HIDDEN_ASSEMBLY = 5

@@ -20,7 +20,7 @@ from edpac.visualisation.zoo_visualizer import ZooVisualizer
 #from edpac.ed_network.evo_network import EvoNetwork
 #from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfig
 
@@ -42,36 +42,36 @@ def stop_everything():
 
 def main():
 
+
+    zoo = Zoo()
     #################################### Zoo ######################################
     # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
-    print(zoo.animals)
+    ################################# Pacman ###########################
 
     pac = Pacman()
     zoo.set_pacman(pac)
 
+
     zoo.load_screen(screen_file="screen.0")
-    print(zoo.animals)
 
     ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(zoo)
+    zoo_viz = ZooVisualizer(title = "EDPac zoo")
+
     # Connect the "X" button of the window to our stop function
     # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
     # if 'destroyed' signal doesn't fire immediately.
-
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-
-
     # 3. Initial Draw
+    zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid(zoo.grid)
-
     zoo_viz.draw_zoo()
-
     zoo_viz.show()
+
+
 
     # 2. Create a local event loop
     loop = QEventLoop()

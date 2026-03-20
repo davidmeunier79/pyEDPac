@@ -26,7 +26,7 @@ class Population:
     
     def __init__(self,
                  chromosome_config = None,
-                 pop_config: PopulationConfig = None,
+                 config: PopulationConfig = None,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
                  mutation_config: MutationConfig = None):
@@ -44,8 +44,8 @@ class Population:
 
         np.random.seed(1)
 
-        self.pop_config = pop_config or PopulationConfig()
-        self.size = self.pop_config.POPULATION_SIZE
+        self.config = config or PopulationConfig()
+        self.size = self.config.POPULATION_SIZE
 
         self.chromosome_config = chromosome_config or ChromosomeConfig()
         
@@ -248,7 +248,7 @@ class Population:
         print("******************* After gen ", self.generation)
         print(sorted_inds)
 
-        elite = sorted_inds[:self.pop_config.ELITE_SIZE]
+        elite = sorted_inds[:self.config.ELITE_SIZE]
         self.best_individual = elite[0]
         
         # Statistiques
@@ -273,7 +273,7 @@ class Population:
         # Générer offspring
         while len(new_pop) < self.size:
             if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
-                print("Crossing Over")
+                #print("Crossing Over")
                 # Crossover
                 parent1 = self.select_parent()
                 parent2 = self.select_parent()

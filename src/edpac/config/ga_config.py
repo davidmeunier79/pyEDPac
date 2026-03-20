@@ -11,7 +11,7 @@ from typing import List
 class SelectionMode(Enum):
     """Mode de sélection"""
     TOURNAMENT = "tournament"
-    ROULETTE_WHEEL = "roulette_wheel"
+    #ROULETTE_WHEEL = "roulette_wheel"
     RANK = "rank"
 
 class MutationMode(Enum):
@@ -29,13 +29,13 @@ class ChromosomeConfig:
     if PROJECTION_ENCODING:
         NB_GENES_EACH_PROJECTION: int = 3          # (pre_assembly, post_assembly, weight)
 
-    #VARIABLE_LENGTH_CHROMOSOME : bool = False
-    VARIABLE_LENGTH_CHROMOSOME : bool = True
+    VARIABLE_LENGTH_CHROMOSOME : bool = False
+    #VARIABLE_LENGTH_CHROMOSOME : bool = True
 
     # Nombre de gènes
     if VARIABLE_LENGTH_CHROMOSOME:
-        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 10 # if VARIABLE_LENGTH_CHROMOSOME=False
-        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*10 # corresponds to initial value
+        NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY = 4 # if VARIABLE_LENGTH_CHROMOSOME=False
+        NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*25 # corresponds to initial value
     else:
         NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
         NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
@@ -92,7 +92,7 @@ class SelectionConfigTest:
     #TOURNAMENT_SIZE: int = 10       # Nombre d'individus dans tournoi
 
     # Roulette
-    ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus
+    #ROULETTE_BIAS: float = 2.0     # Biais pour meilleurs individus # TODO
 
 @dataclass
 class CrossoverConfig:
@@ -106,15 +106,3 @@ class MutationConfig:
     """Configuration de mutation"""
     # Taux
     MUTATION_RATE: float = 0.01    # 1% de mutation par gène
-    #MUTATION_MODE: MutationMode = MutationMode.GAUSSIAN
-    
-    # Gaussienne
-    #GAUSSIAN_SIGMA: float = 0.1    # Écart-type
-    
-    # Uniform
-    #UNIFORM_MAGNITUDE: float = 0.2  # Ampleur du changement
-    
-    # Adaptative mutation
-    #ADAPTIVE_MUTATION: bool = False
-    #MUTATION_RATE_MIN: float = 0.001
-    #MUTATION_RATE_MAX: float = 0.1
