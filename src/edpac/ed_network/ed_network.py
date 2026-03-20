@@ -58,31 +58,6 @@ class EDNetwork(Network):
 
         self.event_manager.reset()
 
-    def inject_input_float(self, assembly_idx: int, time: int, pattern_float: np.ndarray):
-        """
-        Injecter un input dans une assemblée input
-
-        Args:
-            assembly_idx: Index de l'assemblée input
-            time: Temps d'injection
-            pattern_float: Pattern d'activation (valeurs entre 0 et 1)
-        """
-        if assembly_idx >= len(self.input_assemblies):
-            raise IndexError(f"Input assembly {assembly_idx} not found")
-
-        assembly = self.input_assemblies[assembly_idx]
-
-        if len(pattern_float) != assembly.get_nb_neurons():
-            raise ValueError(f"Pattern size {len(pattern_float)} != assembly size {assembly.get_nb_neurons()}")
-
-        # Injecter stochastiquement selon le pattern
-        for neuron_idx, activation in enumerate(pattern_float):
-            neuron = assembly.get_neuron(neuron_idx)
-            neuron.emit_spike(time + (1.0 - activation)*synapse_config.TEMPORAL_WAVE_LENGTH)
-
-                #self.event_manager.inject_input(neuron, time, weight=activation)
-
-
     def initialize_inputs(self):
         """
         Injecter tous les inputs dans input_assemblies
@@ -97,7 +72,8 @@ class EDNetwork(Network):
 
             input_pattern = np.ones(shape = (VISIO_SQRT_NB_NEURONS,VISIO_SQRT_NB_NEURONS))
 
-            spike_neuron_ids.extend(self.inject_input(assembly_idx = i,  time = time , pattern = input_pattern.reshape(-1,1)))
+            init_spikes = self.inject_input(assembly_idx = i,  time = time , pattern = input_pattern.reshape(-1,1))
+            spike_neuron_ids.extend(init_spikes)
 
         return spike_neuron_ids
 
@@ -153,6 +129,31 @@ class EDNetwork(Network):
                 spike_neuron_ids.append(neuron.id)
 
         return spike_neuron_ids
+    #
+    # def inject_input_float(self, assembly_idx: int, time: int, pattern_float: np.ndarray):
+    #     """
+    #     Injecter un input dans une assemblée input
+    #
+    #     Args:
+    #         assembly_idx: Index de l'assemblée input
+    #         time: Temps d'injection
+    #         pattern_float: Pattern d'activation (valeurs entre 0 et 1)
+    #     """
+    #     if assembly_idx >= len(self.input_assemblies):
+    #         raise IndexError(f"Input assembly {assembly_idx} not found")
+    #
+    #     assembly = self.input_assemblies[assembly_idx]
+    #
+    #     if len(pattern_float) != assembly.get_nb_neurons():
+    #         raise ValueError(f"Pattern size {len(pattern_float)} != assembly size {assembly.get_nb_neurons()}")
+    #
+    #     # Injecter stochastiquement selon le pattern
+    #     for neuron_idx, activation in enumerate(pattern_float):
+    #         neuron = assembly.get_neuron(neuron_idx)
+    #         neuron.emit_spike(time + (1.0 - activation)*synapse_config.TEMPORAL_WAVE_LENGTH)
+    #
+    #             #self.event_manager.inject_input(neuron, time, weight=activation)
+
 
     def simulate(self, duration: int) -> Dict:
         """

@@ -16,7 +16,7 @@ class SynapseConfig:
     
     # Poids initial
     WEIGHT: float = 0.5          # Poids moyen
-    INITIAL_WEIGHT_MODE: str = "fixed"  # "fixed" ou "random"
+    INITIAL_WEIGHT_MODE: str = "random"  # "fixed" ou "random"
     
     # Modes
     NO_AUTO_CONNEXIONS: bool = True  # Pas d'autosynapses
@@ -29,9 +29,10 @@ class SynapseConfig:
     EXCIT_ALPHA: float = 0.5    # Coefficient apprentissage excitateur
 
     INHIB_TIME_WINDOW: int = 10
+
     INHIB_ALPHA: float = 0.5    # Coefficient apprentissage inhibiteur
 
-    TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
+    #TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
 
 @dataclass
 class NeuronConfig:
@@ -46,12 +47,12 @@ class NeuronConfig:
     THRESHOLD_REF: float = 100.0     # Seuil de référence
     
     # Refractory periods
-    ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
-    RELATIVE_REFRACTORY: int = 5     # ms (si défini)
-    BURSTY_MODE: bool = True          # Bursting neurons
+    ABSOLUTE_REFRACTORY: int = 10     # ms (si défini)
+    #RELATIVE_REFRACTORY: int = 10     # ms (si défini)
+    #BURSTY_MODE: bool = True          # Bursting neurons
     
     # Inhibition
-    HYPER_POLARISATION_POTENTIAL: float = -20  # mV
+    #HYPER_POLARISATION_POTENTIAL: float = -20  # mV
     #INHIBITION_RESET_MODE: bool = True
 
 @dataclass
