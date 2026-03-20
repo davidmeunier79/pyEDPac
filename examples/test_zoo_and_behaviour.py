@@ -20,7 +20,7 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfig
 
@@ -49,55 +49,32 @@ def main():
     if not SIMULATION_ACTIVE:
         return 0
 
+    ################################# Pacman ###########################
+
+    # Create objects
+
+    chromosome = Chromosome()
+    print(chromosome)
+
+    pac = Pacman(chromosome)
 
     #################################### Zoo ######################################
     # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
+    zoo = Zoo()
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
-    ################################# Pacman ###########################
-
-    ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(title = "EDPac zoo")
-    # Connect the "X" button of the window to our stop function
-    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
-    # if 'destroyed' signal doesn't fire immediately.
-    zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
-    zoo_viz.destroyed.connect(stop_everything)
-
-    #
-    # ################################### Network Visualizer ################################
-    # # Create visualizer (800x600 pixels, scaled up 2x for visibility)
-    # net_viz = NetworkVisualizer(title = "EDPac network", scale = 2)
-    # net_viz.setAttribute(Qt.WA_DeleteOnClose)
-    # net_viz.destroyed.connect(stop_everything)
-#
-#     ################################### EvoNetwork ################################
-#
-#     net = EvoNetwork(indiv.get_chromosome())
-#     net.initialize_inputs()
-#
-#     print(net)
-#
-#     # initilisation
-#
-#     net_viz.init_network(net)
-#     net_viz.setup_topology()
-#     net_viz.show()
-#
-    ################################## Inputs Visualizer #####################################
-    # 2. Input/Sensor View (The new class)
-    input_viz = InputVisualizer(title = "EDPac inputs", scale = 2)
-    input_viz.setAttribute(Qt.WA_DeleteOnClose)
-    input_viz.destroyed.connect(stop_everything)
-
-    # input_viz
-    input_viz.draw_background()
-    input_viz.show()
-
-    ################################## Pacman ################################################
-    pac = Pacman()
     zoo.set_pacman(pac)
+
+
+
+
+
+
+    # 2. Initialize Visualiser
+    # Original EDPac screens were often around 40x25 characters
+    # 40 * 16 = 640px, 25 * 16 = 400px
+    zoo_viz = ZooVisualizer(scale=2)
+    zoo_viz.show()
 
     ################################### Init Zoo
     zoo.load_screen(screen_file="screen.0")
@@ -108,6 +85,12 @@ def main():
     zoo_viz.draw_static_grid(zoo.grid)
     zoo_viz.draw_zoo()
     zoo_viz.show()
+
+    ################################## Inputs #####################################
+    # 2. Input/Sensor View (The new class)
+    input_viz = InputVisualizer(scale=2)
+    input_viz.setWindowTitle("Pacman Sensors")
+    input_viz.show()
 
 
     # 2. Create a local event loop
