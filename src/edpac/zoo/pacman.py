@@ -1,6 +1,8 @@
 from edpac.genetic_algorithm.individual import Individual
-from edpac.config.constants import NB_VISIO_INPUTS, VISIO_COLUMN_DEPTH, INITIAL_LIFE_POINTS, NB_LIFE_POINTS_PER_PACGUM, NB_LIFE_POINTS_PER_PREY, MOTOR_THRESHOLD, BLURRED_FACTOR
 
+from edpac.config.constants import NB_VISIO_INPUTS
+
+from edpac.config.zoo_config import PacmanConfig
 from enum import IntEnum
 
 class Direction(IntEnum):
@@ -33,13 +35,14 @@ class Direction(IntEnum):
 
 
 class Pacman(Individual):
-    def __init__(self, x=0, y=0, zoo=None):
+    def __init__(self, x=0, y=0, zoo=None, config : PacmanConfig = None):
 
+        self.config = config or PacmanConfig()
         self.x = x
         self.y = y
 
-        self.motor_threshold = MOTOR_THRESHOLD
-        self.life_points = INITIAL_LIFE_POINTS
+        self.motor_threshold = self.config.MOTOR_THRESHOLD
+        self.life_points = self.config.INITIAL_LIFE_POINTS
         self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
@@ -69,6 +72,16 @@ class Pacman(Individual):
         }
         left, right = rotation_map[current_dir]
         return left if turn_type == -1 else right
+
+    def predator_contact(self):
+        self.life_points -= self.config.NB_LIFE_POINTS_PER_PREDATOR
+
+    def eat_pacgum(self):
+        self.life_points += self.config.NB_LIFE_POINTS_PER_PACGUM
+
+    def eat_prey(self):
+        self.life_points += self.config.NB_LIFE_POINTS_PER_PREY
+
 
     def integrate_motor_outputs(self, motor_values):
         """
@@ -155,7 +168,7 @@ class Pacman(Individual):
                 # Update grid data: old position becomes a dot
                 # if this a pacgum, increase life
                 if self.zoo.grid[new_y][new_x] == b".":
-                    self.life_points = self.life_points + NB_LIFE_POINTS_PER_PACGUM
+                    self.eat_pacgum()
                     #print("Eating pacgum, Life points: " , self.life_points)
 
                 elif self.zoo.grid[new_y][new_x] == b" ":
@@ -163,16 +176,14 @@ class Pacman(Individual):
                     #print("Moving forward in empty space")
 
                 else:
-                    #print("Eating animal")
-
                     char = self.zoo.grid[new_y][new_x].decode("utf-8")
 
                     if self.zoo.animals[char]["danger"] == "1":
-                        self.life_points = self.life_points + NB_LIFE_POINTS_PER_PREY
-                        #print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
+                        self.eat_prey()
+                        print("Eating prey ", self.zoo.animals[char]["name"], ", Life points: " , self.life_points)
 
                     elif self.zoo.animals[char]["danger"] == "-1":
-                        #print("predator ", self.zoo.animals[char]["name"], "Cannot be eaten !!!! ")
+                        print("Predator ", self.zoo.animals[char]["name"], "cannot be eaten !!!! ")
                         return
 
                 self.zoo.grid[self.y][self.x] = b' '
@@ -180,13 +191,6 @@ class Pacman(Individual):
 
                 # New position becomes Pacman
                 self.zoo.grid[self.y][self.x] = b'0'
-
-                #print(self.zoo.grid)
-        #
-        #     else:
-        #         print("Bumping in a wall")
-        # else:
-        #     print("Outside grid !!!!!!!!!!!!!!!!!")
 
     def integrate_visio_outputs(self):
         """
@@ -223,7 +227,7 @@ class Pacman(Individual):
 
             # 3. Scan depth (j) in the current column
             # Start depth at abs(rel_col) to create a "V" shaped fan
-            for j in range(max(abs(rel_col), 1), VISIO_COLUMN_DEPTH+1):
+            for j in range(max(abs(rel_col), 1), self.config.VISIO_COLUMN_DEPTH+1):
                 # Calculate grid coordinates: Start + (depth * Forward) + (offset * Side)
                 nx = self.x + (j * df[0]) + (rel_col * ds[0])
                 ny = self.y + (j * df[1]) + (rel_col * ds[1])
@@ -238,7 +242,7 @@ class Pacman(Individual):
                     # 4. Check for Objects (Walls or Animals)
                     assert char in self.zoo.animals.keys(), f"Error with {char}"
 
-                    found_shape = self.blur_pattern(self.zoo.animals[char]["shape"], float(abs(j))/VISIO_COLUMN_DEPTH * BLURRED_FACTOR)
+                    found_shape = self.blur_pattern(self.zoo.animals[char]["shape"], float(abs(j))/self.config.VISIO_COLUMN_DEPTH * self.config.BLURRED_FACTOR)
 
                     break
 

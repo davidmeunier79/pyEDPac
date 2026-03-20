@@ -22,7 +22,7 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME
 
-from edpac.config.ga_config import PopulationConfig
+from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 
 
 # 1. Global flag to track if we should keep evolving
@@ -237,11 +237,9 @@ def main():
     # Create objects
     #################################### Population ######################################
 
-    population = Population()
-    pop_config = PopulationConfig()
+    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
-
-    for gen in range(pop_config.NB_GENERATIONS):
+    for gen in range(population.config.NB_GENERATIONS):
 
         print(f"Starting Generation {gen}")
 

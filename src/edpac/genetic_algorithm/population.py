@@ -18,7 +18,7 @@ from ..config.ga_config import PopulationConfig
 
 from edpac.config.ga_config import ChromosomeConfig
 
-pop_config = PopulationConfig()
+
 
 
 class Population:
@@ -26,6 +26,7 @@ class Population:
     
     def __init__(self,
                  chromosome_config = None,
+                 config: PopulationConfig = None,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
                  mutation_config: MutationConfig = None):
@@ -43,7 +44,8 @@ class Population:
 
         np.random.seed(1)
 
-        self.size = pop_config.POPULATION_SIZE
+        self.config = config or PopulationConfig()
+        self.size = self.config.POPULATION_SIZE
 
         self.chromosome_config = chromosome_config or ChromosomeConfig()
         
@@ -246,9 +248,7 @@ class Population:
         print("******************* After gen ", self.generation)
         print(sorted_inds)
 
-        elite_size = pop_config.ELITE_SIZE
-
-        elite = sorted_inds[:elite_size]
+        elite = sorted_inds[:self.config.ELITE_SIZE]
         self.best_individual = elite[0]
         
         # Statistiques
@@ -273,7 +273,7 @@ class Population:
         # Générer offspring
         while len(new_pop) < self.size:
             if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
-                print("Crossing Over")
+                #print("Crossing Over")
                 # Crossover
                 parent1 = self.select_parent()
                 parent2 = self.select_parent()

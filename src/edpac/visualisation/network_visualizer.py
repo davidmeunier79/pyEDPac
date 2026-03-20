@@ -2,22 +2,26 @@ import numpy as np
 from math import sqrt
 
 from edpac.ed_network.network import Network # Assuming your repo structure
-from edpac.config.network_config import ProjectionNature
-
-from edpac.config.constants import *
-
+from edpac.config.network_config import ProjectionNature, NetworkConfig, NetworkVisualizerConfig
+#from edpac.config.constants import
 from .pixel_visualizer import PixelVisualizer
 
 class NetworkVisualizer(PixelVisualizer):
-    def __init__(self, title="Neural Activity", scale=1):
+    def __init__(self,
+                 config : NetworkVisualizerConfig = None,
+                 network_config : NetworkConfig = None,
+                 title="Neural Activity",
+                 scale=1):
+        self.config = config or NetworkVisualizerConfig()
+        self.network_config = network_config or NetworkConfig()
 
         self.neuron_mask = np.ones((2, 2), dtype=np.uint8) # 1x1 pixel or larger
 
-        width = (VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY) + GAP_OUTPUT_ASSEMBLY+MOTOR_SQRT_NB_NEURONS)*self.neuron_mask.shape[0]
+        width = (self.network_config.VISIO_SQRT_NB_NEURONS+self.config.GAP_INPUT_ASSEMBLY + self.network_config.SQRT_NB_ASSEMBLIES*(self.network_config.SQRT_NB_NEURONS+self.config.GAP_HIDDEN_ASSEMBLY) + self.config.GAP_OUTPUT_ASSEMBLY+self.network_config.MOTOR_SQRT_NB_NEURONS)*self.neuron_mask.shape[0]
 
-        height = max((VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY)*NB_INPUT_ASSEMBLIES,
-                     SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY),
-                     (MOTOR_SQRT_NB_NEURONS+GAP_OUTPUT_ASSEMBLY)*NB_OUTPUT_ASSEMBLIES)*self.neuron_mask.shape[1]
+        height = max((self.network_config.VISIO_SQRT_NB_NEURONS+self.config.GAP_INPUT_ASSEMBLY)*self.network_config.NB_INPUT_ASSEMBLIES,
+                     self.network_config.SQRT_NB_ASSEMBLIES*(self.network_config.SQRT_NB_NEURONS+self.config.GAP_HIDDEN_ASSEMBLY),
+                     (self.network_config.MOTOR_SQRT_NB_NEURONS+self.config.GAP_OUTPUT_ASSEMBLY)*self.network_config.NB_OUTPUT_ASSEMBLIES)*self.neuron_mask.shape[1]
 
 
         super().__init__( height=height, width=width,title=title, scale=scale)
@@ -44,8 +48,8 @@ class NetworkVisualizer(PixelVisualizer):
 
         # Define column X-coordinates
         cols = {'input': 0,
-                'hidden': VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY,
-                "output": VISIO_SQRT_NB_NEURONS+GAP_INPUT_ASSEMBLY + SQRT_NB_ASSEMBLIES*(SQRT_NB_NEURONS+GAP_HIDDEN_ASSEMBLY) + GAP_OUTPUT_ASSEMBLY
+                'hidden': self.network_config.VISIO_SQRT_NB_NEURONS+self.config.GAP_INPUT_ASSEMBLY,
+                "output": self.network_config.VISIO_SQRT_NB_NEURONS+self.config.GAP_INPUT_ASSEMBLY + self.network_config.SQRT_NB_ASSEMBLIES*(self.network_config.SQRT_NB_NEURONS+self.config.GAP_HIDDEN_ASSEMBLY) + self.config.GAP_OUTPUT_ASSEMBLY
                 }
 
         # 1. Calculate positions for every neuron in every assembly
@@ -61,7 +65,7 @@ class NetworkVisualizer(PixelVisualizer):
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
             y_offset = a * sqrt_num_neurons
             self.draw_assembly(assembly, x_offset, y_offset )
-            self.assembly_positions[assembly.id] = x_offset+int(VISIO_SQRT_NB_NEURONS/2), y_offset+int(VISIO_SQRT_NB_NEURONS/2)
+            self.assembly_positions[assembly.id] = x_offset+int(self.network_config.VISIO_SQRT_NB_NEURONS/2), y_offset+int(self.network_config.VISIO_SQRT_NB_NEURONS/2)
 
         # hidden
         #print("Draw hidden_assemblies")
@@ -72,15 +76,15 @@ class NetworkVisualizer(PixelVisualizer):
 
             sqrt_num_neurons = sqrt(len(assembly.get_neurons()))
 
-            x_a = a // SQRT_NB_ASSEMBLIES
-            y_a = a % SQRT_NB_ASSEMBLIES
+            x_a = a // self.network_config.SQRT_NB_ASSEMBLIES
+            y_a = a % self.network_config.SQRT_NB_ASSEMBLIES
 
-            x_offset = x_base + x_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
-            y_offset = y_a * (sqrt_num_neurons + GAP_HIDDEN_ASSEMBLY)
+            x_offset = x_base + x_a * (sqrt_num_neurons + self.config.GAP_HIDDEN_ASSEMBLY)
+            y_offset = y_a * (sqrt_num_neurons + self.config.GAP_HIDDEN_ASSEMBLY)
 
             self.draw_assembly(assembly, x_offset, y_offset )
 
-            self.assembly_positions[assembly.id] = x_offset+int(SQRT_NB_NEURONS/2), y_offset+int(SQRT_NB_NEURONS/2)
+            self.assembly_positions[assembly.id] = x_offset+int(self.network_config.SQRT_NB_NEURONS/2), y_offset+int(self.network_config.SQRT_NB_NEURONS/2)
 
         # output
         x_offset = cols['output']
@@ -93,7 +97,7 @@ class NetworkVisualizer(PixelVisualizer):
             y_offset = a * sqrt_num_neurons
 
             self.draw_assembly(assembly, x_offset, y_offset )
-            self.assembly_positions[assembly.id] = x_offset+int(MOTOR_SQRT_NB_NEURONS/2), y_offset+int(MOTOR_SQRT_NB_NEURONS/2)
+            self.assembly_positions[assembly.id] = x_offset+int(self.network_config.MOTOR_SQRT_NB_NEURONS/2), y_offset+int(self.network_config.MOTOR_SQRT_NB_NEURONS/2)
 
     def draw_assemblies(self):
 

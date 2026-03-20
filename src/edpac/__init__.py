@@ -22,9 +22,7 @@ from .ed_network.ed_neuron import EDNeuron
 from .config.constants import *
 from .config.physiology_config import (
     SynapseConfig, 
-    NeuronConfig,
-    DEFAULT_SYNAPSE_CONFIG,
-    DEFAULT_NEURON_CONFIG
+    NeuronConfig
 )
 from .config.network_config import NetworkConfig
 

@@ -7,6 +7,8 @@ Configuration du réseau neuronal
 from dataclasses import dataclass
 from enum import Enum
 
+from .constants import NB_VISIO_INPUTS, NB_MOTOR_PATTERNS
+
 class ProjectionNature(Enum):
     """Type de projection (synapses)"""
     EXCITATORY = "excit"
@@ -24,22 +26,31 @@ class NetworkConfig:
     # Projection mode
     TOPOLOGICAL_PROJECTION: bool = True
     
-    # Input modes
-    STOCHASTIC_INPUT: bool = True  # Vs temporal coding
-    BLOCKING_MODE: bool = False
-#
-#     # Trace/Debug
-#     TRACE_MODE: bool = False
-#     TEXT_TRACE_MODE: bool = False
-#     GNUPLOT_TRACE_MODE: bool = False
-#     TEST_MODE: bool = False
-#
-#     # Graph display
-#     GRAPHICAL_DISPLAY_MODE: bool = False
-#
-#     # Statistics
-#     ASSEMBLY_STAT_MODE: bool = True
-#     GLOBAL_STAT_MODE: bool = True
-#     GLOBAL_SYNAPSE_STAT_MODE: bool = True
+    # Input/Output assemblies
+    NB_INPUT_ASSEMBLIES = NB_VISIO_INPUTS # + NB_AUDIO_INPUTS
+    NB_OUTPUT_ASSEMBLIES = NB_MOTOR_PATTERNS  # Number of motor patterns
 
-DEFAULT_NETWORK_CONFIG = NetworkConfig()
+    # Network topology
+    SQRT_NB_ASSEMBLIES = 10
+    NB_ASSEMBLIES = SQRT_NB_ASSEMBLIES * SQRT_NB_ASSEMBLIES
+
+    SQRT_NB_NEURONS = 5
+    NB_NEURONS_EACH_ASSEMBLY = SQRT_NB_NEURONS * SQRT_NB_NEURONS
+    NB_HIDDEN_NEURONS = NB_NEURONS_EACH_ASSEMBLY * NB_ASSEMBLIES
+
+    # Other parameters
+    MOTOR_SQRT_NB_NEURONS=5
+    VISIO_SQRT_NB_NEURONS=20
+
+    # for genes
+    NB_IN_ASSEMBLIES = NB_INPUT_ASSEMBLIES + NB_ASSEMBLIES
+    NB_OUT_ASSEMBLIES = NB_OUTPUT_ASSEMBLIES + NB_ASSEMBLIES
+
+
+@dataclass
+class NetworkVisualizerConfig:
+    # for visio config
+    GAP_INPUT_ASSEMBLY = 5 # gap in visu between assemblies
+    GAP_HIDDEN_ASSEMBLY = 5
+    GAP_OUTPUT_ASSEMBLY = 5
+

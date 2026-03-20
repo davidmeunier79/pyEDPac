@@ -75,17 +75,15 @@ class SpikingNeuron(Neuron):
         """
         if self.last_time_of_firing != -1:
 
-            time_since_spike = current_time - self.last_time_of_firing
-#
-#             # Période réfractaire absolue
-#             if self.config.ABSOLUTE_REFRACTORY > 0:
-#
-            if time_since_spike < self.config.ABSOLUTE_REFRACTORY:
-                return float('inf')  # Impossible de tirer
+            time_since_last_spike = current_time - self.last_time_of_firing
 
+            if time_since_last_spike < self.config.ABSOLUTE_REFRACTORY:
+                self.threshold_potential = float('inf')  # Impossible de tirer
+
+                return
 
         # Seuil revient à la normale
-        return self.config.THRESHOLD_REF
+        self.threshold_potential = self.config.THRESHOLD_REF
     
     def test_spike_emission(self, time_of_impact: int, weight_of_impact: float) -> bool:
         """
@@ -100,7 +98,7 @@ class SpikingNeuron(Neuron):
         """
         # Mettre à jour les potentiels
         self.update_membrane_potential(time_of_impact)
-        current_threshold = self.update_threshold_potential(time_of_impact)
+        self.update_threshold_potential(time_of_impact)
         
         # Ajouter l'impact du PSP
         #print("membrane_potential before PSP:", self.membrane_potential," ", current_threshold )
@@ -110,14 +108,14 @@ class SpikingNeuron(Neuron):
         self.last_time_of_psp_impact = time_of_impact
         
         # Vérifier si spike
-        if self.membrane_potential >= current_threshold:
+        if self.membrane_potential >= self.threshold_potential:
 
             #print("***** Spike emission:", self.membrane_potential, " ", current_threshold , " ", self.spike_times)
             self.spike_times.append(time_of_impact)
             self.last_time_of_firing = time_of_impact
             
             # Appliquer inhibition (hyperpolarisation)
-            self.membrane_potential = self.config.HYPER_POLARISATION_POTENTIAL
+            self.membrane_potential = self.config.RESTING_POTENTIAL
 #
 #             #TODO
 #             if self.config.INHIBITION_RESET_MODE:
