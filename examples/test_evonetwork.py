@@ -151,26 +151,22 @@ def main():
 
             if spike_neuron_ids is not None:
 
-                #print(spike_neuron_ids)
-                #print("Nb spikes: ", len(spike_neuron_ids))
-
-
-
                 net_viz.display_spikes(spike_neuron_ids)
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
 
             else:
-                print("No more events in event manager, breaking")
-
-                net_viz.refresh_from_background()()
-
+                print("No spikes in event manager")
+                net_viz.refresh_from_background()
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
 
-                break
+            if EDSynapse.event_manager.get_nb_events() == 0:
+                print("No more events in event manager, breaking")
+                loop.quit()
+                return
 
 
         output_patterns = net.get_output_patterns()

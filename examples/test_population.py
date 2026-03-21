@@ -20,9 +20,9 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME, DATA_PATH
+from edpac.config.constants import MINIMAL_TIME
 
-from edpac.config.ga_config import PopulationConfig
+from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 
 
 # 1. Global flag to track if we should keep evolving
@@ -49,13 +49,15 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     #app = QtWidgets.QApplication(sys.argv)
 
 
-    ################################# Pacman ###########################
-
     pac = Pacman(indiv)
     zoo.set_pacman(pac)
     zoo.load_screen(screen_file="screen.0")
 
-
+    # 3. Initial Draw
+    zoo_viz.init_zoo(zoo)
+    zoo_viz.draw_static_grid(zoo.grid)
+    zoo_viz.draw_zoo()
+    zoo_viz.show()
 
     ################################### EvoNetwork ################################
 
@@ -65,16 +67,22 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     print(net)
 
     # initilisation
-    net_viz.init_network(network=net)
-    net_viz.display_empty_network()
 
-    #################################### Zoo  ###################################
-    # 2. Initialize Visualiser
-    # Original EDPac screens were often around 40x25 characters
-    # 40 * 16 = 640px, 25 * 16 = 400px
+    net_viz.set_background_color(0)
+    net_viz.init_assemblies(net)
+    net_viz.draw_projections(net)
+    net_viz.draw_assemblies()
+    net_viz.show()
 
-    # 3. Initial Draw
-    zoo_viz.draw_zoo(zoo)
+
+    net_viz.refresh_from_background()
+    net_viz.update_display()
+    QtWidgets.QApplication.processEvents()
+
+    # input_viz
+    input_viz.draw_background()
+    input_viz.show()
+
 
     # 2. Create a local event loop
     loop = QEventLoop()
@@ -93,7 +101,10 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         zoo.live_one_step()  # Update the model()
 
         # Update both windows
-        zoo_viz.draw_zoo(zoo)
+        zoo_viz.draw_zoo()
+
+
+        zoo.test_pacman_contacts()
 
         # 1. Get sensory data from the world
         sensory_data = zoo.pacman.integrate_visio_outputs()
@@ -103,7 +114,11 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         input_viz.display_inputs(sensory_data)
 
         # 3 integrate to EDNetwork
-        net.integrate_inputs(sensory_data)
+        spike_neuron_ids = net.integrate_inputs(sensory_data)
+
+        net_viz.display_spikes(spike_neuron_ids)
+        net_viz.update_display()
+        QtWidgets.QApplication.processEvents()
 
         current_time = EDSynapse.event_manager.get_time()
 
@@ -111,22 +126,28 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            #net_viz.display_empty_network()
-
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
             if spike_neuron_ids is not None:
 
-                #print("Nb spikes: ", len(spike_neuron_ids))
-                net_viz.display_network(spike_neuron_ids)
+                net_viz.display_spikes(spike_neuron_ids)
+                net_viz.update_display()
+                QtWidgets.QApplication.processEvents()
+
 
             else:
+                print("No spikes in event manager")
+                net_viz.refresh_from_background()
+                net_viz.update_display()
+                QtWidgets.QApplication.processEvents()
+
+
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
+                zoo.pacman.life_points = -100
                 break
 
         output_patterns = net.get_output_patterns()
-        print(output_patterns)
-
 
         zoo.pacman.integrate_motor_outputs(output_patterns)
 
@@ -166,6 +187,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     del timer
     del loop
 
+    print("After Loop")
+
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
 
@@ -180,68 +203,63 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 def main():
 
     global SIMULATION_ACTIVE
+    SIMULATION_ACTIVE = True
 
 
+    #################################### Zoo ######################################
+    # 1. Initialize Data
+    zoo = Zoo()
+    zoo.load_menagerie(menagerie_file= "menagerie.txt")
+
+    ################################# Pacman ###########################
 
     ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(width=800, height=500, scale=2)
+    zoo_viz = ZooVisualizer(title = "EDPac zoo")
     # Connect the "X" button of the window to our stop function
     # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
     # if 'destroyed' signal doesn't fire immediately.
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-    zoo_viz.show()
+
     ################################### Network Visualizer ################################
     # Create visualizer (800x600 pixels, scaled up 2x for visibility)
-    net_viz = NetworkVisualizer( width=300, height=200, scale=5, title = "EDPac network visualizer")
+    net_viz = NetworkVisualizer(title = "EDPac network", scale = 2)
     net_viz.setAttribute(Qt.WA_DeleteOnClose)
     net_viz.destroyed.connect(stop_everything)
 
-    net_viz.show()
     ################################## Inputs Visualizer #####################################
     # 2. Input/Sensor View (The new class)
-    input_viz = InputVisualizer(scale=2)
-
+    input_viz = InputVisualizer(title = "EDPac inputs", scale = 2)
     input_viz.setAttribute(Qt.WA_DeleteOnClose)
     input_viz.destroyed.connect(stop_everything)
-
-    input_viz.setWindowTitle("Pacman Sensors")
-    input_viz.show()
 
     # Create objects
     #################################### Population ######################################
 
-    population = Population()
-    pop_config = PopulationConfig()
+    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
-    #################################### Zoo ######################################
-    # 1. Initialize Data
-    zoo = Zoo(data_dir=DATA_PATH)
-    zoo.load_menagerie(menagerie_file= "menagerie.txt")
-
-    print(zoo.shapes)
-
-
-    for gen in range(pop_config.NB_GENERATIONS):
+    for gen in range(population.config.NB_GENERATIONS):
 
         print(f"Starting Generation {gen}")
 
         for i, ind in enumerate(population.individuals):
             # Check the flag BEFORE starting the next individual
             if not SIMULATION_ACTIVE:
+                print("Simualtion is over, breaking")
                 break
 
             evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
 
+            print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'
             # This is especially helpful when dealing with large neural networks
             gc.collect()
 
         population.evolve_generation()
 
-
     print("Evolution finished or aborted.")
+    print(population.fitness_history)
 
 
     #
@@ -261,4 +279,7 @@ def main():
     #
 
 if __name__ == "__main__":
+    import time
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))

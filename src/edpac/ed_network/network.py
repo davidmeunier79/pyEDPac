@@ -16,7 +16,7 @@ from ..ed_network.assembly import Assembly
 from ..ed_network.ed_synapse import EDSynapse
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 from ..config.network_config import NetworkConfig, ProjectionNature, AssemblyNature
-from ..config.constants import *
+#from ..config.constants import *
 
 class Network:
     """
@@ -52,9 +52,9 @@ class Network:
         # Standard: input, hidden, output
 
         # Input assemblies
-        for i in range(NB_INPUT_ASSEMBLIES):
+        for i in range(self.config.NB_INPUT_ASSEMBLIES):
             assembly = Assembly(
-                nb_neurons=VISIO_SQRT_NB_NEURONS*VISIO_SQRT_NB_NEURONS,
+                nb_neurons=self.config.VISIO_SQRT_NB_NEURONS*self.config.VISIO_SQRT_NB_NEURONS,
                 nature=AssemblyNature.INPUT,
                 position=(0, i),
                 neuron_config=self.neuron_config
@@ -62,10 +62,10 @@ class Network:
             self.add_assembly(assembly)
 
         # Hidden assemblies (5x5 grid = 25 assemblies)
-        for x in range(SQRT_NB_ASSEMBLIES):
-            for y in range(SQRT_NB_ASSEMBLIES):
+        for x in range(self.config.SQRT_NB_ASSEMBLIES):
+            for y in range(self.config.SQRT_NB_ASSEMBLIES):
                 assembly = Assembly(
-                    nb_neurons=NB_NEURONS_EACH_ASSEMBLY,
+                    nb_neurons=self.config.NB_NEURONS_EACH_ASSEMBLY,
                     nature=AssemblyNature.HIDDEN,
                     position=(x+1, y),
                     neuron_config=self.neuron_config
@@ -73,11 +73,11 @@ class Network:
                 self.add_assembly(assembly)
 
         # Output assemblies (4 pour actions Pacman)
-        for i in range(NB_OUTPUT_ASSEMBLIES):
+        for i in range(self.config.NB_OUTPUT_ASSEMBLIES):
             assembly = Assembly(
-                nb_neurons=MOTOR_SQRT_NB_NEURONS*MOTOR_SQRT_NB_NEURONS,
+                nb_neurons=self.config.MOTOR_SQRT_NB_NEURONS*self.config.MOTOR_SQRT_NB_NEURONS,
                 nature=AssemblyNature.OUTPUT,
-                position=(SQRT_NB_ASSEMBLIES+2, i),
+                position=(self.config.SQRT_NB_ASSEMBLIES+2, i),
                 neuron_config=self.neuron_config
             )
             self.add_assembly(assembly)
@@ -105,10 +105,11 @@ class Network:
             synapse_config = SynapseConfig()
 
         # Calculer le délai topologique
-        topological_delay = 0
-        if self.config.TOPOLOGICAL_PROJECTION:
-            distance = pre_assembly.get_distance_to(post_assembly)
-            topological_delay = max(0, int(distance * 5))  # 5ms par unité
+        #TODO
+        # topological_delay = 0
+        # if self.config.TOPOLOGICAL_PROJECTION:
+        #     distance = pre_assembly.get_distance_to(post_assembly)
+        #     topological_delay = max(0, int(distance * 5))  # 5ms par unité
 
         if synapse_config.NO_AUTO_CONNEXIONS:
             if pre_assembly==post_assembly:
@@ -142,10 +143,10 @@ class Network:
                 syn_config = synapse_config
 
             synapse = EDSynapse(pre_neuron, post_neuron, syn_config)
-
-            # Ajouter délai topologique
-            if topological_delay > 0:
-                synapse.delay += topological_delay
+            #
+            # # Ajouter délai topologique
+            # if topological_delay > 0:
+            #     synapse.delay += topological_delay
 
             #synapses_created.append(synapse)
             pre_neuron.add_outgoing_link(synapse)
