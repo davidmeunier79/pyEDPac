@@ -110,6 +110,7 @@ class EDSynapse(DynamicSynapse):
                 self.weight = self.weight + (1.0 - self.weight)*self.config.EXCIT_ALPHA
                 #print(self.weight)
 
+
     def __repr__(self):
         return (f"EDSynapse(pre={self.pre_node.id}, post={self.post_node.id}, "
                 f"w={self.weight:.3f}, d={self.delay})")
