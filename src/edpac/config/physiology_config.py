@@ -45,13 +45,18 @@ class NeuronConfig:
     # Seuil
     #NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
     #THRESHOLD_REF: float = 100.0     # Seuil de référence
-    THRESHOLD_REF: float = 40.0     # Seuil de référence
+    THRESHOLD_REF: float = 20.0     # Seuil de référence
 
 
     # Refractory periods
-    ABSOLUTE_REFRACTORY: int = 10     # ms (si défini)
+    ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
     #RELATIVE_REFRACTORY: int = 10     # ms (si défini)
+
+
     #BURSTY_MODE: bool = True          # Bursting neurons
+    BURSTY_MODE: bool = False          # Bursting neurons
+    if BURSTY_MODE:
+        THRESHOLD_TIME_CONSTANT: int = 10     # ms (si défini)
     
     # Inhibition
     #HYPER_POLARISATION_POTENTIAL: float = -20  # mV

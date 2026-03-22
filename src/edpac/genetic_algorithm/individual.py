@@ -89,7 +89,7 @@ class Individual(Chromosome):
     
     def clone(self) -> 'Individual':
         """Cloner l'individu"""
-        new_ind = Individual(self.chromosome.clone(), self.config)
+        new_ind = Individual(self.config, self.genes)
         new_ind.fitness = - float('inf')
 
         new_ind.fitness_evaluated = False

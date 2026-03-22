@@ -162,7 +162,7 @@ def main():
                 net_viz.update_display()
                 QtWidgets.QApplication.processEvents()
 
-
+            print(EDSynapse.event_manager.get_time(), EDSynapse.event_manager.get_nb_events())
             if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
                 loop.quit()

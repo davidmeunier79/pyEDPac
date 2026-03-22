@@ -15,7 +15,7 @@ NB_VISIO_INPUTS = 5
 #NB_AUDIO_INPUTS = 2
 
 # minimal step of EventManager
-MINIMAL_TIME = 10
+MINIMAL_TIME = 5
 
 # Other parameters
 MOTOR_SQRT_NB_NEURONS=5

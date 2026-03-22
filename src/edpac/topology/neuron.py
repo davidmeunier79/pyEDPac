@@ -29,5 +29,10 @@ class Neuron(Node):
         """
         raise NotImplementedError("Subclasses must implement compute_psp_impact")
     
+    def _reorganise_synapses(self):
+
+        self.outgoing_links.sort(key=lambda s: s.get_weight(), reverse=True)
+
+
     def __repr__(self):
         return f"Neuron({self.index})"

@@ -25,9 +25,9 @@ from PySide6 import QtWidgets, QtCore
 
 from edpac.visualisation.network_visualizer import NetworkVisualizer
 from edpac.visualisation.input_visualizer import InputVisualizer
-from edpac.visualisation.pixel_visualizer import PixelVisualizer
+#from edpac.visualisation.pixel_visualizer import PixelVisualizer
 
-from edpac.visualisation.neuron_tracer import NeuronTracer
+from edpac.tracer.neuron_tracer import NeuronTracer
 
 from edpac.genetic_algorithm.chromosome import Chromosome
 
@@ -76,6 +76,7 @@ def main():
 
     # Create objects
     chromo_config = ChromosomeConfig()
+    chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME = 720
 
     chromosome = Chromosome(chromo_config)
 
@@ -103,13 +104,11 @@ def main():
 
     # --- Neuron tracer ---
     # Pick a neuron to follow (e.g., a motor neuron or a specific interneuron)
-    target_neuron = net.get_neuron_from_id(3000)
-    tracer = NeuronTracer(target_neuron, buffer_size=120, height=100)
+    target_neuron = net.get_neuron_from_id(2001)
+    print(target_neuron)
 
-    # Create a small window for the tracer
-    trace_viz = PixelVisualizer(height=100, width=400, title="Membrane Potential")
-    trace_viz.show()
-
+    neuron_tracer = NeuronTracer(target_neuron, buffer_size=120, height=100)
+    neuron_tracer.record(0)
 
     #
     # 0/0
@@ -156,47 +155,62 @@ def main():
 
         net.init_output_patterns()
 
-
-
+#
+#
+#         current_time = 0
+#
+#         while current_time < 100:
+#
+#             if time == EDSynapse.event_manager.get_time():
+#
+#                 spike_neuron_ids = EDSynapse.event_manager.run_one_step()
+#
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
+            print("time: ", EDSynapse.event_manager.get_time())
+
+            #neuron_tracer.record(current_time)
+
             # Record the potential after the event manager updates
-            tracer.record(EDSynapse.event_manager.get_time())
+            neuron_tracer.record(EDSynapse.event_manager.get_time())
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
-
-
 
             if spike_neuron_ids is not None:
                 # (Your existing network display code)
                 net_viz.display_spikes(spike_neuron_ids)
+
                 net_viz.update_display()
-
-                # Update Trace Window
-                trace_viz.refresh_from_background() # Clear previous frame
-                tracer.draw_trace(trace_viz)
-                trace_viz.update_display()
-
                 QtWidgets.QApplication.processEvents()
 
                 #print(spike_neuron_ids)
                 #print("Nb spikes: ", len(spike_neuron_ids))
 
             else:
+
+                net_viz.refresh_from_background()()
+
+                net_viz.update_display()
+                QtWidgets.QApplication.processEvents()
+
+            if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
 
-                #net_viz.refresh_from_background()()
 
-                #net_viz.update_display()
-                #QtWidgets.QApplication.processEvents()
+                print(neuron_tracer.history)
+                neuron_tracer.plot()
 
+                loop.quit()
 
                 break
 
 
         output_patterns = net.get_output_patterns()
 
+
+    print(neuron_tracer.history)
+    neuron_tracer.plot()
 
     # 3. Set up the timer
     timer = QTimer()

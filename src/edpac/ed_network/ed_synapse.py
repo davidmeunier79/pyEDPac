@@ -52,6 +52,7 @@ class EDSynapse(DynamicSynapse):
             post_neuron: Neurone post-synaptique
             config: Configuration synaptique
         """
+        pass
         super().__init__(pre_neuron, post_neuron, config)
         
         # Pas besoin de stocker event_manager au niveau instance!
