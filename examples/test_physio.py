@@ -285,6 +285,8 @@ def test_three_input_neurons():
 
     synapse_config.WEIGHT = 0.5  # Poids fort
     synapse_config.INITIAL_WEIGHT_MODE = "fixed"
+    synapse_config.DELAY_MODE = "fixed"
+
 
     # N0 -> N1
     syn1 = EDSynapse(neurons[1], neurons[0], synapse_config)
