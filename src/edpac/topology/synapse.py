@@ -44,8 +44,14 @@ class Synapse(Link):
 
         # Délai aléatoire
         #TODO
-        return self.config.DELAY
-        #return np.random.randint(self.config.DELAY - 2, self.config.DELAY + 3)
+        if self.config.DELAY_MODE == "fixed":
+            return self.config.DELAY
+        elif self.config.DELAY_MODE == "random":
+            return np.random.randint(self.config.DELAY - 5, self.config.DELAY + 6)
+        else:
+            print(f"Unknown DELAY_MODE {self.config.DELAY_MODE }")
+            return None
+
 
     def get_weight(self) -> float:
         """Retourner le poids"""

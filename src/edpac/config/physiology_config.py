@@ -13,7 +13,8 @@ class SynapseConfig:
     # Paramètres de délai
     DELAY: int = 10              # Délai max excitateur (ms)
     INHIBITORY_DELAY: int = 5   # Délai max inhibiteur (ms)
-    
+    DELAY_MODE : str = "random" # fixed or randome
+
     # Poids initial
     WEIGHT: float = 0.5          # Poids moyen
     INITIAL_WEIGHT_MODE: str = "random"  # "fixed" ou "random"
