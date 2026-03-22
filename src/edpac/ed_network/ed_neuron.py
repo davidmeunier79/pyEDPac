@@ -23,7 +23,7 @@ class EDNeuron(SpikingNeuron):
             config: Configuration neuronale
         """
         self.config = config or NeuronConfig()
-        super().__init__()
+        super().__init__(config)
     
     def emit_spike(self, spike_time: int):
         """
@@ -32,9 +32,14 @@ class EDNeuron(SpikingNeuron):
         Args:
             spike_time: Temps du spike (ms)
         """
+        #self.spike_times.append(time_of_impact)
+        self.last_time_of_firing = spike_time
+        self.spike_times.append(spike_time)
 
         for synapse in self.incoming_links:
             synapse.update_last_time_of_post_spike(spike_time)
+
+        #nb_events = EDSynapse.event_manager.get_nb_events()
 
         # Pour chaque synapse sortante, programmer le PSP arrivant
         for synapse in self.outgoing_links:
@@ -42,6 +47,9 @@ class EDNeuron(SpikingNeuron):
 
             # Mise à jour STDP pour synapses pré-synaptiques
             synapse.update_last_time_of_pre_spike(spike_time)
+
+
+        #print(f"***** ED Spike event at {spike_time} : added ", EDSynapse.event_manager.get_nb_events() - nb_events , " events ")
 
     def compute_psp_impact(self, time_of_impact: int, weight_of_impact: float):
         """Traiter l'impact d'un PSP"""

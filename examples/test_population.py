@@ -61,7 +61,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     ################################### EvoNetwork ################################
 
-    net = EvoNetwork(indiv.get_chromosome())
+    net = EvoNetwork(indiv)
     net.initialize_inputs()
 
     print(net)
@@ -148,6 +148,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
                 break
 
         output_patterns = net.get_output_patterns()
+        print(output_patterns)
 
         zoo.pacman.integrate_motor_outputs(output_patterns)
 

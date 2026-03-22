@@ -52,6 +52,7 @@ class EDSynapse(DynamicSynapse):
             post_neuron: Neurone post-synaptique
             config: Configuration synaptique
         """
+        pass
         super().__init__(pre_neuron, post_neuron, config)
         
         # Pas besoin de stocker event_manager au niveau instance!
@@ -92,11 +93,22 @@ class EDSynapse(DynamicSynapse):
         elif self.weight > 0:
 
             if diff_time < 0:
+                print("Negative diff time ", diff_time)
+                print(self.weight)
                 self.weight = self.weight - (self.weight - 0)*1.0/float(np.abs(diff_time))*self.config.EXCIT_ALPHA
+                print(self.weight)
+
             elif 0 < diff_time:
+                print("Positive diff time ", diff_time)
+                print(self.weight)
                 self.weight = self.weight + (1.0 - self.weight)*(1.0/float(diff_time))*self.config.EXCIT_ALPHA
+                print(self.weight)
+
             elif diff_time == 0:
+                print("Null diff time", diff_time)
+                print(self.weight)
                 self.weight = self.weight + (1.0 - self.weight)*self.config.EXCIT_ALPHA
+                print(self.weight)
 
     def __repr__(self):
         return (f"EDSynapse(pre={self.pre_node.id}, post={self.post_node.id}, "

@@ -34,7 +34,7 @@ def evaluate_individual(indiv):
 
     ################################### EvoNetwork ################################
 
-    net = EvoNetwork(indiv.get_chromosome())
+    net = EvoNetwork(indiv)
     net.initialize_inputs()
 
     print(net)

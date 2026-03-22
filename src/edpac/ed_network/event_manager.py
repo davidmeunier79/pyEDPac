@@ -41,8 +41,9 @@ class PSPEvent:
         """Comparaison pour heap - ordonne par temps"""
         if self.time != other.time:
             return self.time < other.time
+
         # Déterminisme: secondaire par ID
-        return id(self) < id(other)
+        return self.weight < other.weight
 
     def __eq__(self, other):
         return self.time == other.time and self.synapse == other.synapse
@@ -109,7 +110,7 @@ class EventManager:
         """
         # Calcul du temps d'arrivée = spike_time + délai
         psp_time = spike_time + synapse.get_delay()
-        #print("spike_time: ", spike_time, " -> psp_time: ", psp_time)
+        #zprint("spike_time: ", spike_time, " -> psp_time: ", psp_time)
 
         if psp_time < self.current_time:
             raise ValueError(f"PSP event in past (t={psp_time} < current={self.current_time})")
@@ -134,7 +135,7 @@ class EventManager:
 
         if not self.event_queue:
             self.is_empty = True
-            return None
+            return []
 
         # Récupérer le prochain événement
         next_event = self.event_queue[0]
@@ -160,6 +161,9 @@ class EventManager:
         # Vérifier si queue vide
         if not self.event_queue:
             self.is_empty = True
+        else:
+            self.current_time = self.event_queue[0].time
+
         #print( events_at_current_time)
 
         return events_at_current_time
@@ -231,6 +235,9 @@ class EventManager:
 
     def get_time(self) -> int:
         """Retourner le temps courant"""
+        if len(self.event_queue):
+            self.current_time = self.event_queue[0].time
+
         return self.current_time
 
     def get_empty(self) -> bool:

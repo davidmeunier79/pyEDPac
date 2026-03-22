@@ -135,22 +135,18 @@ class Network:
             # Ajuster le poids selon le type
             if nature == ProjectionNature.INHIBITORY:
                 # Poids inhibiteur généralement plus faible
-                syn_config = synapse_config
-                syn_config.WEIGHT = -synapse_config.WEIGHT
-                syn_config.DELAY = synapse_config.INHIBITORY_DELAY
+                synapse_config.WEIGHT = -synapse_config.WEIGHT
+                synapse_config.DELAY = synapse_config.INHIBITORY_DELAY
 
-            else:
-                syn_config = synapse_config
-
-            synapse = EDSynapse(pre_neuron, post_neuron, syn_config)
+            synapse = EDSynapse(pre_neuron, post_neuron, synapse_config)
             #
             # # Ajouter délai topologique
             # if topological_delay > 0:
             #     synapse.delay += topological_delay
 
             #synapses_created.append(synapse)
-            pre_neuron.add_outgoing_link(synapse)
-            post_neuron.add_incoming_link(synapse)
+            #pre_neuron.add_outgoing_link(synapse)
+            #post_neuron.add_incoming_link(synapse)
 
             # Enregistrer dans les assemblées
             #pre_assembly.add_outgoing_synapse(synapse)
