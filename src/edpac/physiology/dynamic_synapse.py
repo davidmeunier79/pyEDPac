@@ -21,8 +21,8 @@ class DynamicSynapse(Synapse):
         
     def update_last_time_of_pre_spike(self, new_time: int):
         """Mettre à jour le temps du dernier spike pré-synaptique"""
-        #self.last_time_of_pre_spike = new_time + self.delay
-        self.last_time_of_pre_spike = new_time
+        self.last_time_of_pre_spike = new_time + self.delay
+        #self.last_time_of_pre_spike = new_time
 
     def update_last_time_of_post_spike(self, new_time: int):
         """Mettre à jour le temps du dernier spike post-synaptique"""

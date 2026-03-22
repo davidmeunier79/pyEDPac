@@ -44,8 +44,8 @@ class Synapse(Link):
 
         # Délai aléatoire
         #TODO
-        #return self.config.DELAY
-        return np.random.randint(self.config.DELAY - 2, self.config.DELAY + 3)
+        return self.config.DELAY
+        #return np.random.randint(self.config.DELAY - 2, self.config.DELAY + 3)
 
     def get_weight(self) -> float:
         """Retourner le poids"""
