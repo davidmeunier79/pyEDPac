@@ -93,15 +93,15 @@ class Chromosome:
         if target_path==0:
             target_path = os.path.abspath()
 
-        print(f"saving Chromosome.npy")
+        #print(f"saving Chromosome.npy")
         npy_file = os.path.join(target_path, "Chromosome.npy")
-        print(npy_file)
+        #print(npy_file)
         np.save(npy_file, self.genes)
-
-        print(f"saving Chromosome.txt")
-        txt_file = os.path.join(target_path, "Chromosome.txt")
-        print(txt_file )
-        np.savetxt(txt_file , self.genes)
+        #
+        # #print(f"saving Chromosome.txt")
+        # txt_file = os.path.join(target_path, "Chromosome.txt")
+        # #print(txt_file )
+        # np.savetxt(txt_file , self.genes)
 
     def clone(self) -> 'Chromosome':
         """Cloner le chromosome"""

@@ -16,9 +16,12 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME
 
+from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 from edpac.config.ga_config import PopulationConfig
 
-def evaluate_individual(indiv):
+from edpac.tracer.network_tracer import NetworkTracer
+
+def evaluate_individual(indiv, path_indiv):
 
 
     #################################### Zoo ######################################
@@ -35,9 +38,13 @@ def evaluate_individual(indiv):
     ################################### EvoNetwork ################################
 
     net = EvoNetwork(indiv)
-    net.initialize_inputs()
 
     print(net)
+
+    spike_neuron_ids = net.initialize_inputs()
+
+    network_tracer = NetworkTracer(net)
+    network_tracer.record(0, spike_neuron_ids)
 
     while zoo.pacman.life_points > 0 :
 
@@ -50,17 +57,24 @@ def evaluate_individual(indiv):
         #print(sensory_data)
 
         # 3 integrate to EDNetwork
-        net.integrate_inputs(sensory_data)
+        spike_neuron_ids = net.integrate_inputs(sensory_data)
 
+        ### init wave loop
         current_time = EDSynapse.event_manager.get_time()
+
+        # tracer
+        network_tracer.record(current_time, spike_neuron_ids)
 
         net.init_output_patterns()
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-            #net_viz.display_empty_network()
+            time_before = EDSynapse.event_manager.get_time()
 
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
+
+            if len(spike_neuron_ids):
+                network_tracer.record(time_before, spike_neuron_ids)
 
             if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
@@ -79,12 +93,19 @@ def evaluate_individual(indiv):
     del net
     del pac
 
-    #print("After Loop")
+
+    print("After Loop")
+
+    # saving spike traces
+    network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
 
     indiv.set_fitness(score)
+
+    # saving chromosome
+    indiv.save_genes(path_indiv)
 
     EDSynapse.event_manager.reset()
 
@@ -94,26 +115,46 @@ def evaluate_individual(indiv):
 
     return score
 
-def run_parallel_evolution(population):
+def run_parallel_evolution(population, indiv_paths):
     # n_jobs=-1 uses all available cores
     # backend="multiprocessing" is safest for NumPy-heavy code
     results = Parallel(n_jobs=50, backend="multiprocessing")(
-        delayed(evaluate_individual)(ind) for ind in population.individuals
+        delayed(evaluate_individual)(ind, path_indiv) for ind, path_indiv in zip(population.individuals, indiv_paths)
     )
     return results
 
 
 def main():
 
+    def create_indiv_path(population, gen):
+
+        indiv_paths = []
+
+        for i in range(len(population.individuals)):
+            path_indiv = os.path.abspath(f"Gen_{gen}/Ind_{i}/")
+
+            try:
+                os.makedirs(path_indiv)
+            except OSError as e:
+                print(f"Error {e}")
+
+            indiv_paths.append(path_indiv)
+
+        return indiv_paths
+
     # Create objects
     #################################### Population ######################################
-    population = Population()
+    #population = Population()
+
+    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
     for gen in range(population.config.NB_GENERATIONS):
 
         print(f"Starting Generation {gen}")
 
-        results = run_parallel_evolution(population)
+        indiv_paths = create_indiv_path(population, gen)
+
+        results = run_parallel_evolution(population, indiv_paths)
         print(results)
 
         population.set_fitnesses(results)
