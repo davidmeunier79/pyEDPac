@@ -107,7 +107,7 @@ def main():
     target_neuron = net.get_neuron_from_id(2001)
     print(target_neuron)
 
-    neuron_tracer = NeuronTracer(target_neuron, buffer_size=120, height=100)
+    neuron_tracer = NeuronTracer(target_neuron)
     neuron_tracer.record(0)
 
     #

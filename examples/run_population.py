@@ -40,7 +40,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
+def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -66,19 +66,24 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
     print(net)
 
-    # initilisation
-
+    # initilisation visu
     net_viz.set_background_color(0)
     net_viz.init_assemblies(net)
     net_viz.draw_projections(net)
     net_viz.draw_assemblies()
     net_viz.show()
 
-
     net_viz.refresh_from_background()
     net_viz.update_display()
     QtWidgets.QApplication.processEvents()
 
+    # NetworkTracer
+    spike_neuron_ids = net.initialize_inputs()
+
+    network_tracer = NetworkTracer(net)
+    network_tracer.record(0, spike_neuron_ids)
+
+    #################################### Inputs ####################################
     # input_viz
     input_viz.draw_background()
     input_viz.show()
@@ -135,6 +140,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
                 QtWidgets.QApplication.processEvents()
 
 
+                network_tracer.record(time_before, spike_neuron_ids)
+
             else:
                 print("No spikes in event manager")
                 net_viz.refresh_from_background()
@@ -188,6 +195,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     del loop
 
     print("After Loop")
+
+    network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()

@@ -73,14 +73,22 @@ def main():
 
 
     # Create objects
+
+    # Create objects
     chromo_config = ChromosomeConfig()
+    chromo_config.VARIABLE_LENGTH_CHROMOSOME=False
+    chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME = 720  # Nombre de projections
+    chromo_config.NB_GENES_EACH_CHROMOSOME = chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*chromo_config.NB_GENES_EACH_PROJECTION
 
     chromosome = Chromosome(chromo_config)
 
 
     ################################### EvoNetwork ################################
 
-    net = EvoNetwork(chromosome)
+    neuron_config = NeuronConfig()
+    neuron_config.THRESHOLD_REF = 10
+
+    net = EvoNetwork(chromosome, neuron_config=neuron_config)
 
     print(net)
 

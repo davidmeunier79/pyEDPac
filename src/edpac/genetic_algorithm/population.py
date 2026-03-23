@@ -239,12 +239,6 @@ class Population:
             reverse=True
         )
         
-        for ind, indiv in enumerate(sorted_inds):
-            print(f"saving Chromosome_{self.generation}_{ind}.txt")
-            npy_file = os.path.abspath(f"Chromosome_{self.generation}_{ind}.npy")
-            print(npy_file)
-            np.save(npy_file, indiv.get_genes())
-
         print("******************* After gen ", self.generation)
         print(sorted_inds)
 

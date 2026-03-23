@@ -58,14 +58,14 @@ class EDNetwork(Network):
 
         self.event_manager.reset()
 
-    def initialize_inputs(self):
+    def initialize_inputs(self, time = 0):
         """
         Injecter tous les inputs dans input_assemblies
 
         Args:
             sensory_patterns: NB_VISIO_INPUTS
         """
-        time = 0
+
 
         spike_neuron_ids = []
         for i in range(NB_VISIO_INPUTS):

@@ -106,10 +106,8 @@ def main():
     #################################### Population ######################################
 
     population = Population()
-    pop_config = PopulationConfig()
 
-
-    for gen in range(pop_config.NB_GENERATIONS):
+    for gen in range(population.config.NB_GENERATIONS):
 
         print(f"Starting Generation {gen}")
 

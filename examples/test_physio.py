@@ -92,7 +92,6 @@ def test_one_synapse():
             print("*** time: ", time, " != ", EDSynapse.event_manager.get_time())
 
 
-
         if time % 5 == 0:
             print(f"{time}: Neuron 0 spikes ")
             neurons[0].emit_spike(time)

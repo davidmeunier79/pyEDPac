@@ -8,6 +8,9 @@ import numpy as np
 from typing import List
 from ..ed_network.ed_network import EDNetwork
 
+from ..topology.node import Node
+from ..topology.link import Link
+
 from ..genetic_algorithm.chromosome import Chromosome
 from ..config.network_config import NetworkConfig, AssemblyNature, ProjectionNature
 from ..config.physiology_config import NeuronConfig, SynapseConfig
@@ -26,7 +29,8 @@ class EvoNetwork(EDNetwork):
     def __init__(self, 
                  chromosome: Chromosome,
                  config: NetworkConfig = None,
-                 neuron_config: NeuronConfig = None):
+                 neuron_config: NeuronConfig = None,
+                 synapse_config: SynapseConfig = None):
         """
         Créer un réseau à partir d'un chromosome
         
@@ -36,7 +40,11 @@ class EvoNetwork(EDNetwork):
             neuron_config: Configuration neurones
         """
         super().__init__(config, neuron_config)
-        
+
+        Node._node_count = 0
+        Link._link_count = 0
+
+        self.synapse_config = synapse_config or SynapseConfig
         self.chromosome = chromosome
 
         # Construire le réseau
@@ -145,7 +153,7 @@ class EvoNetwork(EDNetwork):
                     post_assembly,
                     connection_ratio=1.0,  # Utiliser weight pour ratio
                     nature=nature,
-                    synapse_config=SynapseConfig()
+                    synapse_config=self.synapse_config
                 )
 
                 if projection is not None:
@@ -207,7 +215,7 @@ class EvoNetwork(EDNetwork):
                     post_assembly,
                     connection_ratio=1.0,  # Utiliser weight pour ratio
                     nature=nature,
-                    synapse_config=SynapseConfig()
+                    synapse_config=self.synapse_config
                 )
 
                 if projection is not None:
