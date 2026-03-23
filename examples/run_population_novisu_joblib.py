@@ -144,9 +144,8 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    #population = Population()
-
-    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
+    population = Population()
+    #population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
     for gen in range(population.config.NB_GENERATIONS):
 
