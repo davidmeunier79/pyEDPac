@@ -35,7 +35,7 @@ class Direction(IntEnum):
 
 
 class Pacman(Individual):
-    def __init__(self, indiv : Individual , x=0, y=0, zoo=None, config : PacmanConfig = None):
+    def __init__(self , x=0, y=0, zoo=None, config : PacmanConfig = None):
 
         self.config = config or PacmanConfig()
         self.x = x
