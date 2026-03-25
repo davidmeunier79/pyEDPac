@@ -4,6 +4,12 @@ import gc
 import sys
 sys.path.insert(0, '../src')
 
+# Force Qt to use the 'offscreen' platform (no window needed)
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
+# Disable DBus warnings on clusters
+os.environ["QT_NO_GLIB"] = "1"
+
 from joblib import Parallel, delayed
 
 from edpac.zoo.zoo import Zoo, Pacman
@@ -144,8 +150,8 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    population = Population()
-    #population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
+    #population = Population()
+    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
     for gen in range(population.config.NB_GENERATIONS):
 
