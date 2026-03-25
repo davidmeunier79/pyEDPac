@@ -44,13 +44,13 @@ class NetworkTracer(Tracer):
 
         fig = plt.figure()
 
-        plt.imshow(spike_array.T, aspect='auto', cmap='binary', origin='lower')
+        fig.imshow(spike_array.T, aspect='auto', cmap='binary', origin='lower')
 
-        plt.xlabel("Time Steps")
-        plt.ylabel("Neuron Index")
-        plt.title("Network Spiking Activity")
+        fig.xlabel("Time Steps")
+        fig.ylabel("Neuron Index")
+        fig.title("Network Spiking Activity")
 #
-        plt.tight_layout()
+        fig.tight_layout()
 #     plt.savefig(filename, dpi=300)
 #     plt.close() # Closes the figure to free up memory
 #
