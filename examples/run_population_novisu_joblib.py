@@ -138,7 +138,8 @@ def main():
             try:
                 os.makedirs(path_indiv)
             except OSError as e:
-                print(f"Error {e}")
+                pass
+                #print(f"Error {e}")
 
             indiv_paths.append(path_indiv)
 
@@ -146,8 +147,8 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    #population = Population()
-    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
+    population = Population()
+    #population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
 
     for gen in range(population.config.NB_GENERATIONS):
 
