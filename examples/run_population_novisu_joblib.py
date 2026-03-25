@@ -95,10 +95,6 @@ def evaluate_individual(indiv, path_indiv):
 
         zoo.pacman.life_points = zoo.pacman.life_points -1
 
-    # 3. Explicitly delete heavy local references
-    del net
-    del pac
-
 
     print("After Loop")
 
@@ -115,6 +111,10 @@ def evaluate_individual(indiv, path_indiv):
 
     pac.save_stats(path_indiv)
 
+    # 3. Explicitly delete heavy local references
+    del net
+    del indiv
+    del pac
 
     EDSynapse.event_manager.reset()
 
