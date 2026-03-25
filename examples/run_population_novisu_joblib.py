@@ -113,6 +113,9 @@ def evaluate_individual(indiv, path_indiv):
     # saving chromosome
     indiv.save_genes(path_indiv)
 
+    pac.save_stats(path_indiv)
+
+
     EDSynapse.event_manager.reset()
 
     del EDSynapse.event_manager
