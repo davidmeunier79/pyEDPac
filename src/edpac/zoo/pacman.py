@@ -35,7 +35,7 @@ class Direction(IntEnum):
 
 
 class Pacman(Individual):
-    def __init__(self, x=0, y=0, zoo=None, config : PacmanConfig = None):
+    def __init__(self, indiv : Individual , x=0, y=0, zoo=None, config : PacmanConfig = None):
 
         self.config = config or PacmanConfig()
         self.x = x
@@ -53,6 +53,8 @@ class Pacman(Individual):
                       "nb_move_forward": 0, "nb_body_turns": 0,
                       "nb_head_forward": 0, "nb_head_turns": 0
                       }
+
+        super().__init__(indiv)
 
     def set_position(self, x, y):
         self.x = x
@@ -282,14 +284,12 @@ class Pacman(Individual):
 
     def save_stats(self,indiv_path=0):
         import json
-
-        self.stats["fitness"] = self.get_fitness()
-        self.stats["nb_genes"] = self.get_nb_genes()
+        import os
 
         if indiv_path==0:
             indiv_path = os.path.abspath("")
 
-        file_stats = os.path.joint(indiv_path, "Stats_pacman.json")
+        file_stats = os.path.join(indiv_path, "Stats_pacman.json")
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
