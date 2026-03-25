@@ -119,7 +119,7 @@ class Individual(Chromosome):
         if indiv_path==0:
             indiv_path = os.path.abspath("")
 
-        file_stats = os.path.joint(indiv_path, "Stats_indiv.json")
+        file_stats = os.path.join(indiv_path, "Stats_indiv.json")
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
