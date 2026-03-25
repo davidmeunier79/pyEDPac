@@ -43,7 +43,6 @@ class NetworkTracer(Tracer):
             spike_array[time, spike_ids] = 1
 
         fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
 
         plt.imshow(spike_array.T, aspect='auto', cmap='binary', origin='lower')
 
@@ -51,15 +50,16 @@ class NetworkTracer(Tracer):
         plt.ylabel("Neuron Index")
         plt.title("Network Spiking Activity")
 #
-#     plt.tight_layout()
+        plt.tight_layout()
 #     plt.savefig(filename, dpi=300)
 #     plt.close() # Closes the figure to free up memory
 #
         file_path = os.path.join(target_dir, "Network_spikes.eps")
-        print(file_path)
 
-        fig.savefig(file_path)
+        fig.savefig(file_path, dpi=300)
         assert os.path.exists(file_path), \
             "Error with plotting {}".format(plot_signals_file)
+
+        fig.close()
 
 
