@@ -283,8 +283,8 @@ class Pacman(Individual):
     def save_stats(self,indiv_path=0):
         import json
 
-        self.stats["fitness"] = get_fitness()
-        self.stats["nb_genes"] = get_nb_genes()
+        self.stats["fitness"] = self.get_fitness()
+        self.stats["nb_genes"] = self.get_nb_genes()
 
         if indiv_path==0:
             indiv_path = os.path.abspath("")
