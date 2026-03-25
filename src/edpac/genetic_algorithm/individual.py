@@ -108,7 +108,7 @@ class Individual(Chromosome):
         fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"
         return f"Individual(id={self.id}, {fitness_str}, age={self.age})"
     
-    def save_stats(self, indiv_path)
+    def save_stats(self, indiv_path);
 
         self.stats["fitness"] = self.get_fitness()
         self.stats["nb_genes"] = self.get_nb_genes()
