@@ -81,8 +81,7 @@ class Pacman(Individual):
 
     def predator_contact(self):
         self.life_points -= self.config.NB_LIFE_POINTS_PER_PREDATOR
-
-        self.stats["nb_eaten_preys"] += 1
+        self.stats["nb_contact_predators"] += 1
 
     def eat_pacgum(self):
         self.life_points += self.config.NB_LIFE_POINTS_PER_PACGUM
