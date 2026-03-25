@@ -37,7 +37,7 @@ def evaluate_individual(indiv, path_indiv):
 
 
     #################################### Pacamn ######################################
-    pac = Pacman(indiv)
+    pac = Pacman()
     zoo.set_pacman(pac)
     zoo.load_screen(screen_file="screen.0")
 
