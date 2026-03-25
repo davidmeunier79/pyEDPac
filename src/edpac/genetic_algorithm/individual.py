@@ -110,6 +110,9 @@ class Individual(Chromosome):
     
     def save_stats(self, indiv_path):
 
+        import os
+        import json
+
         self.stats["fitness"] = self.get_fitness()
         self.stats["nb_genes"] = len(self.genes)
 
