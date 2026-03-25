@@ -113,14 +113,11 @@ def evaluate_individual(indiv, path_indiv):
 
     # 3. Explicitly delete heavy local references
     del net
-    del indiv
     del pac
 
     EDSynapse.event_manager.reset()
 
     del EDSynapse.event_manager
-
-    print(indiv)
 
     return score
 
