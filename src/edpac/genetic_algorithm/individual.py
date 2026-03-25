@@ -111,7 +111,7 @@ class Individual(Chromosome):
     def save_stats(self, indiv_path):
 
         self.stats["fitness"] = self.get_fitness()
-        self.stats["nb_genes"] = self.get_nb_genes()
+        self.stats["nb_genes"] = super().get_nb_genes()
 
         if indiv_path==0:
             indiv_path = os.path.abspath("")
