@@ -49,7 +49,7 @@ class Pacman(Individual):
         self.dir_body = Direction.RIGHT  # Default Right
         self.dir_head = Direction.RIGHT  # Default Right
 
-        self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0, "nb_contact_predators": 0
+        self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0, "nb_contact_predators": 0,
                       "nb_move_forward": 0, "nb_body_turns": 0,
                       "nb_head_forward": 0, "nb_head_turns": 0
                       }
