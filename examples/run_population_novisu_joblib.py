@@ -89,14 +89,9 @@ def evaluate_individual(indiv, path_indiv):
 
         output_patterns = net.get_output_patterns()
         #print(output_patterns)
-
-
         zoo.pacman.integrate_motor_outputs(output_patterns)
 
         zoo.pacman.life_points = zoo.pacman.life_points -1
-
-
-    print("After Loop")
 
     # saving spike traces
     network_tracer.plot(target_dir = path_indiv)
