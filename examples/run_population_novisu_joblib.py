@@ -109,7 +109,11 @@ def evaluate_individual(indiv, path_indiv):
     # saving chromosome
     indiv.save_genes(path_indiv)
 
+    indiv.save_stats(path_indiv)
+
     pac.save_stats(path_indiv)
+
+    #net.save_stats(path_indiv)
 
     # 3. Explicitly delete heavy local references
     del net
