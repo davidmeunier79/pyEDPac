@@ -44,13 +44,13 @@ class NetworkTracer(Tracer):
 
         fig = plt.figure()
 
-        fig.imshow(spike_array.T, aspect='auto', cmap='binary', origin='lower')
+        plt.imshow(spike_array.T, aspect='auto', cmap='binary', origin='lower')
 
-        fig.xlabel("Time Steps")
-        fig.ylabel("Neuron Index")
-        fig.title("Network Spiking Activity")
+        plt.xlabel("Time Steps")
+        plt.ylabel("Neuron Index")
+        plt.title("Network Spiking Activity")
 #
-        fig.tight_layout()
+        plt.tight_layout()
 #     plt.savefig(filename, dpi=300)
 #     plt.close() # Closes the figure to free up memory
 #
@@ -60,6 +60,6 @@ class NetworkTracer(Tracer):
         assert os.path.exists(file_path), \
             "Error with plotting {}".format(plot_signals_file)
 
-        fig.close()
+        plt.close()
 
 
