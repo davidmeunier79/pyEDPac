@@ -91,21 +91,18 @@ def evaluate_individual(indiv, path_indiv):
         #print(output_patterns)
         zoo.pacman.integrate_motor_outputs(output_patterns)
 
-        zoo.pacman.life_points = zoo.pacman.life_points -1
+        zoo.pacman.life_points += -1
 
     # saving spike traces
     network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
-
     indiv.set_fitness(score)
 
     # saving chromosome
     indiv.save_genes(path_indiv)
-
     indiv.save_stats(path_indiv)
-
     pac.save_stats(path_indiv)
 
     #net.save_stats(path_indiv)
