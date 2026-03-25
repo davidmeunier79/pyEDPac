@@ -54,7 +54,6 @@ class Pacman(Individual):
                       "nb_head_forward": 0, "nb_head_turns": 0
                       }
 
-        super().__init__(indiv)
 
     def set_position(self, x, y):
         self.x = x
