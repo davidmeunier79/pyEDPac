@@ -1,10 +1,10 @@
 import os
 import numpy as np
 
-from matplotlib
+import matplotlib
 matplotlib.use('Agg') # Must be called before importing pyplot
-from matplotlib import pyplot as plt
 
+from matplotlib import pyplot as plt
 
 from .tracer import Tracer
 
