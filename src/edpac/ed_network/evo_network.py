@@ -60,8 +60,6 @@ class EvoNetwork(EDNetwork):
 
         self._reorganise_synapses()
 
-
-
     def _create_projections_from_chromosome(self):
         """Créer les projections en décodant le chromosome"""
         
@@ -76,7 +74,6 @@ class EvoNetwork(EDNetwork):
 
             nb_in_assemblies = self.config.NB_INPUT_ASSEMBLIES
             nb_out_assemblies = self.config.NB_OUTPUT_ASSEMBLIES
-
 
             for gene_id, gene in enumerate(self.chromosome.get_genes()):
 
@@ -263,6 +260,14 @@ class EvoNetwork(EDNetwork):
         """
         with INHIBITORY synapses first in the list
         """
+        for assembly in self.input_assemblies:
+            for neuron in assembly.get_neurons():
+                neuron._reorganise_synapses()
+
+        for assembly in self.output_assemblies:
+            for neuron in assembly.get_neurons():
+                neuron._reorganise_synapses()
+
         for assembly in self.hidden_assemblies:
             for neuron in assembly.get_neurons():
                 neuron._reorganise_synapses()
