@@ -217,8 +217,6 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
     # saving evo_network
     net.stats["empty_events"] = empty_events
 
-    print (net.stats)
-
     net.save_stats(path_indiv)
 
     network_tracer.plot(target_dir = path_indiv)
