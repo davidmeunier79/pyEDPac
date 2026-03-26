@@ -111,10 +111,6 @@ class Network:
         #     distance = pre_assembly.get_distance_to(post_assembly)
         #     topological_delay = max(0, int(distance * 5))  # 5ms par unité
 
-        if synapse_config.NO_AUTO_CONNEXIONS:
-            if pre_assembly==post_assembly:
-                return None
-
         # Sélectionner les connexions
         nb_pre = pre_assembly.get_nb_neurons()
         nb_post = post_assembly.get_nb_neurons()
@@ -129,8 +125,14 @@ class Network:
                 continue
 
 
-            pre_neuron = pre_assembly.get_neuron(pre_idx)
-            post_neuron = post_assembly.get_neuron(post_idx)
+            pre_neuron_id = pre_assembly.get_neuron(pre_idx)
+            post_neuron_id = post_assembly.get_neuron(post_idx)
+
+
+            if synapse_config.NO_AUTO_CONNEXIONS:
+                if pre_neuron_id==post_neuron_id:
+                    #print("Auto Synapse, skipping")
+                    continue
 
             # Ajuster le poids selon le type
             if nature == ProjectionNature.INHIBITORY:
@@ -138,7 +140,7 @@ class Network:
                 synapse_config.WEIGHT = -synapse_config.WEIGHT
                 synapse_config.DELAY = synapse_config.INHIBITORY_DELAY
 
-            synapse = EDSynapse(pre_neuron, post_neuron, synapse_config)
+            synapse = EDSynapse(pre_neuron_id, post_neuron_id, synapse_config)
             #
             # # Ajouter délai topologique
             # if topological_delay > 0:
@@ -178,6 +180,18 @@ class Network:
         for assembly_list in [self.input_assemblies, self.hidden_assemblies, self.output_assemblies]:
             for assembly in assembly_list:
                 assembly.reset()
+
+
+    def get_neuron_from_id(self, neuron_id):
+
+        all_assemblies = self.input_assemblies + self.hidden_assemblies + self.output_assemblies
+        print(len(all_assemblies))
+
+        for assembly in all_assemblies:
+            for neuron in assembly.neurons:
+
+                if neuron.id == neuron_id:
+                    return neuron
 
     def get_nb_neurons(self) -> int:
         """Retourner le nombre total de neurones"""

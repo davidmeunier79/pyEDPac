@@ -43,6 +43,9 @@ def stop_everything():
 
 def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
 
+    global empty_events
+    empty_events= False
+
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
         return 0
@@ -93,6 +96,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
 
     # 3. Simulation Loop (simplified)
     def update():
+
+        global empty_events
 
         global SIMULATION_ACTIVE
 
@@ -154,8 +159,9 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
 
 
             if EDSynapse.event_manager.get_nb_events() == 0:
-                print("No more events in event manager, breaking")
+                print("****** No more events in event manager, breaking ***** ")
                 zoo.pacman.life_points = -100
+                empty_events = True
                 break
 
         output_patterns = net.get_output_patterns()
@@ -166,8 +172,10 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
         zoo.pacman.life_points = zoo.pacman.life_points -1
 
         if zoo.pacman.life_points < 0:
+
             print("Individual is dead, breaking")
             loop.quit()  # This breaks the loop.exec_() below
+
         # Get simulated inputs (e.g., [Wall, Empty, Food, Wall, Animal])
         #mock_inputs = [1, 0, 2, 1, 3]
 
@@ -192,32 +200,39 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
     timer.timeout.disconnect(update)
 
-    # 3. Explicitly delete heavy local references
-    del net
-    del pac
 
     del timer
     del loop
 
-    print("After Loop")
-
     network_tracer.plot(target_dir = path_indiv)
 
-    print("After plot")
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
-
-    print("Fitness score: ", score)
-
     indiv.set_fitness(score)
 
+    # saving chromosome
     indiv.save_genes(path_indiv)
+    indiv.save_stats(path_indiv)
+    pac.save_stats(path_indiv)
+
+    # saving evo_network
+    net.stats["empty_events"] = empty_events
+
+    print (net.stats)
+
+    net.save_stats(path_indiv)
+
+    # 3. Explicitly delete heavy local references
+    del net
+    del pac
 
     EDSynapse.event_manager.reset()
 
     del EDSynapse.event_manager
 
-    print(indiv)
+    return score
+
+
 
 def main():
 

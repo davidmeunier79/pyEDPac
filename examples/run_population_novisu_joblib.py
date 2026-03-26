@@ -29,6 +29,7 @@ from edpac.tracer.network_tracer import NetworkTracer
 
 def evaluate_individual(indiv, path_indiv):
 
+    empty_events= False
 
     #################################### Zoo ######################################
     # 1. Initialize Data
@@ -85,6 +86,9 @@ def evaluate_individual(indiv, path_indiv):
             if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
                 zoo.pacman.life_points = -100
+
+                empty_events= True
+
                 break
 
         output_patterns = net.get_output_patterns()
@@ -93,7 +97,7 @@ def evaluate_individual(indiv, path_indiv):
 
         zoo.pacman.life_points += -1
 
-    # saving spike traces
+
     network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
@@ -105,7 +109,12 @@ def evaluate_individual(indiv, path_indiv):
     indiv.save_stats(path_indiv)
     pac.save_stats(path_indiv)
 
-    #net.save_stats(path_indiv)
+    # saving evo_network
+    net.stats["empty_events"] = empty_events
+
+    print (net.stats)
+
+    net.save_stats(path_indiv)
 
     # 3. Explicitly delete heavy local references
     del net
@@ -116,6 +125,7 @@ def evaluate_individual(indiv, path_indiv):
     del EDSynapse.event_manager
 
     return score
+
 
 def run_parallel_evolution(population, indiv_paths):
     # n_jobs=-1 uses all available cores

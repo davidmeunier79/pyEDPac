@@ -22,6 +22,8 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME
 
+from edpac.tracer.network_tracer import NetworkTracer
+
 from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 
 
@@ -41,6 +43,9 @@ def stop_everything():
     app.quit()
 
 def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
+
+    global empty_events
+    empty_events= False
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -103,6 +108,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
             loop.quit()
             return
 
+        global empty_events
+
         zoo.live_one_step()  # Update the model()
 
         # Update both windows
@@ -131,6 +138,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
+            time_before = EDSynapse.event_manager.get_time()
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
             if spike_neuron_ids is not None:
@@ -152,6 +160,7 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
             if EDSynapse.event_manager.get_nb_events() == 0:
                 print("No more events in event manager, breaking")
                 zoo.pacman.life_points = -100
+                empty_events = True
                 break
 
         output_patterns = net.get_output_patterns()
@@ -187,21 +196,36 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
     timer.timeout.disconnect(update)
 
-    # 3. Explicitly delete heavy local references
-    del net
-    del pac
-
     del timer
     del loop
 
     print("After Loop")
 
+
     network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
-
     indiv.set_fitness(score)
+    indiv.save_genes(path_indiv)
+
+    # saving chromosome
+    indiv.save_genes(path_indiv)
+    indiv.save_stats(path_indiv)
+    pac.save_stats(path_indiv)
+
+    # saving evo_network
+    net.stats["empty_events"] = empty_events
+
+    print (net.stats)
+
+    net.save_stats(path_indiv)
+
+    network_tracer.plot(target_dir = path_indiv)
+
+    # 3. Explicitly delete heavy local references
+    del net
+    del pac
 
     EDSynapse.event_manager.reset()
 
@@ -246,7 +270,10 @@ def main():
     # Create objects
     #################################### Population ######################################
 
-    population = Population()
+    #population = Population()
+
+    population = Population(selection_config = SelectionConfigTest(), config = PopulationConfigTest())
+
 
     for gen in range(population.config.NB_GENERATIONS):
 
@@ -258,7 +285,16 @@ def main():
                 print("Simualtion is over, breaking")
                 break
 
-            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
+            path_indiv = os.path.abspath(f"Gen_{gen}/Ind_{i}/")
+
+            try:
+                os.makedirs(path_indiv)
+
+            except OSError as e:
+                print(f"Error {e}")
+
+
+            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz, path_indiv)
 
             print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'

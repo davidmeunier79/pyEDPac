@@ -47,10 +47,6 @@ class EDNetwork(Network):
         self.event_manager = EventManager()
         EDSynapse.set_event_manager(self.event_manager)
 
-        # Statistiques
-        self.total_spikes = 0
-        self.total_simulation_time = 0
-
     def reset(self):
         """Réinitialiser le réseau"""
 
