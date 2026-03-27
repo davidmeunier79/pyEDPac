@@ -85,6 +85,7 @@ class Network:
     def create_projection(self,
                          pre_assembly: Assembly,
                          post_assembly: Assembly,
+                         event_manager,
                          connection_ratio: float = 1.0,
                          nature: ProjectionNature = ProjectionNature.EXCITATORY,
                          synapse_config: SynapseConfig = None) -> List[EDSynapse]:
@@ -140,7 +141,7 @@ class Network:
                 synapse_config.WEIGHT = -synapse_config.WEIGHT
                 synapse_config.DELAY = synapse_config.INHIBITORY_DELAY
 
-            synapse = EDSynapse(pre_neuron_id, post_neuron_id, synapse_config)
+            synapse = EDSynapse(pre_neuron_id, post_neuron_id, event_manager, synapse_config)
             #
             # # Ajouter délai topologique
             # if topological_delay > 0:

@@ -25,8 +25,8 @@ class Population:
     """Population d'individus"""
     
     def __init__(self,
-                 chromosome_config = None,
                  config: PopulationConfig = None,
+                 chromosome_config = None,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
                  mutation_config: MutationConfig = None):

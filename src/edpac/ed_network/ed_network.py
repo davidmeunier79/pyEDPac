@@ -41,17 +41,13 @@ class EDNetwork(Network):
         """
         super().__init__(config, neuron_config)
 
-        self._build_assemblies()
-
-        # ✅ Créer et définir le EventManager pour toutes les synapses
         self.event_manager = EventManager()
-        EDSynapse.set_event_manager(self.event_manager)
+
+        self._build_assemblies()
 
     def reset(self):
         """Réinitialiser le réseau"""
-
         super().reset()
-
         self.event_manager.reset()
 
     def initialize_inputs(self, time = 0):
@@ -83,7 +79,7 @@ class EDNetwork(Network):
         assert len(sensory_patterns) == len(self.input_assemblies), \
             f"Error {len(sensory_patterns)} != {len(self.input_assemblies)}"
 
-        time = EDSynapse.event_manager.get_time()
+        time = self.event_manager.get_time()
 
 
         spike_neuron_ids = []
@@ -151,44 +147,32 @@ class EDNetwork(Network):
     #             #self.event_manager.inject_input(neuron, time, weight=activation)
 
 
-    def simulate(self, duration: int) -> Dict:
+    def compute_one_wave(self, data):
+        """"
+        Run one step in event_manager
         """
-        Simuler le réseau
+        spike_neuron_ids = self.integrate_inputs(data)
+        print(spike_neuron_ids)
 
-        Args:
-            duration: Durée de la simulation (ms)
 
-        Returns:
-            Statistiques de simulation
-        """
-        self.event_manager.reset()
+        current_time = self.event_manager.get_time()
 
-        # Réinitialiser le réseau
-        for assembly_list in [self.input_assemblies, self.hidden_assemblies, self.output_assemblies]:
-            for assembly in assembly_list:
-                assembly.reset()
+        self.init_output_patterns()
 
-        # Exécuter la simulation
-        event_count = self.event_manager.run_until(duration)
+        while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
-        # Collecter les statistiques
-        stats = {
-            'duration': duration,
-            'total_events': event_count,
-            'spike_counts': {},
-            'assembly_activities': {}
-        }
+            time_before = self.event_manager.get_time()
+            spike_neuron_ids = self.event_manager.run_one_step()
 
-        # Compter les spikes par assemblée
-        for assembly_list in [self.input_assemblies, self.hidden_assemblies, self.output_assemblies]:
-            for assembly in assembly_list:
-                spike_count = sum(1 for n in assembly.neurons if n.last_time_of_firing > -1)
-                stats['spike_counts'][assembly.id] = spike_count
-                stats['assembly_activities'][assembly.id] = assembly.get_activity()
+            if self.event_manager.get_nb_events() == 0:
+                print("No more events in event manager, breaking")
+                #zoo.pacman.life_points = -100
+                output_patterns = 0
+                return output_patterns
 
-        self.total_simulation_time += duration
+        output_patterns = self.network.get_output_patterns()
 
-        return stats
+        return output_patterns
 
     def init_output_patterns(self):
 

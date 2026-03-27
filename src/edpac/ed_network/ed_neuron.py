@@ -22,9 +22,17 @@ class EDNeuron(SpikingNeuron):
         Args:
             config: Configuration neuronale
         """
+        self.event_manager = 0
         self.config = config or NeuronConfig()
         super().__init__(config)
     
+    def set_event_manager(self, event_manager):
+        #
+        # if self.event_manager:
+        #     print("Warning, event_manager already set")
+
+        self.event_manager = event_manager
+
     def emit_spike(self, spike_time: int):
         """
         Émettre un spike et le programmer dans l'EventManager
@@ -39,11 +47,9 @@ class EDNeuron(SpikingNeuron):
         for synapse in self.incoming_links:
             synapse.update_last_time_of_post_spike(spike_time)
 
-        #nb_events = EDSynapse.event_manager.get_nb_events()
-
         # Pour chaque synapse sortante, programmer le PSP arrivant
         for synapse in self.outgoing_links:
-            EDSynapse.event_manager.schedule_psp(synapse, spike_time)
+            self.event_manager.schedule_psp(synapse, spike_time)
 
             # Mise à jour STDP pour synapses pré-synaptiques
             synapse.update_last_time_of_pre_spike(spike_time)

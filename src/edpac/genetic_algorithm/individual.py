@@ -43,9 +43,7 @@ class Individual(Chromosome):
         
         # Statistiques
         self.age = 0
-        self.birth_generation = 0
-
-        self.stats = {}
+        self.stats = {"fitness": -float('inf'),  "nb_genes": -1}
 
         
 
@@ -108,6 +106,11 @@ class Individual(Chromosome):
         fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"
         return f"Individual(id={self.id}, {fitness_str}, age={self.age})"
     
+    @staticmethod
+    def reset_count():
+        """Réinitialiser le compteur"""
+        Individual._individual_count = 0
+
     def save_stats(self, indiv_path):
 
         import os
@@ -123,9 +126,3 @@ class Individual(Chromosome):
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
-
-
-    @staticmethod
-    def reset_count():
-        """Réinitialiser le compteur"""
-        Individual._individual_count = 0

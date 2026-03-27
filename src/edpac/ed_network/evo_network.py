@@ -163,6 +163,7 @@ class EvoNetwork(EDNetwork):
                 projection = self.create_projection(
                     pre_assembly,
                     post_assembly,
+                    event_manager = self.event_manager,
                     connection_ratio=1.0,  # Utiliser weight pour ratio
                     nature=nature,
                     synapse_config=self.synapse_config
@@ -261,10 +262,6 @@ class EvoNetwork(EDNetwork):
         with INHIBITORY synapses first in the list
         """
         for assembly in self.input_assemblies:
-            for neuron in assembly.get_neurons():
-                neuron._reorganise_synapses()
-
-        for assembly in self.output_assemblies:
             for neuron in assembly.get_neurons():
                 neuron._reorganise_synapses()
 

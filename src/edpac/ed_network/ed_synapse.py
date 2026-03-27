@@ -18,32 +18,8 @@ class EDSynapse(DynamicSynapse):
     """
     
     # ✅ Class-level attribute - partagé par toutes les instances
-    event_manager = None
-    
-    @classmethod
-    def set_event_manager(cls, manager):
-        """
-        Définir le gestionnaire d'événements pour toutes les synapses
-        
-        Args:
-            manager: EventManager instance
-        """
-        cls.event_manager = manager
-    
-    @classmethod
-    def get_event_manager(cls):
-        """Récupérer le gestionnaire d'événements"""
-        if cls.event_manager is None:
-            raise RuntimeError("EDSynapse.event_manager not set. Call EDSynapse.set_event_manager() first.")
-        return cls.event_manager
-    
-    @classmethod
-    def reset_event_manager(cls):
-        """Réinitialiser le gestionnaire (utility)"""
-        if cls.event_manager is not None:
-            cls.event_manager.reset()
-    
-    def __init__(self, pre_neuron, post_neuron, config: SynapseConfig = None):
+
+    def __init__(self, pre_neuron, post_neuron, event_manager, config: SynapseConfig = None):
         """
         Créer une synapse évolutionnaire
         
@@ -52,7 +28,11 @@ class EDSynapse(DynamicSynapse):
             post_neuron: Neurone post-synaptique
             config: Configuration synaptique
         """
-        pass
+        self.event_manager=event_manager
+
+        pre_neuron.set_event_manager(event_manager)
+        post_neuron.set_event_manager(event_manager)
+
         super().__init__(pre_neuron, post_neuron, config)
         
         # Pas besoin de stocker event_manager au niveau instance!
