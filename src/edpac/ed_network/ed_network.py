@@ -194,7 +194,7 @@ class EDNetwork(Network):
 
         current_time = self.event_manager.get_time()
 
-        print("current_time: ", current_time)
+        #print("current_time: ", current_time)
 
         self.init_output_patterns()
 
@@ -202,9 +202,10 @@ class EDNetwork(Network):
 
             time_before = self.event_manager.get_time()
             spike_neuron_ids = self.event_manager.run_one_step()
+
             nb_events = self.event_manager.get_nb_events()
 
-            print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+            #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
 
             if nb_events == 0:
                 print("No more events in event manager, breaking")

@@ -55,7 +55,7 @@ class ZooVisualizer(PixelVisualizer):
 
             elif char != ".":
                 print(char)
-                char = int(char)
+                char = int(char) % 2
 
             assert char in self.zoo.animals.keys(), f"Error with {char} ands {self.zoo.animals.keys()}"
 

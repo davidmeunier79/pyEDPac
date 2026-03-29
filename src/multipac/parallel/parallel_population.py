@@ -77,7 +77,7 @@ class ParallelPopulation(PacmanPopulation):
             elif visio_input == 1:
                 print("Empty visio inputs")
 
-            print(f"{visio_input=}")
+            #print(f"{visio_input=}")
             pipe.send({'type': 'TASK', 'data': visio_input})
 
 

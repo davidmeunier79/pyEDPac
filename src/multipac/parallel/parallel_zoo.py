@@ -26,15 +26,9 @@ class ParallelZoo(Zoo):
         self.population = ParallelPopulation(pop_config = self.config )
         super().__init__()
 
-    def generate_zoo_positions(self):
-        #
-        # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
-        # random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
-        #
-        # print(random_pos_x, random_pos_y)
+        self.stats = {"nb_predators": 0, "nb_preys" : 0}
 
-        for i in range(len(self.population.individuals)):
-
+    def init_random_position(self, index):
             added = False
 
             while not added:
@@ -47,12 +41,30 @@ class ParallelZoo(Zoo):
 
                 if char == '.':
 
-                    print(f"Setting position for pacman {i}: {pos_x, pos_y}")
-                    self.grid[pos_x, pos_y] = int(i)
-                    char = int(i) // 2
-                    self.population.individuals[i].set_animal_nature(self.animals[char]["danger"])
-                    self.population.individuals[i].set_position(pos_x, pos_y)
+                    print(f"Setting position for pacman {index}: {pos_x, pos_y}")
+                    self.grid[pos_x, pos_y] = index
+                    animal = index % 2
+                    animal_nature = self.animals[animal]["danger"]
+
+                    if animal_nature == "1":
+                        self.stats["nb_preys"] += 1
+                    elif animal_nature == "-1":
+                        self.stats["nb_predators"] += 1
+
+                    self.population.individuals[index].set_animal_nature(animal_nature)
+                    self.population.individuals[index].set_position(pos_x, pos_y)
                     added = True
+
+    def generate_zoo_positions(self):
+        #
+        # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
+        # random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
+        #
+        # print(random_pos_x, random_pos_y)
+
+        for i in range(len(self.population.individuals)):
+
+            self.init_random_position(i)
 
         print(self.grid)
 
@@ -157,5 +169,68 @@ class ParallelZoo(Zoo):
 #         self.population.shutdown()
 #
 #
+
+    def test_prey_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        new_index = self.check_available_individual_slot()
+
+        if new_index == -1: # no available slot
+            return
+
+        if self.animals[new_index % 2]["danger"] == "-1": # predator for new index, break
+            return
+
+        print(f"Prey {new_index=} available, building")
+        self._compute_online_reproduction(new_index, contact_index, pacman_index)
+        #self.stats["nb_preys"] += 1
+
+        self.init_random_position(new_index)
+
+    def test_predator_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        new_index = self.check_available_individual_slot()
+
+        if new_index == -1: # no available slot
+            return
+
+        if self.animals[new_index % 2]["danger"] == "1": # prey for new index, break
+            return
+
+        print(f"Predator {new_index=} available, building")
+        self._compute_online_reproduction(new_index, contact_index, pacman_index)
+        #self.stats["nb_predators"] += 1
+
+        self.init_random_position(new_index)
+
+    def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
+
+        if self.population.individuals[contact_index] == 0:
+            return
+
+        parent1 = self.population.individuals[contact_index]
+
+        if self.population.individuals[pacman_index] == 0:
+            return
+
+        parent2 = self.population.individuals[pacman_index]
+
+        # compute mix chromosome between two parents
+        offspring = self.population.crossover(parent1, parent2)
+
+        # Muter
+        self.population.mutate(offspring)
+        print(offspring.nb_genes.shape)
+
+        self.population.individuals[new_index] = offspring
+
+
+    def check_available_individual_slot(self):
+
+        for i, pac in enumerate(self.population.individuals):
+            if pac == 0:
+                return i
+        return -1
+
+
 
 

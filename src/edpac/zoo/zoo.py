@@ -217,9 +217,6 @@ class Zoo:
                 else:
                     char = int(target_char)
                     print(f"**** Pacman {pacman_index } in contact with {char}")
-                    0/0
-
-
                     if self.animals[char]["danger"] == "1" and pac.animal_nature == "-1":
                         if self.individuals[char].life_points < 0:
                             print("Eating prey ", animals[char]["name"], ", Life points: " , pac.life_points)
@@ -337,11 +334,23 @@ class Zoo:
                     if char_contact in (".", " ", 'X') :
                         continue
                     else:
-                        char_contact = int(char_contact)
+                        contact_index = int(char_contact)
 
-                    if self.animals[char_contact]["danger"] == "-1" and pac.animal_nature == "1":
+                    animal = contact_index % 2
+                    if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
                         pac.predator_contact()
-                        print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , pac.life_points)
+                        print("Contact with predator ", self.animals[animal]["name"], " Life points: " , pac.life_points)
+
+                    elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                        self.test_predator_reproduction(contact_index, pacman_index)
+
+                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+
+                    elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                        self.test_prey_reproduction(contact_index, pacman_index)
+
+                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+
             #
             # else:
             #     print("Outside")
