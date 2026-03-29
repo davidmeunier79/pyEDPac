@@ -299,3 +299,138 @@ This is where it gets interesting. When a child is born, you don't need to resta
 5. Data Tracking for Evolution
 
 Because there is no "Generation 1, Generation 2," you should log the "Mean Genome Complexity" or "Average Lifespan" over time. This will allow you to see if the Preys are actually evolving better evasion networks or if the Predators are getting more efficient.
+
+##############################################################################################################################################
+
+To implement a high-performance multi-agent system where the **Zoo** is the master and **EvoNetworks** are distributed workers, we use `multiprocessing.Pipe`. Pipes provide a fast, duplex (two-way) communication channel that is more efficient than a shared Queue for 1-to-1 synchronization.
+
+In this architecture, the Zoo stays in the main process (handling the grid, collisions, and GA), while each brain lives in its own dedicated process.
+
+
+
+### 1. The Worker Process (The Brain)
+Each worker waits for sensory data, runs the neural inference, and sends back motor commands. It only receives a new chromosome at the start of a generation.
+
+```python
+import multiprocessing as mp
+import numpy as np
+from edpac.network.evo_network import EvoNetwork
+
+def brain_worker(pipe, agent_id):
+    """
+    Independent process for one agent's brain.
+    """
+    network = None
+
+    while True:
+        # Wait for a message from the Zoo
+        msg = pipe.recv()
+
+        cmd = msg.get('type')
+
+        if cmd == 'SET_CHROMOSOME':
+            # Initialize/Update the network with a new genome
+            network = EvoNetwork(msg['data'])
+            pipe.send({'type': 'READY'})
+
+        elif cmd == 'SENSE':
+            # Perform neural computation
+            vision_input = msg['data']
+            motor_output = network.compute(vision_input)
+            # Send motor command back to Zoo
+            pipe.send({'type': 'MOTOR', 'data': motor_output})
+
+        elif cmd == 'TERMINATE':
+            break
+```
+
+---
+
+### 2. The Master Process (The Zoo)
+The Zoo maintains a list of `Process` objects and a list of `Connection` objects (the "parent" end of the pipes).
+
+
+
+```python
+class CentralizedZoo:
+    def __init__(self, population_size=64):
+        self.size = population_size
+        self.pipes = []
+        self.workers = []
+        self.agents = [] # Physical representations in the Zoo
+
+    def setup_workers(self):
+        for i in range(self.size):
+            parent_conn, child_conn = mp.Pipe()
+            p = mp.Process(target=brain_worker, args=(child_conn, i))
+            p.start()
+            self.pipes.append(parent_conn)
+            self.workers.append(p)
+
+    def run_generation(self, genomes):
+        # 1. Send chromosomes to all workers
+        for i, pipe in enumerate(self.pipes):
+            pipe.send({'type': 'SET_CHROMOSOME', 'data': genomes[i]})
+
+        # Wait for all to be ready
+        for pipe in self.pipes:
+            pipe.recv()
+
+        # 2. Main Simulation Loop
+        for tick in range(1000):
+            # A. Distribute Vision (Master -> Workers)
+            for i, pipe in enumerate(self.pipes):
+                vision = self.get_agent_vision(i) # From Zoo grid
+                pipe.send({'type': 'SENSE', 'data': vision})
+
+            # B. Collect Motor Commands (Workers -> Master)
+            # This is the synchronization point
+            for i, pipe in enumerate(self.pipes):
+                response = pipe.recv()
+                motor = response['data']
+                self.apply_action(i, motor)
+
+            # C. Update World Physics & Collisions
+            self.resolve_physics()
+
+            if self.all_dead():
+                break
+
+        # 3. Collect Fitness & Run GA
+        scores = [a.fitness for a in self.agents]
+        new_genomes = self.genetic_algorithm(genomes, scores)
+        return new_genomes
+
+    def cleanup(self):
+        for pipe in self.pipes:
+            pipe.send({'type': 'TERMINATE'})
+        for w in self.workers:
+            w.join()
+```
+
+---
+
+### 3. Critical Considerations for Cluster Performance
+
+#### A. The Synchronization Bottleneck
+In this model, the Zoo must wait for the **slowest** brain to finish its `compute()` before the physics tick can resolve. If one `EvoNetwork` has 1,000 neurons and another has 10, the 1,000-neuron one will dictate the frame rate.
+* **Fix:** Ensure your genomes have a complexity penalty or a hard cap on neuron count.
+
+#### B. Data Serialization (Pickling)
+Every time you `pipe.send()`, Python "pickles" the object.
+* **Optimization:** Do not send complex Python objects. Send **NumPy arrays** or **integers**. Sending a large vision grid as a raw list of strings will be 10x slower than sending it as a `np.uint8` array.
+
+#### C. Mating and Mid-Generation Spawning
+Since you want reproduction to happen on contact:
+1.  When Agent A and B touch, the **Zoo** performs the crossover.
+2.  The Zoo selects an idle pipe (from a "Dead" agent) or spawns a new process.
+3.  The Zoo sends the new `SET_CHROMOSOME` command to that pipe **mid-simulation**.
+4.  The new brain is now active in the next tick.
+
+### 4. Integration with your Priority Queue
+If you use the **Option B (Event-Driven)** logic from our previous discussion:
+The Master process handles the **Priority Queue**. Instead of sending "Vision," the Zoo sends "PSPs" to the workers. The workers run until they produce a "Spike" and send that back to the Master to be inserted into the Global Queue.
+
+This is more complex but allows for **Sub-Tick Parallelism**, where neural spikes happen asynchronously across your 64 cores.
+
+**Would you like me to refine the `brain_worker` to handle the asynchronous "Spike" messaging instead of the simple "Sense/Act" loop?**

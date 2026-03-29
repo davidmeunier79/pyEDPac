@@ -146,34 +146,6 @@ class EDNetwork(Network):
     #
     #             #self.event_manager.inject_input(neuron, time, weight=activation)
 
-
-    def compute_one_wave(self, data):
-        """"
-        Run one step in event_manager
-        """
-        spike_neuron_ids = self.integrate_inputs(data)
-        print(spike_neuron_ids)
-
-
-        current_time = self.event_manager.get_time()
-
-        self.init_output_patterns()
-
-        while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
-
-            time_before = self.event_manager.get_time()
-            spike_neuron_ids = self.event_manager.run_one_step()
-
-            if self.event_manager.get_nb_events() == 0:
-                print("No more events in event manager, breaking")
-                #zoo.pacman.life_points = -100
-                output_patterns = 0
-                return output_patterns
-
-        output_patterns = self.network.get_output_patterns()
-
-        return output_patterns
-
     def init_output_patterns(self):
 
         if not self.output_assemblies:
@@ -207,7 +179,37 @@ class EDNetwork(Network):
 
             output_activities.append(np.sum(np.array(spike_count))/len(assembly.neurons))
 
-        if not output_activities:
-            return np.zeros(len(self.output_assemblies))
+        return output_activities
 
-        return np.array(output_activities)
+
+    def compute_one_wave(self, data):
+        """"
+        Run one step in event_manager
+        """
+        spike_neuron_ids = self.integrate_inputs(data)
+        #print(spike_neuron_ids)
+
+
+        current_time = self.event_manager.get_time()
+
+        print("current_time: ", current_time)
+
+        self.init_output_patterns()
+
+        while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
+
+            time_before = self.event_manager.get_time()
+            spike_neuron_ids = self.event_manager.run_one_step()
+
+            nb_events = self.event_manager.get_nb_events()
+
+            if nb_events == 0:
+                print("No more events in event manager, breaking")
+                #zoo.pacman.life_points = -100
+                return []
+            else:
+                pass
+                #print(nb_events)
+
+
+        return self.get_output_patterns()

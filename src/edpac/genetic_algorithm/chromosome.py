@@ -26,7 +26,7 @@ class Chromosome:
             config: Configuration du chromosome
             genes: Tableau de gènes (si None, généré aléatoirement)
         """
-        self.config = config or ChromosomeConfig()
+        self.chromo_config = config or ChromosomeConfig()
         
         if genes is not None:
             self.genes = np.array(genes, dtype=np.float32)
@@ -36,22 +36,22 @@ class Chromosome:
             self.genes = self._initialize_random_genes()
         
         # Valider la taille
-        if not self.config.VARIABLE_LENGTH_CHROMOSOME:
-            assert len(self.genes) == self.config.NB_GENES_EACH_CHROMOSOME, \
-                f"Chromosome size mismatch: {len(self.genes)} != {self.config.NB_GENES_EACH_CHROMOSOME}"
+        if not self.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
+            assert len(self.genes) == self.chromo_config.NB_GENES_EACH_CHROMOSOME, \
+                f"Chromosome size mismatch: {len(self.genes)} != {self.chromo_config.NB_GENES_EACH_CHROMOSOME}"
     
     def _initialize_random_genes(self) -> np.ndarray:
         """Générer des gènes aléatoires"""
 
 
 
-        if self.config.VARIABLE_LENGTH_CHROMOSOME:
+        if self.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
 
             nb_genes = np.random.uniform(size = 1)
-            nb_genes  = int(nb_genes[0]*self.config.NB_GENES_EACH_CHROMOSOME*2)
+            nb_genes  = int(nb_genes[0]*self.chromo_config.NB_GENES_EACH_CHROMOSOME*2)
             genes = np.random.rand(nb_genes)
         else:
-            genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
+            genes = np.random.rand(self.chromo_config.NB_GENES_EACH_CHROMOSOME)
         return genes
 
     def get_genes(self) -> np.ndarray:
@@ -61,8 +61,8 @@ class Chromosome:
     def set_genes(self, genes: np.ndarray):
         """Définir les gènes"""
 
-        if not self.config.VARIABLE_LENGTH_CHROMOSOME:
-            assert len(genes) == self.config.NB_GENES_EACH_CHROMOSOME
+        if not self.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
+            assert len(genes) == self.chromo_config.NB_GENES_EACH_CHROMOSOME
 
         self.genes = genes
     
@@ -81,7 +81,7 @@ class Chromosome:
         Returns:
             (pre_assembly, post_assembly, weight)
         """
-        start_idx = projection_idx * self.config.NB_GENES_EACH_PROJECTION
+        start_idx = projection_idx * self.chromo_config.NB_GENES_EACH_PROJECTION
         
         # Décoder les gènes
         genes_slice = self.genes[start_idx:start_idx + 3]
@@ -105,7 +105,7 @@ class Chromosome:
 
     def clone(self) -> 'Chromosome':
         """Cloner le chromosome"""
-        return Chromosome(self.config, self.genes.copy())
+        return Chromosome(self.chromo_config, self.genes.copy())
     
     def __repr__(self):
         return f"Chromosome(genes_len={len(self.genes)}, avg={self.genes.mean():.3f})"

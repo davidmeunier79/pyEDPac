@@ -63,7 +63,7 @@ class EvoNetwork(EDNetwork):
     def _create_projections_from_chromosome(self):
         """Créer les projections en décodant le chromosome"""
         
-        if self.chromosome.config.VARIABLE_LENGTH_CHROMOSOME:
+        if self.chromosome.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
 
             # Pour chaque projection codée
             projection_complete = False
@@ -103,7 +103,7 @@ class EvoNetwork(EDNetwork):
                 # print("proj_nature ", proj_nature )
                 # print("post_id ", post_id)
 
-                if len(self.projections) % self.chromosome.config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
+                if len(self.projections) % self.chromosome.chromo_config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
 
                     if (nb_in_assemblies+1) < self.config.NB_IN_ASSEMBLIES :
                         nb_in_assemblies=nb_in_assemblies+1

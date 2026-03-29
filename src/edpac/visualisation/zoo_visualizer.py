@@ -43,15 +43,21 @@ class ZooVisualizer(PixelVisualizer):
         """
         self.refresh_from_background()
 
-        self._draw_pacman()
+        #self._draw_pacman()
         self.update_display()
 
         # Draw Animals
         for code in np.unique(self.zoo.grid):
             char = code.decode("utf-8")
 
-            if char == "0" or char == 'X' or char == " ":
+            if char == 'X' or char == " ":
                 continue
+
+            elif char != ".":
+                print(char)
+                char = int(char)
+
+            assert char in self.zoo.animals.keys(), f"Error with {char} ands {self.zoo.animals.keys()}"
 
             val = self.zoo.animals[char]
             if val["danger"] == "-1":
@@ -70,30 +76,30 @@ class ZooVisualizer(PixelVisualizer):
                                  val["shape"],
                                  color )
         self.update_display()
-
-    def _draw_pacman(self):
-        pacman = self.zoo.pacman
-        x,y = self.zoo._get_pacman_pos()
-
-        bx = x * self.cell_size
-        by = y * self.cell_size
-
-        # A. Draw Body Sprite
-        body_shape = self.zoo.pacman_shapes[pacman.dir_body]
-        self.set_pattern(bx, by ,body_shape,  (255, 255, 0)) # Yellow
-
-        # B. Draw Head Bar (Blue Line)
-        # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
-        blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
-
-        if pacman.dir_head == Direction.UP: # Up: Top edge
-            blue_bar[-2:, 2:19] = 1
-        elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
-            blue_bar[:2, 2:19] = 1
-        elif pacman.dir_head == Direction.LEFT: # Left: Left edge
-            blue_bar[2:19, :2] = 1
-        elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
-            blue_bar[2:19, -2:] = 1
-        self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
-
-        self.update_display()
+    #
+    # def _draw_pacman(self):
+    #     pacman = self.zoo.pacman
+    #     x,y = self.zoo._get_pacman_pos()
+    #
+    #     bx = x * self.cell_size
+    #     by = y * self.cell_size
+    #
+    #     # A. Draw Body Sprite
+    #     body_shape = self.zoo.pacman_shapes[pacman.dir_body]
+    #     self.set_pattern(bx, by ,body_shape,  (255, 255, 0)) # Yellow
+    #
+    #     # B. Draw Head Bar (Blue Line)
+    #     # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
+    #     blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
+    #
+    #     if pacman.dir_head == Direction.UP: # Up: Top edge
+    #         blue_bar[-2:, 2:19] = 1
+    #     elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
+    #         blue_bar[:2, 2:19] = 1
+    #     elif pacman.dir_head == Direction.LEFT: # Left: Left edge
+    #         blue_bar[2:19, :2] = 1
+    #     elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
+    #         blue_bar[2:19, -2:] = 1
+    #     self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
+    #
+    #     self.update_display()
