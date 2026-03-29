@@ -72,7 +72,7 @@ class ParallelZoo(Zoo):
 
 
         self.load_menagerie(menagerie_file= "menagerie.txt")
-        self.load_screen(screen_file= "miniscreen.empty")
+        self.load_screen(screen_file= "screen.empty")
 
         self.generate_zoo_positions()
 
@@ -107,10 +107,6 @@ class ParallelZoo(Zoo):
                 input_percepts.append(input_percept)
 
         return input_percepts
-
-    def init_new_individual(self,pacman_index):
-
-        self.population.init_new_individual(pacman_index)
 
     def print_pacman_positions(self):
 
@@ -219,9 +215,9 @@ class ParallelZoo(Zoo):
 
         # Muter
         self.population.mutate(offspring)
-        print(offspring.nb_genes.shape)
+        print(f"{offspring.get_nb_genes()=}")
 
-        self.population.individuals[new_index] = offspring
+        self.population.init_new_individual(new_index, offspring.get_genes())
 
 
     def check_available_individual_slot(self):

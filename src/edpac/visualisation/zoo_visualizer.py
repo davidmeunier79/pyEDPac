@@ -53,13 +53,23 @@ class ZooVisualizer(PixelVisualizer):
             if char == 'X' or char == " ":
                 continue
 
-            elif char != ".":
-                print(char)
-                char = int(char) % 2
+            elif char == ".":
 
-            assert char in self.zoo.animals.keys(), f"Error with {char} ands {self.zoo.animals.keys()}"
+                color = (80, 80, 80)    # Dim gray for dots
+                val = self.zoo.animals["."]
+                pos_x, pos_y = np.where(self.zoo.grid == code)
+                for x, y in zip(pos_x, pos_y):
+                    self.set_pattern(x * self.cell_size, y * self.cell_size, val["shape"], color )
 
-            val = self.zoo.animals[char]
+                continue
+
+            print(char)
+            pacman_index = int(char)
+            animal = pacman_index % 2
+
+            assert animal in self.zoo.animals.keys(), f"Error with {animal} ands {self.zoo.animals.keys()}"
+
+            val = self.zoo.animals[animal]
             if val["danger"] == "-1":
                 color = (255, 0, 0) # Red for predators
 
@@ -69,37 +79,43 @@ class ZooVisualizer(PixelVisualizer):
             else:
                 color = (80, 80, 80)    # Dim gray for dots
 
-            pos_x, pos_y = np.where(self.zoo.grid == code)
-            for (x, y) in zip(pos_x, pos_y):
-                self.set_pattern(x * self.cell_size,
-                                 y * self.cell_size,
-                                 val["shape"],
-                                 color )
+            self._draw_pacman(pacman_index, color)
+
         self.update_display()
-    #
-    # def _draw_pacman(self):
-    #     pacman = self.zoo.pacman
-    #     x,y = self.zoo._get_pacman_pos()
-    #
-    #     bx = x * self.cell_size
-    #     by = y * self.cell_size
-    #
-    #     # A. Draw Body Sprite
-    #     body_shape = self.zoo.pacman_shapes[pacman.dir_body]
-    #     self.set_pattern(bx, by ,body_shape,  (255, 255, 0)) # Yellow
-    #
-    #     # B. Draw Head Bar (Blue Line)
-    #     # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
-    #     blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
-    #
-    #     if pacman.dir_head == Direction.UP: # Up: Top edge
-    #         blue_bar[-2:, 2:19] = 1
-    #     elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
-    #         blue_bar[:2, 2:19] = 1
-    #     elif pacman.dir_head == Direction.LEFT: # Left: Left edge
-    #         blue_bar[2:19, :2] = 1
-    #     elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
-    #         blue_bar[2:19, -2:] = 1
-    #     self.set_pattern(bx, by ,blue_bar, (50, 50, 255)) # blue
-    #
-    #     self.update_display()
+#
+#     def _turn(self, body_shape, dir_body):
+#         # shapes are normallly looking RIGHT
+#         if dir_body ==
+    def _draw_pacman(self, pacman_index, color):
+
+        if not self.zoo.population.individuals[pacman_index]:
+            return
+        pacman = self.zoo.population.individuals[pacman_index]
+        x,y = pacman.get_position()
+
+        bx = x * self.cell_size
+        by = y * self.cell_size
+
+        # A. Draw Body Sprite
+        animal = pacman_index % 2
+
+        body_shape = self.zoo.animals[animal]["shape"]
+        #body_shape = self._turn(body_shape, pacman.dir_body)
+        self.set_pattern(bx, by ,body_shape,  color)
+
+        # B. Draw Head Bar (Blue Line)
+        # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
+        blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
+
+        if pacman.dir_head == Direction.UP: # Up: Top edge
+            blue_bar[-2:, 2:19] = 1
+        elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
+            blue_bar[:2, 2:19] = 1
+        elif pacman.dir_head == Direction.LEFT: # Left: Left edge
+            blue_bar[2:19, :2] = 1
+        elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
+            blue_bar[2:19, -2:] = 1
+        self.set_pattern(bx, by ,blue_bar, color)
+        #self.update_display()
+
+

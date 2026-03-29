@@ -56,10 +56,10 @@ class PacmanPopulation(Population):
             for _ in range(self.size)
         ]
 
-    def init_new_individual(self, pacman_index):
+    def init_new_individual(self, pacman_index, genes):
 
-        print(f"Saving old individual {pacman_index}")
-        print(self.individuals[pacman_index].save_stats())
+        #print(f"Saving old individual {pacman_index}")
+        #print(self.individuals[pacman_index].save_stats())
 
 
         print(f"Init new individual {pacman_index}")

@@ -54,6 +54,11 @@ class Chromosome:
             genes = np.random.rand(self.chromo_config.NB_GENES_EACH_CHROMOSOME)
         return genes
 
+
+    def get_nb_genes(self) -> np.int64:
+        """Retourner le nombre de gènes"""
+        return self.genes.shape[0]
+
     def get_genes(self) -> np.ndarray:
         """Retourner les gènes"""
         return self.genes.copy()
