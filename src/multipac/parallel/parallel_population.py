@@ -71,9 +71,13 @@ class ParallelPopulation(PacmanPopulation):
         assert len(visio_inputs) == len(self.pipes), f"Error with visio_inputs {visio_inputs}"
 
         for pipe, visio_input in zip(self.pipes, visio_inputs):
-            print(visio_input)
+            #print(visio_input)
             if visio_input == -1:
+                print("Dead visio inputs")
+            elif visio_input == 1:
                 print("Empty visio inputs")
+
+            print(f"{visio_input=}")
             pipe.send({'type': 'TASK', 'data': visio_input})
 
 

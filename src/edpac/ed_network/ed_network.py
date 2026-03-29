@@ -182,11 +182,13 @@ class EDNetwork(Network):
         return output_activities
 
 
-    def compute_one_wave(self, data):
+    def compute_one_wave(self, data = 0):
         """"
         Run one step in event_manager
         """
-        spike_neuron_ids = self.integrate_inputs(data)
+        if data:
+            spike_neuron_ids = self.integrate_inputs(data)
+
         #print(spike_neuron_ids)
 
 
@@ -200,8 +202,9 @@ class EDNetwork(Network):
 
             time_before = self.event_manager.get_time()
             spike_neuron_ids = self.event_manager.run_one_step()
-
             nb_events = self.event_manager.get_nb_events()
+
+            print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
 
             if nb_events == 0:
                 print("No more events in event manager, breaking")

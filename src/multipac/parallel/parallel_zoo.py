@@ -27,33 +27,40 @@ class ParallelZoo(Zoo):
         super().__init__()
 
     def generate_zoo_positions(self):
+        #
+        # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
+        # random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
+        #
+        # print(random_pos_x, random_pos_y)
 
-        random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
-        random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
+        for i in range(len(self.population.individuals)):
 
-        print(random_pos_x, random_pos_y)
+            added = False
 
-        for i,pos in enumerate(zip(random_pos_x, random_pos_y)):
+            while not added:
 
-            print(pos)
-            char = self.grid[pos].decode("utf-8")
+                pos_x = random.randrange(1, self.rows-1)
+                pos_y = random.randrange(1, self.cols-1)
 
-            if char != 'X':
+                print(f"{pos_x=}, {pos_y=}")
+                char = self.grid[pos_x, pos_y].decode("utf-8")
 
-                print(f"Setting position for pacman {i}: {pos}")
-                self.grid[pos] = int(i % 2) + 1
-                self.population.individuals[i].set_animal_nature(self.animals[char]["danger"])
-                self.population.individuals[i].set_position(pos[0], pos[1])
+                if char == '.':
 
-            else:
-                print(f"Could not generate pacman {i}: {pos}")
+                    print(f"Setting position for pacman {i}: {pos_x, pos_y}")
+                    self.grid[pos_x, pos_y] = int(i)
+                    char = int(i) // 2
+                    self.population.individuals[i].set_animal_nature(self.animals[char]["danger"])
+                    self.population.individuals[i].set_position(pos_x, pos_y)
+                    added = True
+
         print(self.grid)
 
     def init_empty_zoo(self):
 
 
         self.load_menagerie(menagerie_file= "menagerie.txt")
-        self.load_screen(screen_file= "screen.empty")
+        self.load_screen(screen_file= "miniscreen.empty")
 
         self.generate_zoo_positions()
 
@@ -73,9 +80,19 @@ class ParallelZoo(Zoo):
 
             print(f"Position pacman {i}: ", pacman.get_position())
 
-            input_pecept = self.integrate_visio_outputs(pac= pacman)
-            print(input_pecept)
-            input_percepts.append(input_pecept)
+            input_percept = self.integrate_visio_outputs(pac= pacman)
+
+            #print([percept is None for percept in input_percept])
+            print("test all is None ", all([percept is None for percept in input_percept]))
+
+            if all([percept is None for percept in input_percept]):
+
+                print(f"Pacman {i}: sending empty inputs")
+
+                input_percepts.append(1)
+            else:
+                #print(input_pecept)
+                input_percepts.append(input_percept)
 
         return input_percepts
 

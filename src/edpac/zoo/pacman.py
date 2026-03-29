@@ -121,13 +121,17 @@ class Pacman(Individual):
         return left if turn_type == -1 else right
 
     def predator_contact(self):
-        self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR
-        self.stats["nb_contact_predators"] += 1
+        if self.animal_nature == 1:
+            self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
+            self.stats["nb_contact_predators"] += 1
+
+        else:
+            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")
 
     def eat_pacgum(self):
-        if animal_nature == 1:
+        if self.animal_nature == 1:
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
-        elif animal_nature == -1:
+        elif self.animal_nature == -1:
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
 
         self.stats["nb_eaten_pacgums"] += 1

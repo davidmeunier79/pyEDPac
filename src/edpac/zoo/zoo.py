@@ -231,7 +231,7 @@ class Zoo:
                             self.individuals[char].bite()
                             #pac.bite()
 
-                    elif self.animals[char]["danger"] == "-1":
+                    elif self.animals[char]["danger"] == "-1" and pac.animal_nature == "1":
                         print("Predator ", self.animals[char]["name"], "cannot be eaten !!!! ")
                         return
 
@@ -272,6 +272,7 @@ class Zoo:
             rel_col = i - (NB_VISIO_INPUTS - 1) // 2
 
             found_shape = None
+            #np.zeros(shape = (VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS), dtype = 'int64')
 
             # 3. Scan depth (j) in the current column
             # Start depth at abs(rel_col) to create a "V" shaped fan
@@ -290,7 +291,7 @@ class Zoo:
                     else:
                         char = int(char)
 
-                    print(self.animals.keys())
+                    #print(self.animals.keys())
 
                     # 4. Check for Objects (Walls or Animals)
                     assert char in self.animals.keys(), f"Error with {char}, not in {self.animals.keys()}"
@@ -338,9 +339,8 @@ class Zoo:
                     else:
                         char_contact = int(char_contact)
 
-                    if self.animals[char_contact]["danger"] == "-1":
+                    if self.animals[char_contact]["danger"] == "-1" and pac.animal_nature == "1":
                         pac.predator_contact()
-
                         print("Contact with predator ", self.animals[char_contact]["name"], " Life points: " , pac.life_points)
             #
             # else:

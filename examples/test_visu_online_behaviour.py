@@ -104,7 +104,7 @@ def main():
             loop.quit()
             return
 
-        global MAX_TIM
+        global MAX_TIME
 
         print(MAX_TIME)
 
@@ -114,7 +114,7 @@ def main():
         zoo_viz.draw_zoo()
 
         input_percepts = zoo.compute_zoo_interaction()
-        print(f"{input_percepts=}")
+        #print(f"{input_percepts=}")
 
         move_pos = zoo.population.run_one_step(input_percepts)
         print(f"{move_pos=}")
@@ -133,7 +133,7 @@ def main():
         MAX_TIME -= 1
 
         if MAX_TIME < 0 or SIMULATION_ACTIVE==False:
-            print("In shutting_down")
+            print(f"In shutting_down at {MAX_TIME=}")
             loop.quit()
 
             zoo.population.shutdown()
