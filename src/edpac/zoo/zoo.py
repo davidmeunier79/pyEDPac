@@ -8,7 +8,7 @@ import pathlib
 
 from edpac.config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS
 
-
+from .chars import char_to_index, index_to_char
 from .pacman import Pacman, Direction
 
 class Zoo:
@@ -26,10 +26,13 @@ class Zoo:
 
         self.data_dir = self._get_data_dir()
 
-        # Mapping for clarity
-        self.WALL = 'X'
-        self.EMPTY = ' '
-        self.DOT = '.'
+        self.nb_deads = 0
+
+        #
+        # # Mapping for clarity
+        # self.WALL = 'X'
+        # self.EMPTY = ' '
+        # self.DOT = '.'
 
 
     def _get_data_dir(self):
@@ -194,11 +197,13 @@ class Zoo:
 
         #print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
 
-        rows, cols = self.grid.shape
+        #rows, cols = self.grid.shape
 
         # Check for walls in the Zoo grid before moving
-        if 0 <= new_x < cols and 0 <= new_y < rows:
 
+        if 0 <= new_y < self.rows and 0 <= new_x < self.cols:
+
+        #if 0 <= new_x < cols and 0 <= new_y < rows: # old version
 
             target_char = self.grid[new_y][new_x].decode("utf-8")
 
@@ -207,29 +212,33 @@ class Zoo:
                 # Update grid data: old position becomes a dot
                 # if this a pacgum, increase life
                 if target_char == ".":
-                    pac.eat_pacgum()
                     print("Eating pacgum, Life points: " , pac.life_points)
+                    pac.eat_pacgum()
 
                 elif target_char == " ":
                     pass
                     #print("Moving forward in empty space")
 
                 else:
-                    char = int(target_char)
-                    print(f"**** Pacman {pacman_index } in contact with {char}")
-                    if self.animals[char]["danger"] == "1" and pac.animal_nature == "-1":
-                        if self.individuals[char].life_points < 0:
-                            print("Eating prey ", animals[char]["name"], ", Life points: " , pac.life_points)
+                    index = char_to_index(target_char)
+                    animal = index % 2
+
+                    print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
+
+                    if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+
+                        print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                        self.population.individuals[index].is_bitten()
+
+                        if self.population.individuals[index].life_points < 0:
+                            print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
                             pac.eat_prey()
-                            self.individuals[char].deal_death()
+                            self.population.individuals[index].process_death()
 
-                        else:
-                            print("Eating prey ", animals[char]["name"], ", Life points: " , pac.life_points)
-                            self.individuals[char].bite()
-                            #pac.bite()
 
-                    elif self.animals[char]["danger"] == "-1" and pac.animal_nature == "1":
-                        print("Predator ", self.animals[char]["name"], "cannot be eaten !!!! ")
+
+                    elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                        print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
                         return
 
                 self.grid[pac.y][pac.x] = b' '
@@ -243,9 +252,10 @@ class Zoo:
         Scans the zoo grid in a fan shape based on dir_head.
         Returns a list of 5 shapes (lists of pixel coordinates).
         """
-        rows, cols = self.grid.shape
-            ## scanning laterally from higher to lower if dir_head = UP or LEFT ds > 0
-            ## scanning laterally from lower to higher if dir_head = DOWN or RIGHT ds < 0
+        #rows, cols = self.grid.shape
+
+        ## scanning laterally from higher to lower if dir_head = UP or LEFT ds > 0
+        ## scanning laterally from lower to higher if dir_head = DOWN or RIGHT ds < 0
 
         ### scanning depth from lower to higher if dir_head = UP or RIGHT: df > 0
         ### scanning depth from higher to lower if dir_head = DOWN or LEFT df < 0
@@ -278,7 +288,7 @@ class Zoo:
                 nx = pac.x + (j * df[0]) + (rel_col * ds[0])
                 ny = pac.y + (j * df[1]) + (rel_col * ds[1])
 
-                if (0<=ny and ny < rows) and (0<=nx and nx < cols):
+                if (0<=ny and ny < self.rows) and (0<=nx and nx < self.cols):
 
                     char = self.grid[ny][nx].decode("utf-8")
 
@@ -286,14 +296,15 @@ class Zoo:
                         continue
 
                     else:
-                        char = int(char)
+                        index = char_to_index(char)
 
+                    animal = index % 2
                     #print(self.animals.keys())
 
                     # 4. Check for Objects (Walls or Animals)
-                    assert char in self.animals.keys(), f"Error with {char}, not in {self.animals.keys()}"
+                    assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
 
-                    found_shape = self.blur_pattern(self.animals[char]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
+                    found_shape = self.blur_pattern(self.animals[animal]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
 
                     break
 
@@ -320,7 +331,7 @@ class Zoo:
 
         for pacman_index, pac in enumerate(self.population.individuals):
             print(pac)
-            if not pac:
+            if pac==0:
                 continue
 
             x, y = pac.get_position()
@@ -329,34 +340,36 @@ class Zoo:
 
             for dir_x, dir_y in directions:
                 if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
+
                     char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
 
                     if char_contact in (".", " ", 'X') :
                         continue
+
                     else:
-                        contact_index = int(char_contact)
+                        contact_index = char_to_index(char_contact)
 
                     animal = contact_index % 2
+
                     if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
                         pac.predator_contact()
                         print("Contact with predator ", self.animals[animal]["name"], " Life points: " , pac.life_points)
 
                     elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                         self.test_predator_reproduction(contact_index, pacman_index)
 
-                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
 
                     elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
                         self.test_prey_reproduction(contact_index, pacman_index)
 
-                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-
-            #
-            # else:
-            #     print("Outside")
             if pac.life_points < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
+
+        print(f"******************** {self.nb_deads=} ***********************")
+
 
 
     def process_death(self, pacman_index):
@@ -368,10 +381,15 @@ class Zoo:
 
         # remove from zoo
         x, y = self.population.individuals[pacman_index].get_position()
-        self.grid[x, y] = " "
+        self.grid[y, x] = " "
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
         #print(self.population.individuals)
+
+        self.nb_deads += 1
+
+        print(f"******************** {self.nb_deads=} ***********************")
+
 
 
 

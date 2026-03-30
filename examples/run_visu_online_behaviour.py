@@ -68,7 +68,7 @@ def main():
     zoo.init_empty_zoo()
 
     ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(title = "EDPac zoo")
+    zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo", scale = 2)
     # Connect the "X" button of the window to our stop function
     # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
     # if 'destroyed' signal doesn't fire immediately.
@@ -76,8 +76,7 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-    zoo_viz.init_zoo(zoo)
-    zoo_viz.draw_static_grid(zoo.grid)
+    zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
 
@@ -112,6 +111,8 @@ def main():
 
         # Update both windows
         zoo_viz.draw_zoo()
+        zoo_viz.update_display()
+        QtWidgets.QApplication.processEvents()
 
         input_percepts = zoo.compute_zoo_interaction()
         #print(f"{input_percepts=}")
@@ -123,7 +124,6 @@ def main():
 
         if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
             print("All individuals are dead , Breaking")
-
             SIMULATION_ACTIVE = False
 
         # Update both windows

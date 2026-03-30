@@ -21,8 +21,7 @@ class ParallelPopulation(PacmanPopulation):
         self.num_agents = self.pop_config.POPULATION_SIZE
         self.pipes = []
         self.processes = []
-        # Centralized Genomes (each is a random array of 20 values)
-        #self.chromosomes = [np.random.rand(20) for _ in range(num_agents)]
+
         super().__init__(pop_config)
 
     def deploy(self):
@@ -40,7 +39,7 @@ class ParallelPopulation(PacmanPopulation):
             # Pass the specific chromosome for this ID
             pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[i]})
 
-        print(f"[ParallelPopulation] Waiting Worker {i}")
+            print(f"[ParallelPopulation] Waiting Worker {i}")
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
@@ -55,7 +54,7 @@ class ParallelPopulation(PacmanPopulation):
             # Pass the specific chromosome for this ID
             pipe.send({'type': 'INIT_INPUTS'})
 
-        print(f"[ParallelPopulation] Waiting Worker {i} INIT_INPUTS")
+            print(f"[ParallelPopulation] Waiting Worker {i} INIT_INPUTS")
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
@@ -65,17 +64,18 @@ class ParallelPopulation(PacmanPopulation):
 
 
     def run_one_step(self, visio_inputs):
-        print("\n[ParallelPopulation] Running a test neural computation step...")
+        #print("\n[ParallelPopulation] Running a test neural computation step...")
         #test_input = [np.zeros(shape=(NetworkConfig.VISIO_SQRT_NB_NEURONS, NetworkConfig.VISIO_SQRT_NB_NEURONS)) for i in range(NB_VISIO_INPUTS)]
 
         assert len(visio_inputs) == len(self.pipes), f"Error with visio_inputs {visio_inputs}"
 
         for pipe, visio_input in zip(self.pipes, visio_inputs):
             #print(visio_input)
-            if visio_input == -1:
-                print("Dead visio inputs")
-            elif visio_input == 1:
-                print("Empty visio inputs")
+#
+#             if visio_input == -1:
+#                 print("Dead visio inputs")
+#             elif visio_input == 1:
+#                 print("Empty visio inputs")
 
             #print(f"{visio_input=}")
             pipe.send({'type': 'TASK', 'data': visio_input})
@@ -85,12 +85,13 @@ class ParallelPopulation(PacmanPopulation):
 
         for i, pipe in enumerate(self.pipes):
             res = pipe.recv()
-            print(f"[ParallelPopulation] Agent {i} computed result: {res['data']}")
+            #print(f"[ParallelPopulation] Agent {i} computed result: {res['data']}")
 
             if len(res['data']):
                 pos = self.individuals[i].integrate_motor_outputs(res['data'])
 
                 if pos:
+                    print(f"**** Move forward for agent {i}")
                     move_pos[i] = pos
             else:
                 move_pos[i] = -1

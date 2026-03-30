@@ -49,25 +49,25 @@ def worker_loop(pipe, agent_id):
         elif cmd == 'TASK':
 
             if msg['data'] == -1:
-                print("Receiving Dead visio inputs")
-                print("Sending empty outputs")
+                #print("Receiving Dead visio inputs")
+                #print("Sending empty outputs")
                 pipe.send({'type': 'RESULT', 'data': []})
 
             elif msg['data'] == 1:
 
-                print("Receiving empty inputs")
+                #print("Receiving empty inputs")
                 result = net_process.network.compute_one_wave()
 
-                print("Sending outputs")
+                #print("Sending outputs")
                 pipe.send({'type': 'RESULT', 'data': result})
 
             else:
                 # Simulate a sensory-motor cycle
 
-                print("Receiving visio inputs")
+                #print("Receiving visio inputs")
                 result = net_process.network.compute_one_wave(msg['data'])
 
-                print("Sending outputs")
+                #print("Sending outputs")
                 pipe.send({'type': 'RESULT', 'data': result})
 
         elif cmd == 'TERMINATE':

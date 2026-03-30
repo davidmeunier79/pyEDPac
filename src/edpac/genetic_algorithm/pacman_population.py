@@ -56,6 +56,9 @@ class PacmanPopulation(Population):
             for _ in range(self.size)
         ]
 
+        self.set_chromosome_lengths()
+        print(self.lengths)
+
     def init_new_individual(self, pacman_index, genes):
 
         #print(f"Saving old individual {pacman_index}")

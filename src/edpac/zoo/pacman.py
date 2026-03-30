@@ -121,7 +121,7 @@ class Pacman(Individual):
         return left if turn_type == -1 else right
 
     def predator_contact(self):
-        if self.animal_nature == 1:
+        if self.animal_nature == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
             self.stats["nb_contact_predators"] += 1
 
@@ -129,23 +129,26 @@ class Pacman(Individual):
             print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")
 
     def eat_pacgum(self):
-        if self.animal_nature == 1:
+        if self.animal_nature == "1":
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
-        elif self.animal_nature == -1:
+        elif self.animal_nature == "-1":
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
 
         self.stats["nb_eaten_pacgums"] += 1
 
     def eat_prey(self):
-        self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PREY
-        self.stats["nb_eaten_preys"] += 1
+        if animal_nature == "-1":
+            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PREY
+            self.stats["nb_eaten_preys"] += 1
+        else:
+            print(f"!!!!!! Warning, animal with nature = {animal_nature} eats a prey")
 
-    def bite(self):
-        if animal_nature == 1:
+    def is_bitten(self):
+        if self.animal_nature == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_BITE
             self.stats["nb_bites"] += 1
         else:
-            print("!!!!!! Warning, animal with nature = {animal_nature} is bitten")
+            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is bitten")
 
     def integrate_motor_outputs(self, motor_values):
         """
@@ -171,20 +174,20 @@ class Pacman(Individual):
             # Turn head left
             self.dir_head = self._get_turn(self.dir_head, -1)
             new_dir_head = Direction(self.dir_head).to_string()
-            print(f"Turn head left")
+            #print(f"Turn head left")
             self.stats["nb_head_turns"] += 1
 
         elif h_right and not h_left:
             # Turn head right
             self.dir_head = self._get_turn(self.dir_head, 1)
             new_dir_head = Direction(self.dir_head).to_string()
-            print(f"Turn head right ")
+            #print(f"Turn head right ")
             self.stats["nb_head_turns"] += 1
 
         elif h_left and h_right:
             # Both active: Realign head to body
             self.dir_head = self.dir_body
-            print("Realign head to body")
+            #print("Realign head to body")
             self.stats["nb_head_forward"] += 1
 
         # --- 2. BODY CONTROL ---
@@ -200,7 +203,7 @@ class Pacman(Individual):
 
             self.dir_body = self._get_turn(self.dir_body, -1)
             new_dir_body = Direction(self.dir_body).to_string()
-            print(f"Turn body left ")
+            #print(f"Turn body left ")
 
             self.stats["nb_body_turns"] += 1
 
@@ -209,7 +212,7 @@ class Pacman(Individual):
             self.dir_body = self._get_turn(self.dir_body, 1)
 
             new_dir_body = Direction(self.dir_body).to_string()
-            print(f"Turn body right")
+            #print(f"Turn body right")
 
             self.stats["nb_body_turns"] += 1
 

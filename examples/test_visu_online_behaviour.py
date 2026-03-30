@@ -68,7 +68,7 @@ def main():
     zoo.init_empty_zoo()
 
     ################################### Zoo Visualizer ################################
-    zoo_viz = ZooVisualizer(title = "EDPac zoo")
+    zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo")
     # Connect the "X" button of the window to our stop function
     # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
     # if 'destroyed' signal doesn't fire immediately.
@@ -76,8 +76,8 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-    zoo_viz.init_zoo(zoo)
-    zoo_viz.draw_static_grid(zoo.grid)
+    #zoo_viz.init_zoo(zoo)
+    zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
 

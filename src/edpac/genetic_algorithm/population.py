@@ -52,20 +52,20 @@ class Population:
         self.selection_config = selection_config or SelectionConfig()
         self.crossover_config = crossover_config or CrossoverConfig()
         self.mutation_config = mutation_config or MutationConfig()
-        
-        # Créer population initiale
-        self.individuals: List[Individual] = [
-            Individual(config=chromosome_config) 
-            for _ in range(self.size)
-        ]
+#
+#         # Créer population initiale
+#         self.individuals: List[Individual] = [
+#             Individual(config=chromosome_config)
+#             for _ in range(self.size)
+#         ]
         
         # Statistiques
         self.generation = 0
         self.best_individual = None
         self.fitness_history = []
 
-        self.set_chromosome_lengths()
-        print(self.lengths)
+        #self.set_chromosome_lengths()
+        #print(self.lengths)
     
     def clean_population(self):
 

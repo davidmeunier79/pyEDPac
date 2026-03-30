@@ -46,10 +46,13 @@ class Chromosome:
 
 
         if self.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
-
             nb_genes = np.random.uniform(size = 1)
+            #print(f"{nb_genes=}")
+            #print(f"{self.chromo_config.NB_GENES_EACH_CHROMOSOME=}")
             nb_genes  = int(nb_genes[0]*self.chromo_config.NB_GENES_EACH_CHROMOSOME*2)
+            #print(f"{nb_genes=}")
             genes = np.random.rand(nb_genes)
+            #print(genes.shape)
         else:
             genes = np.random.rand(self.chromo_config.NB_GENES_EACH_CHROMOSOME)
         return genes

@@ -18,6 +18,8 @@ from multipac.parallel.parallel_population import ParallelPopulation
 
 from edpac.zoo.zoo import Zoo
 
+from edpac.zoo.chars import char_to_index, index_to_char
+
 # --- The Centralized Population ---
 class ParallelZoo(Zoo):
     def __init__(self, config : PopulationConfig = None):
@@ -33,17 +35,18 @@ class ParallelZoo(Zoo):
 
             while not added:
 
-                pos_x = random.randrange(1, self.rows-1)
-                pos_y = random.randrange(1, self.cols-1)
+                pos_y = random.randrange(1, self.rows-2)
+                pos_x = random.randrange(1, self.cols-2)
 
-                print(f"{pos_x=}, {pos_y=}")
-                char = self.grid[pos_x, pos_y].decode("utf-8")
+                #print(f"{pos_y=}, {pos_x=}")
+                char = self.grid[pos_y, pos_x].decode("utf-8")
 
-                if char == '.':
+                if char == '.' or char == ' ':
 
-                    print(f"Setting position for pacman {index}: {pos_x, pos_y}")
-                    self.grid[pos_x, pos_y] = index
+                    print(f"Setting position for pacman {index}: {pos_y, pos_x}")
+                    self.grid[pos_y, pos_x] = index_to_char(index)
                     animal = index % 2
+
                     animal_nature = self.animals[animal]["danger"]
 
                     if animal_nature == "1":
@@ -52,7 +55,7 @@ class ParallelZoo(Zoo):
                         self.stats["nb_predators"] += 1
 
                     self.population.individuals[index].set_animal_nature(animal_nature)
-                    self.population.individuals[index].set_position(pos_x, pos_y)
+                    self.population.individuals[index].set_position(y=pos_y,x=pos_x)
                     added = True
 
     def generate_zoo_positions(self):
@@ -84,22 +87,22 @@ class ParallelZoo(Zoo):
 
         input_percepts = []
         for i,pacman in enumerate(self.population.individuals):
-            print (i, pacman)
+            #print (i, pacman)
             if pacman == 0:
-                print(f"Pacman {i} is empty, skipping")
+                #print(f"Pacman {i} is empty, skipping")
                 input_percepts.append(-1)
                 continue
 
-            print(f"Position pacman {i}: ", pacman.get_position())
+            #print(f"Position pacman {i}: ", pacman.get_position())
 
             input_percept = self.integrate_visio_outputs(pac= pacman)
 
             #print([percept is None for percept in input_percept])
-            print("test all is None ", all([percept is None for percept in input_percept]))
+            #print("test all is None ", all([percept is None for percept in input_percept]))
 
             if all([percept is None for percept in input_percept]):
 
-                print(f"Pacman {i}: sending empty inputs")
+                #print(f"Pacman {i}: sending empty inputs")
 
                 input_percepts.append(1)
             else:
@@ -113,100 +116,81 @@ class ParallelZoo(Zoo):
         for i,pacman in enumerate(self.population.individuals):
             print(f" pacman  Position {i}: ", pacman.get_position())
 
+
     def compute_move_pos(self, move_pos):
 
-        count_death = 0
-
         for pacman_index, pos in move_pos.items():
-            #pac = self.population.individuals[pacman_index]
+            pac = self.population.individuals[pacman_index]
 
             if pos == 1:
-                print(f"Individual {pacman_index} moving forward")
+                #print(f"Individual {pacman_index} moving forward")
                 self._move_forward(pacman_index)
             elif pos == -1:
-
-                print(f"Individual {pacman_index} is dead")
-                # dealing with death signal
-                #self.init_new_individual(pacman_index)
-
                 self.process_death(pacman_index)
+#
+    def _find_first_avail(self, avail, target_danger):
 
-                count_death += 1
-#
-#     def run_population(self):
-#
-#         print("In run_population")
-#         self.population.initialize_all_inputs()
-#
-#         MAX_TIME = 10000
-#         break_comp = True
-#
-#         while break_comp and MAX_TIME>0:
-#             print(MAX_TIME)
-#             input_percepts = self.compute_zoo_interaction()
-#             print(f"{input_percepts=}")
-#             #print(self.grid)
-#             move_pos = self.population.run_one_step(input_percepts)
-#             print(f"{move_pos=}")
-#
-#             self.compute_move_pos(move_pos)
-#             print(f"{break_comp=}")
-#             #print(self.grid)
-#
-#             #
-#             # if all(self.population.individuals) == False:
-#             #     print("Breaking")
-#             #
-#             #     break_comp = False
-#             #     break
-#             MAX_TIME -= 1
-#
-#         print("In shutting_down")
-#         self.population.shutdown()
-#
-#
+        all_dangers = [self.animals[new_index % 2]["danger"] for new_index in avail]
+
+        for i, danger in enumerate(all_dangers):
+            if danger == target_danger:
+                return avail[i]
+        return -1
 
     def test_prey_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
-        new_index = self.check_available_individual_slot()
+        avail = self.check_available_individual_slot()
 
-        if new_index == -1: # no available slot
+        if avail == -1: # no available slot
+            print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
-        if self.animals[new_index % 2]["danger"] == "-1": # predator for new index, break
+        new_index = self._find_first_avail(avail, target_danger = "1")
+
+        if new_index == -1:
+            print("No available slots for prey_reproduction danger, breaking")
             return
 
         print(f"Prey {new_index=} available, building")
-        self._compute_online_reproduction(new_index, contact_index, pacman_index)
-        #self.stats["nb_preys"] += 1
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            #self.stats["nb_preys"] += 1
+            self.init_random_position(new_index)
+            self.nb_deads -= 1
 
-        self.init_random_position(new_index)
+        print(f"******************** {self.nb_deads=} ***********************")
+
 
     def test_predator_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
-        new_index = self.check_available_individual_slot()
+        avail = self.check_available_individual_slot()
 
-        if new_index == -1: # no available slot
+        if avail == -1: # no available slot
+            print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
-        if self.animals[new_index % 2]["danger"] == "1": # prey for new index, break
+        new_index = self._find_first_avail(avail, target_danger = "-1")
+
+        if new_index == -1:
+            print("No available slots for predator_reproduction danger, breaking")
             return
 
         print(f"Predator {new_index=} available, building")
-        self._compute_online_reproduction(new_index, contact_index, pacman_index)
-        #self.stats["nb_predators"] += 1
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            #self.stats["nb_predators"] += 1
+            self.init_random_position(new_index)
+            self.nb_deads -= 1
 
-        self.init_random_position(new_index)
+        print(f"******************** {self.nb_deads=} ***********************")
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
         if self.population.individuals[contact_index] == 0:
-            return
+            return False
 
         parent1 = self.population.individuals[contact_index]
 
         if self.population.individuals[pacman_index] == 0:
-            return
+            return False
 
         parent2 = self.population.individuals[pacman_index]
 
@@ -215,17 +199,21 @@ class ParallelZoo(Zoo):
 
         # Muter
         self.population.mutate(offspring)
-        print(f"{offspring.get_nb_genes()=}")
+        #print(f"{offspring.get_nb_genes()=}")
 
         self.population.init_new_individual(new_index, offspring.get_genes())
+
+        return True
 
 
     def check_available_individual_slot(self):
 
-        for i, pac in enumerate(self.population.individuals):
-            if pac == 0:
-                return i
-        return -1
+        avail = [i for i, pac in enumerate(self.population.individuals) if pac==0 ]
+
+        if len(avail):
+            return avail
+        else:
+            return -1
 
 
 
