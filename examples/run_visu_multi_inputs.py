@@ -169,7 +169,7 @@ def main():
     print("In run_population")
 
     global MAX_TIME
-    MAX_TIME = 10
+    MAX_TIME = 100
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)

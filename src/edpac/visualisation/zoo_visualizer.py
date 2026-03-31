@@ -79,10 +79,23 @@ class ZooVisualizer(PixelVisualizer):
             self._draw_pacman(pacman_index, color)
 
         self.update_display()
-#
-#     def _turn(self, body_shape, dir_body):
-#         # shapes are normallly looking RIGHT
-#         if dir_body ==
+
+    def _turn(self, body_shape, dir_body):
+        # shapes are normallly looking RIGHT
+        if dir_body == Direction.RIGHT:
+            pass # nothing to do
+            return body_shape
+        elif dir_body == Direction.UP:
+            return body_shape.T
+        elif dir_body == Direction.LEFT:
+            return np.flip(body_shape,1)
+        elif dir_body == Direction.DOWN:
+            return np.flip(body_shape,1).T
+
+        else:
+            print(f"Error , {dir_body=} not found ")
+            return body_shape
+
     def _draw_pacman(self, pacman_index, color):
 
         assert 0 <= pacman_index and pacman_index < len(self.zoo.population.individuals), \
@@ -102,7 +115,9 @@ class ZooVisualizer(PixelVisualizer):
         animal = pacman_index % 2
 
         body_shape = self.zoo.animals[animal]["shape"]
-        #body_shape = self._turn(body_shape, pacman.dir_body)
+
+        body_shape = self._turn(body_shape, pacman.dir_body)
+
         self.set_pattern(by, bx ,body_shape,  color)
 
         # B. Draw Head Bar (Blue Line)
