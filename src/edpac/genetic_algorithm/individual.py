@@ -43,8 +43,7 @@ class Individual(Chromosome):
         
         # Statistiques
         self.age = 0
-        self.stats = {}
-
+        self.stats = {"fitness": -float('inf'),  "nb_genes": -1}
         
 
     def evaluate(self, eval_func) -> float:

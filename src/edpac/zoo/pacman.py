@@ -36,6 +36,7 @@ class AnimalNature(IntEnum):
     """
     Énumération des Natures Animales
 
+
     Convention:
     - 0 = UP (Haut, y diminue)
     - 1 = DOWN (Bas, y augmente)
@@ -120,7 +121,6 @@ class Pacman(Individual):
         return left if turn_type == -1 else right
 
     def predator_contact(self):
-
         if self.animal_nature == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
             self.stats["nb_contact_predators"] += 1
@@ -131,6 +131,7 @@ class Pacman(Individual):
     def eat_pacgum(self):
         if self.animal_nature == "1":
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
+            
         elif self.animal_nature == "-1":
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
 
@@ -142,7 +143,6 @@ class Pacman(Individual):
             self.stats["nb_eaten_preys"] += 1
         else:
             print(f"!!!!!! Warning, animal with nature = {animal_nature} eats a prey")
-
 
     def is_bitten(self):
         if self.animal_nature == "1":
@@ -205,9 +205,6 @@ class Pacman(Individual):
             self.dir_body = self._get_turn(self.dir_body, -1)
             new_dir_body = Direction(self.dir_body).to_string()
             #print(f"Turn body left ")
-
-            self.stats["nb_body_turns"] += 1
-
             self.stats["nb_body_turns"] += 1
 
         elif b_right and not b_left:
@@ -216,9 +213,6 @@ class Pacman(Individual):
 
             new_dir_body = Direction(self.dir_body).to_string()
             #print(f"Turn body right")
-
-            self.stats["nb_body_turns"] += 1
-
             self.stats["nb_body_turns"] += 1
 
         elif b_left and b_right:

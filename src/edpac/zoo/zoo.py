@@ -330,7 +330,7 @@ class Zoo:
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
         for pacman_index, pac in enumerate(self.population.individuals):
-            print(pac)
+            #print(pac)
             if pac==0:
                 continue
 
@@ -371,7 +371,6 @@ class Zoo:
         print(f"******************** {self.nb_deads=} ***********************")
 
 
-
     def process_death(self, pacman_index):
         #TODO
         print(f"TODO process_death of indiv {pacman_index=}")
@@ -387,11 +386,4 @@ class Zoo:
         #print(self.population.individuals)
 
         self.nb_deads += 1
-
         print(f"******************** {self.nb_deads=} ***********************")
-
-
-
-
-
-
