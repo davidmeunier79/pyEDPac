@@ -85,6 +85,9 @@ class ZooVisualizer(PixelVisualizer):
 #         if dir_body ==
     def _draw_pacman(self, pacman_index, color):
 
+        assert 0 <= pacman_index and pacman_index < len(self.zoo.population.individuals), \
+            f"Error with {pacman_index=} {len(self.zoo.population.individuals)=}"
+
         if not self.zoo.population.individuals[pacman_index]:
             return
 
