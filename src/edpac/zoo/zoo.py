@@ -386,5 +386,4 @@ class Zoo:
         #print(self.population.individuals)
 
         self.nb_deads += 1
-
         print(f"******************** {self.nb_deads=} ***********************")
