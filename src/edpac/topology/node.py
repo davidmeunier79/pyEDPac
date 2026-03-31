@@ -11,6 +11,7 @@ class Node:
         """Initialiser un nœud"""
         self.id = Node._node_count
         Node._node_count += 1
+
         self.outgoing_links = []  # Liens sortants (post-synaptiques)
         self.incoming_links = []  # Liens entrants (pré-synaptiques)
     

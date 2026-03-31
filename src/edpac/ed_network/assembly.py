@@ -50,9 +50,6 @@ class Assembly:
         ]
         
         self.neuron_ids: List[int] = [neuron.id for neuron in self.neurons]
-
-        # Historique d'activité
-        self.spike_history = []
     
     def get_neuron_ids(self) -> List[int]:
 
@@ -87,7 +84,6 @@ class Assembly:
         """Réinitialiser tous les neurones"""
         for neuron in self.neurons:
             neuron.reset_neuron()
-        self.spike_history = []
     
     def get_activity(self) -> float:
         """

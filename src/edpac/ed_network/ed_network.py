@@ -47,10 +47,6 @@ class EDNetwork(Network):
         self.event_manager = EventManager()
         EDSynapse.set_event_manager(self.event_manager)
 
-        # Statistiques
-        self.total_spikes = 0
-        self.total_simulation_time = 0
-
     def reset(self):
         """Réinitialiser le réseau"""
 
@@ -58,14 +54,14 @@ class EDNetwork(Network):
 
         self.event_manager.reset()
 
-    def initialize_inputs(self):
+    def initialize_inputs(self, time = 0):
         """
         Injecter tous les inputs dans input_assemblies
 
         Args:
             sensory_patterns: NB_VISIO_INPUTS
         """
-        time = 0
+
 
         spike_neuron_ids = []
         for i in range(NB_VISIO_INPUTS):

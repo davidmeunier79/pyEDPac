@@ -24,6 +24,7 @@ from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 
+from edpac.tracer.network_tracer import NetworkTracer
 
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
@@ -40,7 +41,10 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
+def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz, path_indiv):
+
+    global empty_events
+    empty_events= False
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -64,7 +68,10 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     net = EvoNetwork(indiv)
     net.initialize_inputs()
 
-    print(net)
+    spike_neuron_ids = net.initialize_inputs()
+
+    network_tracer = NetworkTracer(net)
+    network_tracer.record(0, spike_neuron_ids)
 
     # initilisation
 
@@ -90,6 +97,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     # 3. Simulation Loop (simplified)
     def update():
 
+        global empty_events
+
         global SIMULATION_ACTIVE
 
         # If the window was closed, stop this individual's evaluation
@@ -114,18 +123,23 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         input_viz.display_inputs(sensory_data)
 
         # 3 integrate to EDNetwork
+        current_time = EDSynapse.event_manager.get_time()
         spike_neuron_ids = net.integrate_inputs(sensory_data)
 
+        # tracer
+        network_tracer.record(current_time, spike_neuron_ids)
+
+        # visu
         net_viz.display_spikes(spike_neuron_ids)
         net_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        current_time = EDSynapse.event_manager.get_time()
 
         net.init_output_patterns()
 
         while (EDSynapse.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
+            time_before = EDSynapse.event_manager.get_time()
             spike_neuron_ids = EDSynapse.event_manager.run_one_step()
 
             if spike_neuron_ids is not None:
@@ -135,6 +149,8 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
                 QtWidgets.QApplication.processEvents()
 
 
+                network_tracer.record(time_before, spike_neuron_ids)
+
             else:
                 print("No spikes in event manager")
                 net_viz.refresh_from_background()
@@ -143,8 +159,9 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
 
 
             if EDSynapse.event_manager.get_nb_events() == 0:
-                print("No more events in event manager, breaking")
+                print("****** No more events in event manager, breaking ***** ")
                 zoo.pacman.life_points = -100
+                empty_events = True
                 break
 
         output_patterns = net.get_output_patterns()
@@ -155,8 +172,10 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
         zoo.pacman.life_points = zoo.pacman.life_points -1
 
         if zoo.pacman.life_points < 0:
+
             print("Individual is dead, breaking")
             loop.quit()  # This breaks the loop.exec_() below
+
         # Get simulated inputs (e.g., [Wall, Empty, Food, Wall, Animal])
         #mock_inputs = [1, 0, 2, 1, 3]
 
@@ -181,25 +200,37 @@ def evaluate_individual(indiv, zoo, zoo_viz, net_viz, input_viz):
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
     timer.timeout.disconnect(update)
 
-    # 3. Explicitly delete heavy local references
-    del net
-    del pac
 
     del timer
     del loop
 
-    print("After Loop")
+    network_tracer.plot(target_dir = path_indiv)
 
     # 5. Now we can finally return the value to the EA
     score = EDSynapse.event_manager.get_time()
-
     indiv.set_fitness(score)
+
+    # saving chromosome
+    indiv.save_genes(path_indiv)
+    indiv.save_stats(path_indiv)
+    pac.save_stats(path_indiv)
+
+    # saving evo_network
+    net.stats["empty_events"] = empty_events
+
+    net.save_stats(path_indiv)
+
+    # 3. Explicitly delete heavy local references
+    del net
+    del pac
 
     EDSynapse.event_manager.reset()
 
     del EDSynapse.event_manager
 
-    print(indiv)
+    return score
+
+
 
 def main():
 
@@ -250,7 +281,16 @@ def main():
                 print("Simualtion is over, breaking")
                 break
 
-            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz)
+            path_indiv = os.path.abspath(f"Gen_{gen}/Ind_{i}/")
+
+            try:
+                os.makedirs(path_indiv)
+
+            except OSError as e:
+                print(f"Error {e}")
+
+
+            evaluate_individual(ind, zoo, zoo_viz, net_viz, input_viz, path_indiv)
 
             print("SIMULATION_ACTIVE = ", SIMULATION_ACTIVE)
             # 5. Force Python to reclaim memory now rather than 'whenever'
