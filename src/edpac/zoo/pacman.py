@@ -90,10 +90,9 @@ class Pacman(Individual):
         self.animal_nature = animal_nature
 
     def get_animal_nature(self, animal_nature):
-            return self.animal_nature
+        return self.animal_nature
 
     def get_position(self):
-
         return (self.x, self.y)
 
     def set_position(self, x, y):
@@ -121,6 +120,7 @@ class Pacman(Individual):
         return left if turn_type == -1 else right
 
     def predator_contact(self):
+
         if self.animal_nature == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
             self.stats["nb_contact_predators"] += 1
@@ -142,6 +142,7 @@ class Pacman(Individual):
             self.stats["nb_eaten_preys"] += 1
         else:
             print(f"!!!!!! Warning, animal with nature = {animal_nature} eats a prey")
+
 
     def is_bitten(self):
         if self.animal_nature == "1":
@@ -207,6 +208,8 @@ class Pacman(Individual):
 
             self.stats["nb_body_turns"] += 1
 
+            self.stats["nb_body_turns"] += 1
+
         elif b_right and not b_left:
             # Turn body right
             self.dir_body = self._get_turn(self.dir_body, 1)
@@ -216,9 +219,10 @@ class Pacman(Individual):
 
             self.stats["nb_body_turns"] += 1
 
+            self.stats["nb_body_turns"] += 1
+
         elif b_left and b_right:
             # Both active: Move forward
-
 
             print("**** Move Forward **** ")
             self.stats["nb_move_forward"] += 1
@@ -237,9 +241,3 @@ class Pacman(Individual):
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
-
-    def process_death(self):
-        #TODO
-        print("TODO process_death")
-
-

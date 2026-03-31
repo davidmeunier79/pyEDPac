@@ -142,6 +142,7 @@ class Network:
                 synapse_config.DELAY = synapse_config.INHIBITORY_DELAY
 
             synapse = EDSynapse(pre_neuron_id, post_neuron_id, event_manager, synapse_config)
+
             #
             # # Ajouter délai topologique
             # if topological_delay > 0:

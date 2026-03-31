@@ -57,6 +57,7 @@ class EDNetwork(Network):
         Args:
             sensory_patterns: NB_VISIO_INPUTS
         """
+
         spike_neuron_ids = []
         for i in range(NB_VISIO_INPUTS):
 
