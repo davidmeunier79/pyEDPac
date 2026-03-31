@@ -43,8 +43,6 @@ class Individual(Chromosome):
         
         # Statistiques
         self.age = 0
-        self.birth_generation = 0
-
         self.stats = {}
 
         
@@ -129,3 +127,19 @@ class Individual(Chromosome):
     def reset_count():
         """Réinitialiser le compteur"""
         Individual._individual_count = 0
+
+    def save_stats(self, indiv_path):
+
+        import os
+        import json
+
+        self.stats["fitness"] = self.get_fitness()
+        self.stats["nb_genes"] = len(self.genes)
+
+        if indiv_path==0:
+            indiv_path = os.path.abspath("")
+
+        file_stats = os.path.join(indiv_path, "Stats_indiv.json")
+
+        with open(file_stats, 'w+') as fp:
+            json.dump(self.stats, fp, indent=4)
