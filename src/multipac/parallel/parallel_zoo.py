@@ -155,7 +155,7 @@ class ParallelZoo(Zoo):
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             #self.stats["nb_preys"] += 1
             self.init_random_position(new_index)
-            self.send_init_input(new_index)
+            self.population.send_init_input(new_index)
             self.nb_deads -= 1
 
         print(f"******************** {self.nb_deads=} ***********************")
@@ -178,7 +178,8 @@ class ParallelZoo(Zoo):
         print(f"Predator {new_index=} available, building")
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             #self.stats["nb_predators"] += 1
-            self.population.init_random_position(new_index)
+            self.init_random_position(new_index)
+            self.population.send_init_input(new_index)
             self.nb_deads -= 1
 
         print(f"******************** {self.nb_deads=} ***********************")
