@@ -97,14 +97,17 @@ class ParallelPopulation(PacmanPopulation):
 
         for pipe, visio_input in zip(self.pipes, visio_inputs):
             #print(visio_input)
-#
-#             if visio_input == -1:
-#                 print("Dead visio inputs")
-#             elif visio_input == 1:
-#                 print("Empty visio inputs")
 
-            #print(f"{visio_input=}")
-            pipe.send({'type': 'TASK', 'data': visio_input})
+            try
+                pipe.send({'type': 'TASK', 'data': visio_input})
+
+            except BrokenPipeError:
+                if visio_input == -1:
+                    print("Dead visio inputs")
+                elif visio_input == 1:
+                    print("Empty visio inputs")
+
+                print(f"{visio_input=}")
 
 
         move_pos = {}
