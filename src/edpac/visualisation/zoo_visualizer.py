@@ -124,6 +124,7 @@ class ZooVisualizer(PixelVisualizer):
         # We draw a 2-pixel thick blue line on the edge of the 16x16 cell
         blue_bar = np.zeros(shape = (self.cell_size, self.cell_size))
 
+        # previously
         if pacman.dir_head == Direction.UP: # Up: Top edge
             blue_bar[-2:, 2:19] = 1
         elif pacman.dir_head == Direction.DOWN: # Down: Bottom edge
@@ -132,6 +133,7 @@ class ZooVisualizer(PixelVisualizer):
             blue_bar[2:19, :2] = 1
         elif pacman.dir_head == Direction.RIGHT: # Right: Right edge
             blue_bar[2:19, -2:] = 1
+
         self.set_pattern(by, bx ,blue_bar, color)
         #self.update_display()
 
