@@ -63,7 +63,7 @@ class ParallelPopulation(PacmanPopulation):
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} is initialized.")
 
     def send_init_input(self, pacman_index):
-        assert 0 <= pacman_index and pacman_index < self.pipes, f"Error with {pacman_index=} in pipes"
+        assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
 
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'INIT_INPUTS'})
