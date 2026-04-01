@@ -248,13 +248,13 @@ class Zoo:
                     return
 
             self.grid[pac.y][pac.x] = ' '
-            print(f"Pacman {pacman_index=} move from {pac.x}, {pac.y} to {new_x}, {new_y}")
+            #print(f"Pacman {pacman_index=} move from {pac.x}, {pac.y} to {new_x}, {new_y}")
             #pac.x, pac.y = new_x, new_y
 
             # New position becomes Pacman
             self.grid[new_y][new_x] = index_to_char(pacman_index)
 
-            print(self.grid[new_y][new_x])
+            #print(self.grid[new_y][new_x])
 
             pac.set_position(new_x, new_y)
 
