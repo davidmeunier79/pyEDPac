@@ -67,7 +67,7 @@ class ParallelPopulation(PacmanPopulation):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
 
         pipe = self.pipes[pacman_index]
-        pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[i]})
+        pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[pacman_index]})
 
         print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
 
