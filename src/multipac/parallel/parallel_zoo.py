@@ -155,6 +155,7 @@ class ParallelZoo(Zoo):
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             #self.stats["nb_preys"] += 1
             self.init_random_position(new_index)
+            self.send_init_input(new_index)
             self.nb_deads -= 1
 
         print(f"******************** {self.nb_deads=} ***********************")

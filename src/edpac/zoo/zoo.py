@@ -310,7 +310,6 @@ class Zoo:
                         animal = 'X'
                     else:
                         index = char_to_index(char)
-
                         animal = index % 2
                     #print(self.animals.keys())
 

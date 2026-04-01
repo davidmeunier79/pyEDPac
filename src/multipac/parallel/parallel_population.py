@@ -62,6 +62,18 @@ class ParallelPopulation(PacmanPopulation):
             if response['type'] == 'READY':
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} is initialized.")
 
+    def send_init_input(pacman_index)
+        assert 0 <= pacman_index and pacman_index < self.pipes
+
+        pipe = self.pipes[pacman_index]
+        pipe.send({'type': 'INIT_INPUTS'})
+
+        print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} INIT_INPUTS")
+
+        response = pipe.recv()
+        if response['type'] == 'READY':
+            print(f"***** [ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
+
 
     def run_one_step(self, visio_inputs):
         #print("\n[ParallelPopulation] Running a test neural computation step...")
