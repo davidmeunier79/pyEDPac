@@ -37,12 +37,19 @@ class ParallelPopulation(PacmanPopulation):
         print("[Population] Sending chromosomes to workers...")
         for i, pipe in enumerate(self.pipes):
             # Pass the specific chromosome for this ID
+            if not self.individuals[i]:
+                continue
+
             pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[i]})
 
             print(f"[ParallelPopulation] Waiting Worker {i}")
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
+
+            if not self.individuals[i]:
+                continue
+
             response = pipe.recv()
             if response['type'] == 'READY':
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} chromosome is ready.")
@@ -51,6 +58,8 @@ class ParallelPopulation(PacmanPopulation):
     def initialize_all_inputs(self):
         print("[Population] Sending INIT_INPUTS to workers...")
         for i, pipe in enumerate(self.pipes):
+            if not self.individuals[i]:
+                continue
             # Pass the specific chromosome for this ID
             pipe.send({'type': 'INIT_INPUTS'})
 
@@ -58,6 +67,9 @@ class ParallelPopulation(PacmanPopulation):
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
+            if not self.individuals[i]:
+                continue
+
             response = pipe.recv()
             if response['type'] == 'READY':
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} is initialized.")
@@ -65,6 +77,7 @@ class ParallelPopulation(PacmanPopulation):
 
     def send_chromosome(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+        assert  self.individuals[pacman_index], f"Error, sending empty chromosome {pacman_index}"
 
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[pacman_index]})
@@ -78,6 +91,8 @@ class ParallelPopulation(PacmanPopulation):
 
     def send_init_input(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+
+        assert  self.individuals[pacman_index], f"Error, empty individual {pacman_index} sending INIT_INPUTS "
 
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'INIT_INPUTS'})

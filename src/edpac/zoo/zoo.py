@@ -414,18 +414,18 @@ class Zoo:
 
 
     def process_death(self, pacman_index):
-        #TODO
-        print(f"TODO process_death of indiv {pacman_index=}")
+        #print(f"process_death of indiv {pacman_index=}")
         if self.population.individuals[pacman_index] == 0:
-            print(f"Pacman {pacman_index=} is already removed")
+            #print(f"Pacman {pacman_index=} is already removed")
             return
 
         # remove from zoo
         x, y = self.population.individuals[pacman_index].get_position()
         self.grid[y, x] = " "
+
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
-        #print(self.population.individuals)
 
+        # increment nb_deads
         self.nb_deads += 1
         print(f"******************** {self.nb_deads=} ***********************")

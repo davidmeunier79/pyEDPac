@@ -67,7 +67,8 @@ class ParallelZoo(Zoo):
 
         for i in range(len(self.population.individuals)):
 
-            self.init_random_position(i)
+            if self.population.individuals[i]:
+                self.init_random_position(i)
 
         print(self.grid)
 
