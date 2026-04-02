@@ -355,9 +355,13 @@ class Zoo:
             pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
 
     def _in_grid(self, pos_x, pos_y):
-        if 0 <= x + dir_x < self.cols and 0 <= y + dir_y < self.rows:
+        if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
             return True
         else:
+
+            if 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+                print(f"**** Error, accessing {x=},{y=} in reverse order in grid ****")
+
             return False
 
 
