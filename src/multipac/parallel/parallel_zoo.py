@@ -39,7 +39,9 @@ class ParallelZoo(Zoo):
                 pos_x = random.randrange(1, self.cols-2)
 
                 #print(f"{pos_y=}, {pos_x=}")
-                char = self.grid[pos_y, pos_x].decode("utf-8")
+                char = self._in_grid(pos_x, pos_y)
+                if not char:
+                    continue
 
                 if char == '.' or char == ' ':
 
@@ -73,16 +75,15 @@ class ParallelZoo(Zoo):
 
                 for dir_x, dir_y in directions:
 
-                    if not self._in_grid(x + dir_x, y + dir_y):
+                    char_contact = self._in_grid(x + dir_x, y + dir_y)
+                    if not char_contact:
                         continue
-
-                    char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
 
                     if char_contact in (".", " ") :
                         print(f"Position of new_individual:  {x + dir_x} {y + dir_y}")
                         self.population.individuals[new_index].set_position(x + dir_x, y + dir_y)
 
-                        self.grid[y + dir_y][x + dir_x] = index_to_char(new_index)
+                        self._set_in_grid(x + dir_x, y + dir_y, index_to_char(new_index))
 
                         animal = new_index % 2
                         animal_nature = self.animals[animal]["danger"]

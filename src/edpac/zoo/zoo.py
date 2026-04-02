@@ -18,7 +18,8 @@ class Zoo:
         self.cell_size = cell_size
         self.rows = 0
         self.cols = 0
-        self.grid = None  # Now a NumPy array
+
+        self._grid = None  # Now a NumPy array
 
         #self.shapes = {}
         #self.danger = {}
@@ -47,18 +48,6 @@ class Zoo:
 
         data_dir = os.path.join(PROJECT_ROOT, "data")
         return data_dir
-    #
-    # def _get_pacman_pos(self):
-    #     """Locates Pacman ('0') on the grid."""
-    #     x, y = np.where(self.grid == b'0')
-    #
-    #     if len(x) == 1 and len(y) == 1:
-    #         return x[0], y[0]
-    #     else:
-    #         print("Warning, could not find pacman in zoo")
-    #         print(self.grid)
-    #         0/0
-    #         return 0, 0
 
     def _parse_xbm_hex(self, full_path):
         """Unpacks C-style XBM hex data into coordinates."""
@@ -180,11 +169,11 @@ class Zoo:
             self.cols = nb_cols
 
             # Create a numeric numpy grid
-            self.grid = np.zeros((self.rows, self.cols), dtype=bytes)
+            self._grid = np.zeros((self.rows, self.cols), dtype=bytes)
 
             for r, line in enumerate(f.readlines()):
                 for c, char in enumerate(line.strip()):
-                    self.grid[r, c] = char
+                    self._set_in_grid(c, r, char)
 
     def _move_forward(self, pacman_index):
         """Calculates movement based on dir_body and updates grid."""
@@ -199,11 +188,9 @@ class Zoo:
         new_x = pac.x + dx
         new_y = pac.y + dy
 
-        if not self._in_grid(new_x, new_y):
+        target_char = self._in_grid(new_x, new_y)
+        if not target_char:
             return
-
-        # Check for walls in the Zoo grid before moving
-        target_char = self.grid[new_y][new_x].decode("utf-8")
 
         if target_char == 'X': # Not a wall
             return
@@ -240,10 +227,10 @@ class Zoo:
                 print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
                 return
 
-        self.grid[pac.y][pac.x] = ' '
+        self._set_in_grid(pac.x, pac.y, ' ')
 
         # New position becomes Pacman
-        self.grid[new_y][new_x] = index_to_char(pacman_index)
+        self._set_in_grid(new_x, new_y, index_to_char(pacman_index))
 
         pac.set_position(new_x, new_y)
 
@@ -288,13 +275,14 @@ class Zoo:
                 nx = pac.x + (j * df[0]) + (rel_col * ds[0])
                 ny = pac.y + (j * df[1]) + (rel_col * ds[1])
 
-                if not self._in_grid(nx, ny):
-                    continue
+                char = self._in_grid(nx, ny)
 
-                char = self.grid[ny][nx].decode("utf-8")
+                if not char:
+                    continue
 
                 if char == '.' or char == ' ':
                     continue
+
                 elif char == 'X':
                     animal = 'X'
                 else:
@@ -354,16 +342,35 @@ class Zoo:
 
             pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
 
+
     def _in_grid(self, pos_x, pos_y):
         if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
-            return True
+            char = self._grid[pos_y][pos_x].decode("utf-8")
+            return char
+
+        elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+            print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+            char = self.grid[pos_x][pos_y].decode("utf-8")
+            return char
+
+        return 0
+
+
+    def _set_in_grid(self, pos_x, pos_y, char):
+        if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
+            self._grid[pos_y][pos_x] = char
+
+        elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+            print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+            self._grid[pos_x][pos_y] = char
+
+    def _where_in_grid(self, char):
+        if char in np.unique(self._grid):
+            yy, xx = np.where(self._grid == char)
+            return yy, xx
         else:
-
-            if 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
-                print(f"**** Error, accessing {x=},{y=} in reverse order in grid ****")
-
-            return False
-
+            print(f"Error, {char=} could not be found in _grid")
+            return (-1, -1)
 
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
@@ -377,11 +384,10 @@ class Zoo:
             x, y = pac.get_position()
 
             for dir_x, dir_y in directions:
-                if not self._in_grid(x + dir_x,  y + dir_y):
-                    continue
 
-                #char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
-                char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
+                char_contact = self._in_grid(x + dir_x,  y + dir_y)
+                if not char_contact:
+                    continue
 
                 if char_contact in (".", " ", 'X') :
                     continue
@@ -426,7 +432,7 @@ class Zoo:
 
         # remove from zoo
         x, y = self.population.individuals[pacman_index].get_position()
-        self.grid[y, x] = " "
+        self._set_in_grid(x, y, " ")
 
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
