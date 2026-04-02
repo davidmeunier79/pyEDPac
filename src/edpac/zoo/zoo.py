@@ -368,7 +368,6 @@ class Zoo:
 
 
     def test_pacman_contacts(self):
-
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
         for pacman_index, pac in enumerate(self.population.individuals):
@@ -383,7 +382,8 @@ class Zoo:
             for dir_x, dir_y in directions:
                 if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
 
-                    char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
+                    #char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
+                    char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
 
                     if char_contact in (".", " ", 'X') :
                         continue
