@@ -232,14 +232,14 @@ class Zoo:
                 print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
 
                 if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+                    #
+                    # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                    # self.population.individuals[index].is_bitten()
 
-                    print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    self.population.individuals[index].is_bitten()
-
-                    if self.population.individuals[index].life_points < 0:
-                        print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                        pac.eat_prey()
-                        self.population.individuals[index].process_death()
+                    print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                    pac.eat_prey(self.population.individuals[index].life_points)
+                    print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                    self.population.individuals[index].process_death()
 
 
 
@@ -419,6 +419,9 @@ class Zoo:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
             else:
+                pac.fitness = pac.life_points
+                pac.fitness_evaluated = True
+
                 nb_alive_individuals+=1
 
         return nb_alive_individuals

@@ -221,9 +221,8 @@ class ParallelZoo(Zoo):
 
             self.population.send_chromosome(new_index)
             self.population.send_init_input(new_index)
-            self.nb_deads -= 1
 
-        print(f"******************** {self.nb_deads=} ***********************")
+            self.nb_deads -= 1
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
