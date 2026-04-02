@@ -165,7 +165,6 @@ def main():
 
             zoo.population.shutdown()
 
-
     print("In run_population")
 
     global MAX_TIME

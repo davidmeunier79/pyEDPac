@@ -406,6 +406,10 @@ class Zoo:
                         print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
                         self.test_prey_reproduction(contact_index, pacman_index)
 
+
+            # naturally losing life each time points
+            pac.life_points -= 1
+
             if pac.life_points < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
