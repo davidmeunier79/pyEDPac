@@ -110,7 +110,7 @@ class ParallelZoo(Zoo):
             if self.population.individuals[i]:
                 self.init_random_position(i)
 
-        print(self.grid)
+        print(self._grid)
 
     def init_empty_zoo(self):
 
