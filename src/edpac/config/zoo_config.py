@@ -26,14 +26,14 @@ class MultiPacmanConfig:
     ## Pacman Life
     INITIAL_LIFE_POINTS = 100
 
-    NB_LIFE_POINTS_PER_PREY = 100
+    #NB_LIFE_POINTS_PER_PREY = 100
     NB_LIFE_POINTS_PER_PREDATOR_CONTACT = 10
 
     # Special 2 populations prey and predators
     NB_LIFE_POINTS_PER_PACGUM_PREY = 5
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR = 1
 
-    NB_LIFE_POINTS_PER_BITE = 5
+    #NB_LIFE_POINTS_PER_BITE = 5
 
 @dataclass
 class PacmanConfig:

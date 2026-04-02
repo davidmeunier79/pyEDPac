@@ -239,7 +239,7 @@ class Zoo:
                     print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
                     pac.eat_prey(self.population.individuals[index].life_points)
                     print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    self.population.individuals[index].process_death()
+                    self.process_death(index)
 
 
 
@@ -370,8 +370,6 @@ class Zoo:
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
-        nb_alive_individuals = 0
-
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
                 continue
@@ -422,9 +420,7 @@ class Zoo:
                 pac.fitness = pac.life_points
                 pac.fitness_evaluated = True
 
-                nb_alive_individuals+=1
-
-        return nb_alive_individuals
+        return len([pac for pac in self.population.individuals if pac])
 
     def process_death(self, pacman_index):
         #print(f"process_death of indiv {pacman_index=}")
