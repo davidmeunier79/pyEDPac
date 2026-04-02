@@ -70,7 +70,7 @@ class PopulationConfigMulti:
     # # # # Taille population
     POPULATION_SIZE: int = 63
 
-    INIT_POPULATION_SIZE : int = 40
+    INIT_POPULATION_SIZE : int = 50
 
 
 @dataclass

@@ -129,8 +129,6 @@ def main():
 
         print(f"{MAX_TIME=}")
 
-        zoo.test_pacman_contacts()  # Update the model()
-
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
@@ -164,6 +162,8 @@ def main():
             loop.quit()
 
             zoo.population.shutdown()
+
+        zoo.test_pacman_contacts()  # Update the model()
 
     print("In run_population")
 
