@@ -46,7 +46,7 @@ class ParallelZoo(Zoo):
                 if char == '.' or char == ' ':
 
                     print(f"Setting position for pacman {index}: {pos_y, pos_x}")
-                    self.grid[pos_y, pos_x] = index_to_char(index)
+                    self._set_in_grid(pos_x, pos_y, index_to_char(index))
                     animal = index % 2
 
                     animal_nature = self.animals[animal]["danger"]
