@@ -86,7 +86,6 @@ class Pacman(Individual):
                       'nb_bites': 0
                       }
 
-
     def set_animal_nature(self, animal_nature):
         self.animal_nature = animal_nature
 
