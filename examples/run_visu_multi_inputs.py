@@ -147,7 +147,14 @@ def main():
 
         zoo.compute_move_pos(move_pos)
 
-        if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
+
+        nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
+
+
+        print(f"******************** {nb_alive_indiv=} ***********************")
+
+
+        if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
 
@@ -162,8 +169,6 @@ def main():
             loop.quit()
 
             zoo.population.shutdown()
-
-        zoo.test_pacman_contacts()  # Update the model()
 
     print("In run_population")
 

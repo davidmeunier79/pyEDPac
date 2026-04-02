@@ -370,6 +370,8 @@ class Zoo:
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
+        nb_alive_individuals = 0
+
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
                 continue
@@ -416,9 +418,10 @@ class Zoo:
             if pac.life_points < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
+            else:
+                nb_alive_individuals+=1
 
-        print(f"******************** {self.nb_deads=} ***********************")
-
+        return nb_alive_individuals
 
     def process_death(self, pacman_index):
         #print(f"process_death of indiv {pacman_index=}")
@@ -435,4 +438,4 @@ class Zoo:
 
         # increment nb_deads
         self.nb_deads += 1
-        print(f"******************** {self.nb_deads=} ***********************")
+

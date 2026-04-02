@@ -200,9 +200,6 @@ class ParallelZoo(Zoo):
 
             self.nb_deads -= 1
 
-        print(f"******************** {self.nb_deads=} ***********************")
-
-
     def test_predator_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
         avail = self.check_available_individual_slot()
