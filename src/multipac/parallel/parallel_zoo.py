@@ -239,7 +239,8 @@ class ParallelZoo(Zoo):
         if parent1.pacman_config.INITIAL_LIFE_POINTS <= parent1.life_points and parent2.pacman_config.INITIAL_LIFE_POINTS <= parent2.life_points:
             parent1.life_points -= int(parent1.pacman_config.INITIAL_LIFE_POINTS // 2)
             parent2.life_points -= int(parent2.pacman_config.INITIAL_LIFE_POINTS // 2)
-        else
+
+        else:
             print(f"Not enough life points to reproduce {parent1.life_points} {parent2.life_points}")
             return False
 
