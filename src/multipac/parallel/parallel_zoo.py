@@ -192,8 +192,9 @@ class ParallelZoo(Zoo):
             print("No available slots for prey_reproduction danger, breaking")
             return
 
-        print(f"Prey {new_index=} available, building")
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+
+            print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
             self.init_nearby_position(new_index, contact_index, pacman_index)
 
@@ -216,8 +217,8 @@ class ParallelZoo(Zoo):
             print("No available slots for predator_reproduction danger, breaking")
             return
 
-        print(f"Predator {new_index=} available, building")
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            print(f"Predator {new_index=} available, building")
             #self.stats["nb_predators"] += 1
             self.init_nearby_position(new_index, contact_index, pacman_index)
 
