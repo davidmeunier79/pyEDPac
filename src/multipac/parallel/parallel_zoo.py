@@ -243,9 +243,12 @@ class ParallelZoo(Zoo):
         parent2 = self.population.individuals[pacman_index]
 
         # parents with enough life_points get exhaust if reproduction happens
-        if parent1.pacman_config.INITIAL_LIFE_POINTS <= parent1.life_points and parent2.pacman_config.INITIAL_LIFE_POINTS <= parent2.life_points:
+        if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
             parent1.life_points -= int(parent1.pacman_config.INITIAL_LIFE_POINTS // 2)
             parent2.life_points -= int(parent2.pacman_config.INITIAL_LIFE_POINTS // 2)
+        # if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
+        #     parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD // 2)
+        #     parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD // 2)
 
         else:
             print(f"Not enough life points to reproduce {parent1.life_points} {parent2.life_points}")
