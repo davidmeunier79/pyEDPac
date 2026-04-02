@@ -217,90 +217,9 @@ class Population:
         individual.fitness_evaluated = False
         individual.fitness = -float("inf")
     
-    def evolve_generation(self):
-        """
-        Générer la prochaine génération
-        
-        Args:
-            eval_func: Fonction d'évaluation
-            elite_size: Nombre d'élites à conserver
-        """
-        # Évaluer la population actuelle
-        #self.evaluate(eval_func)
-#
-#         for indiv in self.individuals:
-#             print(indiv.id)
-#             print(indiv.get_fitness())
-
-        # Trouver les élites
-        sorted_inds = sorted(
-            self.individuals,
-            key=lambda x: x.get_fitness(),
-            reverse=True
-        )
-        
-        print("******************* After gen ", self.generation)
-        print(sorted_inds)
-
-        elite = sorted_inds[:self.config.ELITE_SIZE]
-        self.best_individual = elite[0]
-        
-        # Statistiques
-        fitnesses = [ind.get_fitness() for ind in self.individuals]
-        #print(fitnesses)
-
-        self.fitness_history.append({
-            'generation': self.generation,
-            'mean length ': np.mean(self.lengths),
-            'best': max(fitnesses),
-            'worst': min(fitnesses),
-            'mean': np.mean(fitnesses),
-            'std': np.std(fitnesses)
-        })
-        
-        print(self.fitness_history)
-
-        # Créer nouvelle génération
-
-        new_pop = [ind.clone() for ind in elite]  # Conserver élites
-        
-        # Générer offspring
-        while len(new_pop) < self.size:
-            if np.random.rand() < self.crossover_config.CROSSOVER_RATE:
-                #print("Crossing Over")
-                # Crossover
-                parent1 = self.select_parent()
-                parent2 = self.select_parent()
-                offspring = self.crossover(parent1, parent2)
-            else:
-                #print("No Crossing Over")
-                # Mutation seule
-                parent = self.select_parent()
-                offspring = parent.clone()
-            
-            # Muter
-            self.mutate(offspring)
-
-            #print(offspring)
-
-            new_pop.append(offspring)
-        
-        # Remplacer population
-        #self.clean_population()
-
-        #print(new_pop)
-
-        self.individuals = new_pop
-        self.generation += 1
-
-        self.set_chromosome_lengths()
-        self.set_indivual_ages()
-
-        return self.best_individual
-
     def set_chromosome_lengths(self):
 
-        self.lengths = [indiv.genes.shape[0] for indiv in self.individuals]
+        self.lengths = [indiv.genes.shape[0] for indiv in self.individuals if indiv != 0 ]
 
     def set_fitnesses(self, list_fitnesses):
 

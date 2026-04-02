@@ -32,12 +32,12 @@ from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, Popu
 
 from edpac.tracer.network_tracer import NetworkTracer
 
-
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
-
 from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
 from multipac.parallel.parallel_zoo import ParallelZoo
+
+
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -129,16 +129,17 @@ def main():
         zoo.test_pacman_contacts()  # Update the model()
 
         # Update both windows
-        zoo_viz.draw_zoo()
-        zoo_viz.update_display()
+        #zoo_viz.draw_zoo()
+        #zoo_viz.update_display()
+        #QtWidgets.QApplication.processEvents()
+
+        input_percepts = zoo.compute_zoo_interaction()
+        #print(f"{input_percepts=}")
 
         # display percepts in multi_input_viz
         multi_input_viz.display_all_inputs(input_percepts)
         multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
-
-        input_percepts = zoo.compute_zoo_interaction()
-        #print(f"{input_percepts=}")
 
         move_pos = zoo.population.run_one_step(input_percepts)
         print(f"{move_pos=}")
@@ -150,6 +151,7 @@ def main():
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
+        time.sleep(2.5)
 
         if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
             print("All individuals are dead , Breaking")
@@ -168,7 +170,7 @@ def main():
     print("In run_population")
 
     global MAX_TIME
-    MAX_TIME = 100
+    MAX_TIME = 1000
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)

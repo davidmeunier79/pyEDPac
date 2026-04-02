@@ -146,8 +146,12 @@ class Zoo:
                 parts = line.split()
                 if len(parts) == 3:
                     char, rel_path = parts[0], parts[1]
-                    print(char.lower())
-                    index = string.ascii_lowercase.index(char.lower())
+                    if char == "X":
+                        index = "X"
+                    else:
+                        print(char.lower())
+                        index = string.ascii_lowercase.index(char.lower())
+
                     print(index)
                     self.animals[index] = {
                         "shape": self._parse_img_file(os.path.join(self.data_dir, "menagerie", rel_path)),
@@ -185,7 +189,8 @@ class Zoo:
     def _move_forward(self, pacman_index):
         """Calculates movement based on dir_body and updates grid."""
         # Map dir_body to coordinate changes
-        move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
+        #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
+        move_map = {Direction.DOWN: (0, -1), Direction.UP: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
 
         pac = self.population.individuals[pacman_index]
 
@@ -207,45 +212,52 @@ class Zoo:
 
             target_char = self.grid[new_y][new_x].decode("utf-8")
 
-            if target_char != 'X': # Not a wall
+            if target_char == 'X': # Not a wall
+                return
 
-                # Update grid data: old position becomes a dot
-                # if this a pacgum, increase life
-                if target_char == ".":
-                    print("Eating pacgum, Life points: " , pac.life_points)
-                    pac.eat_pacgum()
+            # Update grid data: old position becomes a dot
+            # if this a pacgum, increase life
+            if target_char == ".":
+                print("Eating pacgum, Life points: " , pac.life_points)
+                pac.eat_pacgum()
 
-                elif target_char == " ":
-                    pass
-                    #print("Moving forward in empty space")
+            elif target_char == " ":
+                pass
+                #print("Moving forward in empty space")
 
-                else:
-                    index = char_to_index(target_char)
-                    animal = index % 2
+            else:
+                index = char_to_index(target_char)
+                animal = index % 2
 
-                    print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
+                print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
 
-                    if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+                if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
 
-                        print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                        self.population.individuals[index].is_bitten()
+                    print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                    self.population.individuals[index].is_bitten()
 
-                        if self.population.individuals[index].life_points < 0:
-                            print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                            pac.eat_prey()
-                            self.population.individuals[index].process_death()
+                    if self.population.individuals[index].life_points < 0:
+                        print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                        pac.eat_prey()
+                        self.population.individuals[index].process_death()
 
 
 
-                    elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                        print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
-                        return
+                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                    print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
+                    return
 
-                self.grid[pac.y][pac.x] = b' '
-                pac.x, pac.y = new_x, new_y
+            self.grid[pac.y][pac.x] = ' '
+            #print(f"Pacman {pacman_index=} move from {pac.x}, {pac.y} to {new_x}, {new_y}")
+            #pac.x, pac.y = new_x, new_y
 
-                # New position becomes Pacman
-                self.grid[pac.y][pac.x] = pacman_index
+            # New position becomes Pacman
+            self.grid[new_y][new_x] = index_to_char(pacman_index)
+
+            #print(self.grid[new_y][new_x])
+
+            pac.set_position(new_x, new_y)
+
 
     def integrate_visio_outputs(self, pac):
         """
@@ -292,13 +304,13 @@ class Zoo:
 
                     char = self.grid[ny][nx].decode("utf-8")
 
-                    if char == '.' or char == ' ' or char == 'X':
+                    if char == '.' or char == ' ':
                         continue
-
+                    elif char == 'X':
+                        animal = 'X'
                     else:
                         index = char_to_index(char)
-
-                    animal = index % 2
+                        animal = index % 2
                     #print(self.animals.keys())
 
                     # 4. Check for Objects (Walls or Animals)
@@ -323,6 +335,36 @@ class Zoo:
         new_pattern[mask] = rand_values[mask]
 
         return new_pattern
+
+
+    def all_move_forward(self, turn_dir = 1):
+
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            self._move_forward(pacman_index)
+
+    def turn_all_body(self, turn_dir = 1):
+
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac == 0:
+                continue
+
+            pac.dir_body = pac._get_turn(pac.dir_body, turn_dir)
+
+
+    def turn_all_heads(self, turn_dir = 1):
+
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
+
 
 
     def test_pacman_contacts(self):
@@ -372,18 +414,18 @@ class Zoo:
 
 
     def process_death(self, pacman_index):
-        #TODO
-        print(f"TODO process_death of indiv {pacman_index=}")
+        #print(f"process_death of indiv {pacman_index=}")
         if self.population.individuals[pacman_index] == 0:
-            print(f"Pacman {pacman_index=} is already removed")
+            #print(f"Pacman {pacman_index=} is already removed")
             return
 
         # remove from zoo
         x, y = self.population.individuals[pacman_index].get_position()
         self.grid[y, x] = " "
+
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
-        #print(self.population.individuals)
 
+        # increment nb_deads
         self.nb_deads += 1
         print(f"******************** {self.nb_deads=} ***********************")

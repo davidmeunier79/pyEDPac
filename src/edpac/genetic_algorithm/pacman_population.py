@@ -53,8 +53,11 @@ class PacmanPopulation(Population):
         # Créer population initiale
         self.individuals: List[Pacman] = [
             Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
-            for _ in range(self.size)
+            for _ in range(self.config.INIT_POPULATION_SIZE)
         ]
+
+        for _ in range(self.config.INIT_POPULATION_SIZE, self.config.POPULATION_SIZE):
+            self.individuals.append(0)
 
         self.set_chromosome_lengths()
         print(self.lengths)
@@ -67,6 +70,8 @@ class PacmanPopulation(Population):
 
         print(f"Init new individual {pacman_index}")
         self.individuals[pacman_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config)
+        self.generation +=1
+        self.individuals[pacman_index].set_age(self.generation)
 
         
     def __repr__(self):

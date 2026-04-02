@@ -67,7 +67,8 @@ class ParallelZoo(Zoo):
 
         for i in range(len(self.population.individuals)):
 
-            self.init_random_position(i)
+            if self.population.individuals[i]:
+                self.init_random_position(i)
 
         print(self.grid)
 
@@ -155,6 +156,10 @@ class ParallelZoo(Zoo):
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             #self.stats["nb_preys"] += 1
             self.init_random_position(new_index)
+
+            self.population.send_chromosome(new_index)
+            self.population.send_init_input(new_index)
+
             self.nb_deads -= 1
 
         print(f"******************** {self.nb_deads=} ***********************")
@@ -178,6 +183,9 @@ class ParallelZoo(Zoo):
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             #self.stats["nb_predators"] += 1
             self.init_random_position(new_index)
+
+            self.population.send_chromosome(new_index)
+            self.population.send_init_input(new_index)
             self.nb_deads -= 1
 
         print(f"******************** {self.nb_deads=} ***********************")

@@ -31,7 +31,6 @@ class Direction(IntEnum):
         }
         return names[self]
 
-
 class AnimalNature(IntEnum):
     """
     Énumération des Natures Animales
@@ -73,6 +72,7 @@ class Pacman(Individual):
         self.y = y
 
         self.motor_threshold = self.pacman_config.MOTOR_THRESHOLD
+
         self.life_points = self.pacman_config.INITIAL_LIFE_POINTS
         #self.zoo = zoo
 

@@ -37,12 +37,19 @@ class ParallelPopulation(PacmanPopulation):
         print("[Population] Sending chromosomes to workers...")
         for i, pipe in enumerate(self.pipes):
             # Pass the specific chromosome for this ID
+            if not self.individuals[i]:
+                continue
+
             pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[i]})
 
             print(f"[ParallelPopulation] Waiting Worker {i}")
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
+
+            if not self.individuals[i]:
+                continue
+
             response = pipe.recv()
             if response['type'] == 'READY':
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} chromosome is ready.")
@@ -51,6 +58,8 @@ class ParallelPopulation(PacmanPopulation):
     def initialize_all_inputs(self):
         print("[Population] Sending INIT_INPUTS to workers...")
         for i, pipe in enumerate(self.pipes):
+            if not self.individuals[i]:
+                continue
             # Pass the specific chromosome for this ID
             pipe.send({'type': 'INIT_INPUTS'})
 
@@ -58,9 +67,41 @@ class ParallelPopulation(PacmanPopulation):
 
         # Synchronize: Wait for all "READY" signals
         for i, pipe in enumerate(self.pipes):
+            if not self.individuals[i]:
+                continue
+
             response = pipe.recv()
             if response['type'] == 'READY':
                 print(f"[ParallelPopulation] Confirmed: Worker {response['id']} is initialized.")
+
+
+    def send_chromosome(self, pacman_index):
+        assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+        assert  self.individuals[pacman_index], f"Error, sending empty chromosome {pacman_index}"
+
+        pipe = self.pipes[pacman_index]
+        pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[pacman_index]})
+
+        print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
+
+        response = pipe.recv()
+        if response['type'] == 'READY':
+            print(f"***** [ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
+
+
+    def send_init_input(self, pacman_index):
+        assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+
+        assert  self.individuals[pacman_index], f"Error, empty individual {pacman_index} sending INIT_INPUTS "
+
+        pipe = self.pipes[pacman_index]
+        pipe.send({'type': 'INIT_INPUTS'})
+
+        print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} INIT_INPUTS")
+
+        response = pipe.recv()
+        if response['type'] == 'READY':
+            print(f"***** [ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
 
 
     def run_one_step(self, visio_inputs):
@@ -71,15 +112,17 @@ class ParallelPopulation(PacmanPopulation):
 
         for pipe, visio_input in zip(self.pipes, visio_inputs):
             #print(visio_input)
-#
-#             if visio_input == -1:
-#                 print("Dead visio inputs")
-#             elif visio_input == 1:
-#                 print("Empty visio inputs")
 
-            #print(f"{visio_input=}")
-            pipe.send({'type': 'TASK', 'data': visio_input})
+            try:
+                pipe.send({'type': 'TASK', 'data': visio_input})
 
+            except BrokenPipeError:
+                if visio_input == -1:
+                    print("Dead visio inputs")
+                elif visio_input == 1:
+                    print("Empty visio inputs")
+
+                print(f"{visio_input=}")
 
         move_pos = {}
 

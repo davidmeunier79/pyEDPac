@@ -4,20 +4,18 @@ import gc
 import sys
 sys.path.insert(0, '../src')
 
+import sys
 from PySide6.QtCore import QEventLoop, QTimer, Qt
 from PySide6 import QtWidgets
 
-#
-#
-# # Force Qt to use the 'offscreen' platform (no window needed)
-# os.environ["QT_QPA_PLATFORM"] = "offscreen"
-#
-# # Disable DBus warnings on clusters
-# os.environ["QT_NO_GLIB"] = "1"
-
-from joblib import Parallel, delayed
-
 from edpac.zoo.zoo import Zoo, Pacman
+
+from edpac.visualisation.zoo_visualizer import ZooVisualizer
+from edpac.visualisation.input_visualizer import InputVisualizer
+
+from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
+
+from edpac.visualisation.network_visualizer import NetworkVisualizer
 
 from edpac.genetic_algorithm.population import Population
 from edpac.genetic_algorithm.chromosome import Chromosome
@@ -27,17 +25,14 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME
 
-from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
-from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, PopulationConfigMultiTest
+from edpac.config.ga_config import PopulationConfig, PopulationConfigMultiTest
 
-from edpac.tracer.network_tracer import NetworkTracer
-
-
-from edpac.visualisation.zoo_visualizer import ZooVisualizer
-from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
+import time
 
 
 from multipac.parallel.parallel_zoo import ParallelZoo
+
+
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -53,6 +48,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
+
 def main():
 
     global SIMULATION_ACTIVE
@@ -61,9 +57,26 @@ def main():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+def main():
+
+    global SIMULATION_ACTIVE
+    if not SIMULATION_ACTIVE:
+        return 0
+
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(config = PopulationConfigMulti())
+    zoo = ParallelZoo(config = PopulationConfigMultiTest())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
@@ -78,10 +91,10 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
+    #zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
-
 
 
     ####################################### MultiInputVisualizer ########################
@@ -99,12 +112,9 @@ def main():
 
     multi_input_viz.display_all_backgrounds()
     multi_input_viz.show()
+
     #multi_input_viz.update_display()
-
     QtWidgets.QApplication.processEvents()
-
-
-
 
 
     print("Running population")
@@ -127,36 +137,98 @@ def main():
 
         global MAX_TIME
 
-        print(f"{MAX_TIME=}")
+        print(MAX_TIME)
 
-        zoo.test_pacman_contacts()  # Update the model()
+        print("Init: dirhead = ", zoo.population.individuals[0].dir_head.to_string())
+        print("Init: dirbody = ", zoo.population.individuals[0].dir_body.to_string())
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
-        QtWidgets.QApplication.processEvents()
+        #QtWidgets.QApplication.processEvents()
 
         input_percepts = zoo.compute_zoo_interaction()
+        #print(f"{input_percepts=}")
 
         # display percepts in multi_input_viz
         multi_input_viz.display_all_inputs(input_percepts)
         multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
+        time.sleep(2.5)
 
-        move_pos = zoo.population.run_one_step(input_percepts)
-        print(f"{move_pos=}")
+        # turn 90deg to the right
+        zoo.turn_all_heads(1)
 
-        zoo.compute_move_pos(move_pos)
+        print("Turn head: dirhead = ", zoo.population.individuals[0].dir_head.to_string())
+        print("Turn head: dirbody = ", zoo.population.individuals[0].dir_body.to_string())
 
-        if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
-            print("All individuals are dead , Breaking")
-            SIMULATION_ACTIVE = False
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
+        #QtWidgets.QApplication.processEvents()
+
+        input_percepts = zoo.compute_zoo_interaction()
+        #print(f"{input_percepts=}")
+
+        # display percepts in multi_input_viz
+        multi_input_viz.display_all_inputs(input_percepts)
+        multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
+
+        time.sleep(2.5)
+
+        # turn 90deg to the right
+        zoo.turn_all_body(1)
+
+        print("Turn body: dirhead = ", zoo.population.individuals[0].dir_head.to_string())
+        print("Turn body: dirbody = ", zoo.population.individuals[0].dir_body.to_string())
+
+        # Update both windows
+        zoo_viz.draw_zoo()
+        zoo_viz.update_display()
+        #QtWidgets.QApplication.processEvents()
+
+        input_percepts = zoo.compute_zoo_interaction()
+        #print(f"{input_percepts=}")
+
+        # display percepts in multi_input_viz
+        multi_input_viz.display_all_inputs(input_percepts)
+        multi_input_viz.update_display()
+        QtWidgets.QApplication.processEvents()
+
+        time.sleep(2.5)
+
+        # move forward with dir body
+        zoo.all_move_forward()
+
+        print("Move forward: dirhead = ", zoo.population.individuals[0].dir_head.to_string())
+        print("Move forward: dirbody = ", zoo.population.individuals[0].dir_body.to_string())
+
+        # Update both windows
+        zoo_viz.draw_zoo()
+        zoo_viz.update_display()
+        #QtWidgets.QApplication.processEvents()
+
+        #time.sleep(2.5)
+
+        input_percepts = zoo.compute_zoo_interaction()
+        #print(f"{input_percepts=}")
+
+        # display percepts in multi_input_viz
+        multi_input_viz.display_all_inputs(input_percepts)
+        multi_input_viz.update_display()
+        QtWidgets.QApplication.processEvents()
+
+        time.sleep(2.5)
+
+        ## break conditions
+        if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
+            print("All individuals are dead , Breaking")
+
+            SIMULATION_ACTIVE = False
+
         MAX_TIME -= 1
 
         if MAX_TIME < 0 or SIMULATION_ACTIVE==False:
@@ -169,14 +241,8 @@ def main():
     print("In run_population")
 
     global MAX_TIME
-    MAX_TIME = 100
+    MAX_TIME = 10
 
-    # timer = QtCore.QTimer()
-    # timer.timeout.connect(update)
-    # timer.start(100) # 10 FPS
-    #
-    #
-    # sys.exit(app.exec())
 
     # 3. Set up the timer
     timer = QTimer()
@@ -190,16 +256,6 @@ def main():
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
     timer.timeout.disconnect(update)
 
-    del timer
-    del loop
-
-
-
-
-    print("Evolution finished or aborted.")
 
 if __name__ == "__main__":
-    import time
-    start_time = time.time()
     main()
-    print("--- %s seconds ---" % (time.time() - start_time))
