@@ -164,7 +164,6 @@ def main():
         QtWidgets.QApplication.processEvents()
 
         if SIMULATION_ACTIVE==False:
-            print(f"In shutting_down at {MAX_TIME=}")
             loop.quit()
 
             zoo.population.shutdown()
