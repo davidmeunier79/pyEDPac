@@ -133,7 +133,7 @@ class Pacman(Individual):
             
         elif self.animal_nature == "-1":
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR
-        else
+        else:
             print(f"Warning, {self.animal_nature=} is not defined for Pacman.eat_pacgum":
 
         self.stats["nb_eaten_pacgums"] += 1
