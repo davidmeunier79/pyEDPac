@@ -357,7 +357,7 @@ class Zoo:
     def _in_grid(self, pos_x, pos_y):
         if 0 <= x + dir_x < self.cols and 0 <= y + dir_y < self.rows:
             return True
-        else
+        else:
             return False
 
 
