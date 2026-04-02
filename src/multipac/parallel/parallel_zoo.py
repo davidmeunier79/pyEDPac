@@ -73,23 +73,24 @@ class ParallelZoo(Zoo):
 
                 for dir_x, dir_y in directions:
 
-                    if 0 <= x + dir_x < self.rows and 0 <= y + dir_y < self.cols:
+                    if not self._in_grid(x + dir_x, y + dir_y):
+                        continue
 
-                        char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
+                    char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
 
-                        if char_contact in (".", " ") :
-                            print(f"Position of new_individual:  {x + dir_x} {y + dir_y}")
-                            self.population.individuals[new_index].set_position(x + dir_x, y + dir_y)
+                    if char_contact in (".", " ") :
+                        print(f"Position of new_individual:  {x + dir_x} {y + dir_y}")
+                        self.population.individuals[new_index].set_position(x + dir_x, y + dir_y)
 
-                            self.grid[y + dir_y][x + dir_x] = index_to_char(new_index)
+                        self.grid[y + dir_y][x + dir_x] = index_to_char(new_index)
 
-                            animal = new_index % 2
-                            animal_nature = self.animals[animal]["danger"]
-                            assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
-                                f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
+                        animal = new_index % 2
+                        animal_nature = self.animals[animal]["danger"]
+                        assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
+                            f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
 
-                            self.population.individuals[new_index].set_animal_nature(animal_nature)
-                            return
+                        self.population.individuals[new_index].set_animal_nature(animal_nature)
+                        return
 
             print("Could not find nearby empty position {x=} {y=} for new indiv {new_index}")
             print("Initing random_position")
@@ -220,7 +221,7 @@ class ParallelZoo(Zoo):
             self.init_nearby_position(new_index, contact_index, pacman_index)
 
             self.population.send_chromosome(new_index)
-            self.population.send_init_input(new_index)
+            self.population.send_init_input(nfound_shapeew_index)
 
             self.nb_deads -= 1
 

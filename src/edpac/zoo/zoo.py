@@ -196,67 +196,56 @@ class Zoo:
 
         dx, dy = move_map[pac.dir_body]
 
-
         new_x = pac.x + dx
         new_y = pac.y + dy
 
-        #print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
-
-        #rows, cols = self.grid.shape
+        if not self._in_grid(new_x, new_y):
+            return
 
         # Check for walls in the Zoo grid before moving
+        target_char = self.grid[new_y][new_x].decode("utf-8")
 
-        if 0 <= new_y < self.rows and 0 <= new_x < self.cols:
+        if target_char == 'X': # Not a wall
+            return
 
-        #if 0 <= new_x < cols and 0 <= new_y < rows: # old version
+        # Update grid data: old position becomes a dot
+        # if this a pacgum, increase life
+        if target_char == ".":
+            print("Eating pacgum, Life points: " , pac.life_points)
+            pac.eat_pacgum()
 
-            target_char = self.grid[new_y][new_x].decode("utf-8")
+        elif target_char == " ":
+            pass
+            #print("Moving forward in empty space")
 
-            if target_char == 'X': # Not a wall
+        else:
+            index = char_to_index(target_char)
+            animal = index % 2
+
+            print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
+
+            if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+                #
+                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                # self.population.individuals[index].is_bitten()
+
+                print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                pac.eat_prey(self.population.individuals[index].life_points)
+                print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                self.process_death(index)
+
+
+
+            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
                 return
 
-            # Update grid data: old position becomes a dot
-            # if this a pacgum, increase life
-            if target_char == ".":
-                print("Eating pacgum, Life points: " , pac.life_points)
-                pac.eat_pacgum()
+        self.grid[pac.y][pac.x] = ' '
 
-            elif target_char == " ":
-                pass
-                #print("Moving forward in empty space")
+        # New position becomes Pacman
+        self.grid[new_y][new_x] = index_to_char(pacman_index)
 
-            else:
-                index = char_to_index(target_char)
-                animal = index % 2
-
-                print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
-
-                if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
-                    #
-                    # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    # self.population.individuals[index].is_bitten()
-
-                    print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    pac.eat_prey(self.population.individuals[index].life_points)
-                    print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    self.process_death(index)
-
-
-
-                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                    print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
-                    return
-
-            self.grid[pac.y][pac.x] = ' '
-            #print(f"Pacman {pacman_index=} move from {pac.x}, {pac.y} to {new_x}, {new_y}")
-            #pac.x, pac.y = new_x, new_y
-
-            # New position becomes Pacman
-            self.grid[new_y][new_x] = index_to_char(pacman_index)
-
-            #print(self.grid[new_y][new_x])
-
-            pac.set_position(new_x, new_y)
+        pac.set_position(new_x, new_y)
 
 
     def integrate_visio_outputs(self, pac):
@@ -264,7 +253,6 @@ class Zoo:
         Scans the zoo grid in a fan shape based on dir_head.
         Returns a list of 5 shapes (lists of pixel coordinates).
         """
-        #rows, cols = self.grid.shape
 
         ## scanning laterally from higher to lower if dir_head = UP or LEFT ds > 0
         ## scanning laterally from lower to higher if dir_head = DOWN or RIGHT ds < 0
@@ -300,25 +288,26 @@ class Zoo:
                 nx = pac.x + (j * df[0]) + (rel_col * ds[0])
                 ny = pac.y + (j * df[1]) + (rel_col * ds[1])
 
-                if (0<=ny and ny < self.rows) and (0<=nx and nx < self.cols):
+                if not self._in_grid(nx, ny):
+                    continue
 
-                    char = self.grid[ny][nx].decode("utf-8")
+                char = self.grid[ny][nx].decode("utf-8")
 
-                    if char == '.' or char == ' ':
-                        continue
-                    elif char == 'X':
-                        animal = 'X'
-                    else:
-                        index = char_to_index(char)
-                        animal = index % 2
-                    #print(self.animals.keys())
+                if char == '.' or char == ' ':
+                    continue
+                elif char == 'X':
+                    animal = 'X'
+                else:
+                    index = char_to_index(char)
+                    animal = index % 2
+                #print(self.animals.keys())
 
-                    # 4. Check for Objects (Walls or Animals)
-                    assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
+                # 4. Check for Objects (Walls or Animals)
+                assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
 
-                    found_shape = self.blur_pattern(self.animals[animal]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
+                found_shape = self.blur_pattern(self.animals[animal]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
 
-                    break
+                break
 
             # If nothing found in this column, it's an empty sensor
             visio_patterns.append(found_shape)
@@ -365,12 +354,13 @@ class Zoo:
 
             pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
 
-
     def _in_grid(self, pos_x, pos_y)
         if 0 <= x + dir_x < self.cols and 0 <= y + dir_y < self.rows
             return True
         else
             return False
+
+
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
