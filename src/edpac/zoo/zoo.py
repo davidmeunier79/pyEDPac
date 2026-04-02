@@ -347,11 +347,11 @@ class Zoo:
         if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
             char = self._grid[pos_y][pos_x].decode("utf-8")
             return char
-
-        elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
-            print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
-            char = self.grid[pos_x][pos_y].decode("utf-8")
-            return char
+        #
+        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+        #     char = self._grid[pos_x][pos_y].decode("utf-8")
+        #     return char
 
         return 0
 
