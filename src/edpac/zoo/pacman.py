@@ -89,7 +89,7 @@ class Pacman(Individual):
     def set_animal_nature(self, animal_nature):
         self.animal_nature = animal_nature
 
-    def get_animal_nature(self, animal_nature):
+    def get_animal_nature(self):
         return self.animal_nature
 
     def get_position(self):

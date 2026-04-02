@@ -371,9 +371,10 @@ class Zoo:
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
         for pacman_index, pac in enumerate(self.population.individuals):
-            #print(pac)
             if pac==0:
                 continue
+
+            print(pac)
 
             x, y = pac.get_position()
 
@@ -394,8 +395,8 @@ class Zoo:
                     animal = contact_index % 2
 
                     if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                        print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                         pac.predator_contact()
-                        print("Contact with predator ", self.animals[animal]["name"], " Life points: " , pac.life_points)
 
                     elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
                         print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
@@ -405,6 +406,8 @@ class Zoo:
                     elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
                         print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
                         self.test_prey_reproduction(contact_index, pacman_index)
+                    else:
+                        print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
             # naturally losing life each time points

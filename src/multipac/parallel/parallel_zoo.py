@@ -59,7 +59,6 @@ class ParallelZoo(Zoo):
                     added = True
 
     def init_nearby_position(self, new_index, parent1_index, parent2_index):
-            added = False
 
             parent1 = self.population.individuals[parent1_index]
             parent2 = self.population.individuals[parent2_index]
@@ -79,8 +78,17 @@ class ParallelZoo(Zoo):
                         char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
 
                         if char_contact in (".", " ") :
-
+                            print(f"Position of new_individual:  {x + dir_x} {y + dir_y}")
                             self.population.individuals[new_index].set_position(x + dir_x, y + dir_y)
+
+                            self.grid[y + dir_y][x + dir_x] = index_to_char(new_index)
+
+                            animal = new_index % 2
+                            animal_nature = self.animals[animal]["danger"]
+                            assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
+                                f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
+
+                            self.population.individuals[new_index].set_animal_nature(animal_nature)
                             return
 
             print("Could not find nearby empty position {x=} {y=} for new indiv {new_index}")
