@@ -353,16 +353,19 @@ class Zoo:
         #     char = self._grid[pos_x][pos_y].decode("utf-8")
         #     return char
 
+        print(f"Error, could not find position {pos_x} {pos_y}")
         return 0
 
 
     def _set_in_grid(self, pos_x, pos_y, char):
         if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
             self._grid[pos_y][pos_x] = char
-
-        elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
-            print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
-            self._grid[pos_x][pos_y] = char
+        else:
+            print(f"Error, could not add {char} at position {pos_x} {pos_y}")
+        #
+        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+        #     self._grid[pos_x][pos_y] = char
 
     def _where_in_grid(self, char):
         if char in np.unique(self._grid):
