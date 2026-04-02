@@ -376,7 +376,7 @@ class Zoo:
             return (-1, -1)
 
     def test_pacman_contacts(self):
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0), [(1, -1), (1, 1), (-1, 1), (-1, -1)]
 
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:

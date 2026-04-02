@@ -21,7 +21,8 @@ class MultiPacmanConfig:
     VISIO_COLUMN_DEPTH = 6
     BLURRED_FACTOR = 0.2
 
-    MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    #MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
     INITIAL_LIFE_POINTS = 100
