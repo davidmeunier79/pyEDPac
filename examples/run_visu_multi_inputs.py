@@ -162,7 +162,6 @@ def main():
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
-        MAX_TIME -= 1
 
         if SIMULATION_ACTIVE==False:
             print(f"In shutting_down at {MAX_TIME=}")
