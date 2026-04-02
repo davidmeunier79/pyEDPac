@@ -353,7 +353,7 @@ class Zoo:
         #     char = self._grid[pos_x][pos_y].decode("utf-8")
         #     return char
 
-        print(f"Error, could not find position {pos_x} {pos_y}")
+        #print(f"Error, could not find position {pos_x} {pos_y}")
         return 0
 
 
