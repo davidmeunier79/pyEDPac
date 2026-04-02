@@ -366,7 +366,11 @@ class Zoo:
             pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
 
 
-
+    def _in_grid(self, pos_x, pos_y)
+        if 0 <= x + dir_x < self.cols and 0 <= y + dir_y < self.rows
+            return True
+        else
+            return False
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
@@ -374,40 +378,38 @@ class Zoo:
             if pac==0:
                 continue
 
-            print(pac)
+            #print(pac)
 
             x, y = pac.get_position()
 
-            rows, cols = self.grid.shape
-
             for dir_x, dir_y in directions:
-                if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
+                if not self._in_grid(x + dir_x,  y + dir_y):
+                    continue
 
-                    #char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
-                    char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
+                #char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
+                char_contact = self.grid[y + dir_y][x + dir_x].decode("utf-8")
 
-                    if char_contact in (".", " ", 'X') :
-                        continue
+                if char_contact in (".", " ", 'X') :
+                    continue
 
-                    else:
-                        contact_index = char_to_index(char_contact)
+                else:
+                    contact_index = char_to_index(char_contact)
 
-                    animal = contact_index % 2
+                animal = contact_index % 2
 
-                    if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                        print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
-                        pac.predator_contact()
+                if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                    print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                    pac.predator_contact()
 
-                    elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
-                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
-                        self.test_predator_reproduction(contact_index, pacman_index)
+                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                    print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                    self.test_predator_reproduction(contact_index, pacman_index)
 
-
-                    elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
-                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-                        self.test_prey_reproduction(contact_index, pacman_index)
-                    else:
-                        print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
+                elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                    print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+                    self.test_prey_reproduction(contact_index, pacman_index)
+                else:
+                    print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
             # naturally losing life each time points
