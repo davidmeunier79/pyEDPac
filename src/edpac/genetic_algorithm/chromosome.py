@@ -138,7 +138,7 @@ class Chromosome:
         start_idx = projection_idx * self.chromo_config.NB_GENES_EACH_PROJECTION
         
         # Décoder les gènes
-        genes_slice = self.genes[start_idx:start_idx + NB_GENES_EACH_PROJECTION]
+        genes_slice = self.genes[start_idx:start_idx + self.chromo_config.NB_GENES_EACH_PROJECTION]
         
         return genes_slice
 
