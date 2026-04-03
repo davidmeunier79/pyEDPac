@@ -151,7 +151,7 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
-        print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["min_fitness_preys"]=} {zoo.stats["min_fitness_predators"]=} {zoo.stats["generation"]=}", {zoo.stats["nb_deads"]=})
+        print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["min_fitness_preys"]=} {zoo.stats["min_fitness_predators"]=} {zoo.stats["generation"]=}, {zoo.stats["nb_deads"]=}")
         zoo.save_stats("test_stats")
 
         if nb_alive_indiv == 0:
