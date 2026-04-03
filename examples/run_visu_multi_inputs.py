@@ -168,7 +168,7 @@ def main():
             loop.quit()
             zoo.population.shutdown()
 
-        MAX_TIME+=1
+        TIME+=1
 
     print("In run_population")
 
