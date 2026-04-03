@@ -19,6 +19,9 @@ from ..config.ga_config import PopulationConfig
 from edpac.config.ga_config import ChromosomeConfig
 
 
+from ..config.network_config import NetworkConfig
+network_config = NetworkConfig()
+
 
 
 class Population:
@@ -217,14 +220,15 @@ class Population:
         if self.chromosome_config.RELATIVE_ENCODING:
             mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
             genes[mask] = np.random.rand(len(genes))[mask]
-        else
+
+        else:
             if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
                 print("VARIABLE_LENGTH_CHROMOSOME=TRUE and RELATIVE_ENCODING=FALSE not implemented yet")
-            else
 
+            else:
                 print("Mutation")
-                max_val = np.array([NB_IN_ASSEMBLIES, 2,
-                                    NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
+                max_val = np.array([network_config.NB_IN_ASSEMBLIES, 2,
+                                    network_config.NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
 
                 mutation_rate = self.mutation_config.MUTATION_RATE
 
