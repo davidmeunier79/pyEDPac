@@ -194,24 +194,24 @@ class Population:
                     print(f"Error, {len(genes1)=} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION} for projection_encoding")
                 nb_projections1 = len(genes1) // self.chromosome_config.NB_GENES_EACH_PROJECTION
 
-                crossover_point1 = np.random.choice(nb_projections1, 1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION
+                crossover_point1 = int(np.random.choice(nb_projections1, 1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
                 # genes2
                 if len(genes2) % self.chromosome_config.NB_GENES_EACH_PROJECTION != 0:
                     print(f"Error, {len(genes2)=} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION} for projection_encoding")
                 nb_projections2 = len(genes2) // self.chromosome_config.NB_GENES_EACH_PROJECTION
 
-                crossover_point2 = np.random.choice(nb_projections2,1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION
+                crossover_point2 = int(np.random.choice(nb_projections2,1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
 
                 part1 = genes1[:crossover_point1]
                 part2 = genes2[crossover_point2:]
 
-                # print("part1: ", part1.shape)
-                #print("part2: ", part2.shape)
+                print("part1: ", part1)
+                print("part2: ", part2)
 
-                offspring_genes = np.concatenate((part1, part2), axis = 0)
-                #print("offspring_genes: ", offspring_genes.shape)
+                offspring_genes = np.concatenate((part1, part2), axis = 0 , dtype = int)
+                print("offspring_genes: shape = ", offspring_genes.shape, " , dtype = ", offspring_genes.dtype)
 
                 assert  offspring_genes.shape[0] %  self.chromosome_config.NB_GENES_EACH_PROJECTION ==0, \
                     f"Error, {offspring_genes.shape[0]} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION}"
