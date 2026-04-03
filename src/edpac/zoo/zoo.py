@@ -422,22 +422,23 @@ class Zoo:
                 animal = contact_index % 2
 
                 if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                    print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                    #print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                     pac.predator_contact()
 
                 elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
-                    print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                    #print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                     pair_contacts.append((contact_index, pacman_index, "-1"))
 
                     #self.test_predator_reproduction(contact_index, pacman_index)
 
                 elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
-                    print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+                    #print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
 
                     pair_contacts.append((contact_index, pacman_index, "1"))
                     #self.test_prey_reproduction(contact_index, pacman_index)
                 else:
-                    print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
+                    pass
+                    #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
             # naturally losing life each time points

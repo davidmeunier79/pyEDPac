@@ -183,13 +183,13 @@ class ParallelZoo(Zoo):
         avail = self.check_available_individual_slot()
 
         if avail == -1: # no available slot
-            print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
+            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
         new_index = self._find_first_avail(avail, target_danger = "1")
 
         if new_index == -1:
-            print("No available slots for prey_reproduction danger, breaking")
+            #print("No available slots for prey_reproduction danger, breaking")
             return
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
@@ -209,13 +209,13 @@ class ParallelZoo(Zoo):
         avail = self.check_available_individual_slot()
 
         if avail == -1: # no available slot
-            print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
+            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
         new_index = self._find_first_avail(avail, target_danger = "-1")
 
         if new_index == -1:
-            print("No available slots for predator_reproduction danger, breaking")
+            #print("No available slots for predator_reproduction danger, breaking")
             return
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
