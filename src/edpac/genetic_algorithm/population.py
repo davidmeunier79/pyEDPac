@@ -207,9 +207,6 @@ class Population:
                 part1 = genes1[:crossover_point1]
                 part2 = genes2[crossover_point2:]
 
-                print("part1: ", part1)
-                print("part2: ", part2)
-
                 offspring_genes = np.concatenate((part1, part2), axis = 0 , dtype = int)
                 print("offspring_genes: shape = ", offspring_genes.shape, " , dtype = ", offspring_genes.dtype)
 
@@ -227,8 +224,6 @@ class Population:
             offspring_genes = genes1.copy()
             offspring_genes[crossover_point:] = genes2[crossover_point:]
 
-            print("Offspring: ")
-            print(offspring_genes)
             print("offspring_genes: ", offspring_genes.shape)
 
         indiv = Individual(self.chromosome_config, offspring_genes)

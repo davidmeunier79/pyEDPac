@@ -191,12 +191,12 @@ class Zoo:
         target_char = self._in_grid(new_x, new_y)
 
         if not target_char:
-            print(f"******* could not find move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            print(f"******* could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
             return
 
         if target_char == 'X': # Not a wall
 
-            print(f"******* could not find move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            print(f"******* could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
             return
 
         # Update grid data: old position becomes a dot
@@ -205,7 +205,7 @@ class Zoo:
             print("Eating pacgum, Life points: " , pac.life_points)
             pac.eat_pacgum()
 
-        if target_char != " ":
+        elif target_char != " ":
 
             index = char_to_index(target_char)
             animal = index % 2
