@@ -265,7 +265,7 @@ class ParallelZoo(Zoo):
         self.population.mutate(offspring)
         #print(f"{offspring.get_nb_genes()=}")
 
-        self.population.init_new_individual(new_index, offspring.get_genes())
+        self.population.init_new_individual(pacman_index = new_index, genes = offspring.get_genes())
 
         return True
 
