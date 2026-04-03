@@ -375,8 +375,30 @@ class Zoo:
             print(f"Error, {char=} could not be found in _grid")
             return (-1, -1)
 
+    def _compute_test_contats(self, pair_contacts):
+
+        print(pair_contacts)
+
+        # remove if one_indiv is dead in the pair
+        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]]!=0)]
+
+        checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
+
+        print(checked_pair_contacts)
+
+        for pac1, pac2, nature in pair_contacts:
+            if nature == "1":
+                test_prey_reproduction(pac1, pac2)
+
+            elif nature == "-1":
+                test_predator_reproduction(pac1, pac2)
+
+
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+
+        pair_contacts = []
+
 
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
@@ -406,11 +428,15 @@ class Zoo:
 
                 elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
                     print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
-                    self.test_predator_reproduction(contact_index, pacman_index)
+                    pair_contacts.append((contact_index, pacman_index, "-1"))
+
+                    #self.test_predator_reproduction(contact_index, pacman_index)
 
                 elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
                     print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-                    self.test_prey_reproduction(contact_index, pacman_index)
+
+                    pair_contacts.append((contact_index, pacman_index, "1"))
+                    #self.test_prey_reproduction(contact_index, pacman_index)
                 else:
                     print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
@@ -424,6 +450,10 @@ class Zoo:
             else:
                 pac.fitness = pac.life_points
                 pac.fitness_evaluated = True
+
+
+        self._compute_test_contats(pair_contacts)
+
 
         return len([pac for pac in self.population.individuals if pac])
 
