@@ -121,9 +121,11 @@ def main():
             loop.quit()
             return
         #
-        global MAX_TIME
+        global TIME
         #
-        print(f"{MAX_TIME=}")
+        print(f"{TIME=}")
+
+        self.stats["time"] = TIME
 
         # Update both windows
         zoo_viz.draw_zoo()
@@ -149,6 +151,7 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
+        print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["min_fitness_preys"]=} {zoo.stats["min_fitness_predators"]=} {zoo.stats["generation"]=}")
         zoo.save_stats("test_stats")
 
         if nb_alive_indiv == 0:
@@ -168,8 +171,8 @@ def main():
 
     print("In run_population")
 
-    global MAX_TIME
-    MAX_TIME = 0
+    global TIME
+    TIME = 0
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)

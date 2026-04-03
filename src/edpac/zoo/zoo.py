@@ -27,7 +27,8 @@ class Zoo:
 
         self.data_dir = self._get_data_dir()
 
-        self.nb_deads = 0
+
+        self.stats = {"time: ": 0 , "nb_predators": 0, "nb_preys" : 0, "mean_predator_fitness" : 0, "mean_prey_fitness": 0, "generation" : 0, "nb_deads": 0}
 
         #
         # # Mapping for clarity
@@ -399,7 +400,7 @@ class Zoo:
 
         pair_contacts = []
 
-
+        self.stats["mean_fitness"]
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
                 continue
@@ -452,8 +453,18 @@ class Zoo:
                 pac.fitness = pac.life_points
                 pac.fitness_evaluated = True
 
+                if pac.animal_nature == "-1":
+                    self.stats["mean_predator_fitness"] += pac.get_fitness()
+                    self.stats["nb_predators"] +=1
+                elif pac.animal_nature == "1":
+                    self.stats["mean_prey_fitness"] += pac.get_fitness()
+                    self.stats["nb_preys"] +=1
+
+        self.stats["generation"] = self.generation
+        self.stats["nb_deads"] = self.nb_deads
 
         self._compute_test_contats(pair_contacts)
+
 
 
         return len([pac for pac in self.population.individuals if pac])
@@ -473,4 +484,19 @@ class Zoo:
 
         # increment nb_deads
         self.nb_deads += 1
+
+    def save_stats(self, indiv_path):
+
+        import json
+        import os
+
+        if indiv_path==0:
+            indiv_path = os.path.abspath("")
+
+        file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.time}.json")
+
+        with open(file_stats, 'w+') as fp:
+            json.dump(self.stats, fp, indent=4)
+
+
 
