@@ -32,7 +32,7 @@ class Chromosome:
         self.chromo_config = config or ChromosomeConfig()
         
         if genes is not None:
-            self.genes = np.array(genes, dtype=np.float32)
+            self.genes = np.array(genes, dtype=np.int64)
 
         else:
             # Générer aléatoirement
