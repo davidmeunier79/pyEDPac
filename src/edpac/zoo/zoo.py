@@ -460,7 +460,6 @@ class Zoo:
                     self.stats["nb_preys"] +=1
 
         self.stats["generation"] = self.population.generation
-        self.stats["nb_deads"] = self.nb_deads
 
         self._compute_test_contats(pair_contacts)
 
@@ -482,7 +481,7 @@ class Zoo:
         self.population.individuals[pacman_index] = 0
 
         # increment nb_deads
-        self.nb_deads += 1
+        self.stats["nb_deads"] += 1
 
     def save_stats(self, indiv_path):
 
