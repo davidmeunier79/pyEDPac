@@ -180,10 +180,10 @@ class EvoNetwork(EDNetwork):
                 #TODO
                 #print("RELATIVE_ENCODING and VARIABLE_LENGTH_CHROMOSOME not yet coded")
 
-                assert self.chromosome.nb_genes % self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION == 0, \
+                assert self.chromosome.get_nb_genes() % self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION == 0, \
                     "Error, {self.chromosome.nb_genes=} should be a multiple of {self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION}"
 
-                nb_projections = self.chromosome.nb_genes // self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION
+                nb_projections = self.chromosome.get_nb_genes() // self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION
 
                 # Pour chaque projection codée
                 for proj_id in range(nb_projections):
