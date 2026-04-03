@@ -380,7 +380,7 @@ class Zoo:
         print(pair_contacts)
 
         # remove if one_indiv is dead in the pair
-        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]]!=0)]
+        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]!=0)]
 
         checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
 
@@ -388,11 +388,10 @@ class Zoo:
 
         for pac1, pac2, nature in pair_contacts:
             if nature == "1":
-                test_prey_reproduction(pac1, pac2)
+                self.test_prey_reproduction(pac1, pac2)
 
             elif nature == "-1":
-                test_predator_reproduction(pac1, pac2)
-
+                self.test_predator_reproduction(pac1, pac2)
 
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
