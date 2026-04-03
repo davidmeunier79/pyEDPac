@@ -82,7 +82,7 @@ class ParallelPopulation(PacmanPopulation):
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[pacman_index]})
 
-        print(f[ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
+        print(f"[ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
 
         response = pipe.recv()
         if response['type'] == 'READY':
