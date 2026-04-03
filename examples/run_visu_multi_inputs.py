@@ -149,6 +149,7 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
+        zoo.save_stats("test_stats")
 
         if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")

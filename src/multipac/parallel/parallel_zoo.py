@@ -28,7 +28,7 @@ class ParallelZoo(Zoo):
         self.population = ParallelPopulation(pop_config = self.config )
         super().__init__()
 
-        self.stats = {"nb_predators": 0, "nb_preys" : 0}
+        self.stats = {"nb_predators": 0, "nb_preys" : 0, "mean_predator_fitness" : 0, "mean_prey_fitness": 0}
 
     def init_random_position(self, index):
             added = False
@@ -281,6 +281,19 @@ class ParallelZoo(Zoo):
         else:
             return -1
 
+
+    def save_stats(self, indiv_path):
+
+        import json
+        import os
+
+        if indiv_path==0:
+            indiv_path = os.path.abspath("")
+
+        file_stats = os.path.join(indiv_path, f"Stats_evozoo_gen{self.population.generation}.json")
+
+        with open(file_stats, 'w+') as fp:
+            json.dump(self.stats, fp, indent=4)
 
 
 
