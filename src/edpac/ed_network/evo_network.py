@@ -65,197 +65,334 @@ class EvoNetwork(EDNetwork):
         
         if self.chromosome.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
 
-            # Pour chaque projection codée
-            projection_complete = False
+            if self.chromosome.chromo_config.RELATIVE_ENCODING:
 
-            pre_id= -1
-            proj_nature = -1
-            post_id=-1
+                # Pour chaque projection codée
+                projection_complete = False
 
-            nb_in_assemblies = self.config.NB_INPUT_ASSEMBLIES
-            nb_out_assemblies = self.config.NB_OUTPUT_ASSEMBLIES
+                pre_id= -1
+                proj_nature = -1
+                post_id=-1
 
-            for gene_id, gene in enumerate(self.chromosome.get_genes()):
+                nb_in_assemblies = self.config.NB_INPUT_ASSEMBLIES
+                nb_out_assemblies = self.config.NB_OUTPUT_ASSEMBLIES
 
-                # print("Gene: ", gene_id)
+                for gene_id, gene in enumerate(self.chromosome.get_genes()):
 
-                if gene_id %3 == 0:
-                    projection_complete = False
+                    # print("Gene: ", gene_id)
 
-                    pre_id=int(gene*nb_in_assemblies)
-                    proj_nature = -1
-                    post_id = -1
+                    if gene_id %3 == 0:
+                        projection_complete = False
 
-                elif gene_id %3 == 1:
-                    proj_nature = (gene < 0.5 )
+                        pre_id=int(gene*nb_in_assemblies)
+                        proj_nature = -1
+                        post_id = -1
 
-                elif gene_id %3 == 2:
-                    post_id = int(gene*nb_out_assemblies)
+                    elif gene_id %3 == 1:
+                        proj_nature = (gene < 0.5 )
 
-                if pre_id == -1 or proj_nature == -1 or post_id == -1:
-                    projection_complete = False
-                    continue
+                    elif gene_id %3 == 2:
+                        post_id = int(gene*nb_out_assemblies)
 
-                projection_complete = True
-                #
-                # print("*** projection_complete ** ")
-                # print("pre_id ", pre_id )
-                # print("proj_nature ", proj_nature )
-                # print("post_id ", post_id)
+                    if pre_id == -1 or proj_nature == -1 or post_id == -1:
+                        projection_complete = False
+                        continue
 
-                if len(self.projections) % self.chromosome.chromo_config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
+                    projection_complete = True
+                    #
+                    # print("*** projection_complete ** ")
+                    # print("pre_id ", pre_id )
+                    # print("proj_nature ", proj_nature )
+                    # print("post_id ", post_id)
 
-                    if (nb_in_assemblies+1) < self.config.NB_IN_ASSEMBLIES :
-                        nb_in_assemblies=nb_in_assemblies+1
+                    if len(self.projections) % self.chromosome.chromo_config.NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY == 0:
 
-                    # else:
-                    #     print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
-                    #     print(f"(Already {len(self.projections)} projections stored)")
+                        if (nb_in_assemblies+1) < self.config.NB_IN_ASSEMBLIES :
+                            nb_in_assemblies=nb_in_assemblies+1
 
-                    if (nb_out_assemblies+1) < self.config.NB_OUT_ASSEMBLIES :
-                        nb_out_assemblies=nb_out_assemblies+1
+                        # else:
+                        #     print(f"Error , too many nb_in_assemblies = {nb_in_assemblies}")
+                        #     print(f"(Already {len(self.projections)} projections stored)")
 
-                    # else:
-                    #     print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}")
-                    #     print(f"(Already {len(self.projections)} projections stored)")
+                        if (nb_out_assemblies+1) < self.config.NB_OUT_ASSEMBLIES :
+                            nb_out_assemblies=nb_out_assemblies+1
 
-                direct = 0
-                hidden = 0
-                # Mapper les indices aux assemblées
-                if pre_id < self.config.NB_INPUT_ASSEMBLIES:
-                    pre_assembly = self.input_assemblies[pre_id]
+                        # else:
+                        #     print(f"Error , too many nb_out_assemblies = {nb_out_assemblies}")
+                        #     print(f"(Already {len(self.projections)} projections stored)")
 
-                    self.stats["nb_input_projections"] += 1
+                    direct = 0
+                    hidden = 0
+                    # Mapper les indices aux assemblées
+                    if pre_id < self.config.NB_INPUT_ASSEMBLIES:
+                        pre_assembly = self.input_assemblies[pre_id]
 
-                    direct += 1
-                else:
-                    pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
-                    pre_assembly = self.hidden_assemblies[pre_id]
+                        self.stats["nb_input_projections"] += 1
 
-                    hidden += 1
+                        direct += 1
+                    else:
+                        pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
+                        pre_assembly = self.hidden_assemblies[pre_id]
 
-                if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
-                    post_assembly = self.output_assemblies[post_id]
+                        hidden += 1
 
-                    self.stats["nb_output_projections"] += 1
-                    direct += 1
-                else:
-                    post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
-                    post_assembly = self.hidden_assemblies[post_id]
+                    if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
+                        post_assembly = self.output_assemblies[post_id]
 
-                    hidden += 1
+                        self.stats["nb_output_projections"] += 1
+                        direct += 1
+                    else:
+                        post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
+                        post_assembly = self.hidden_assemblies[post_id]
 
-                if direct == 2:
-                    self.stats["nb_direct_projections"] += 1
+                        hidden += 1
 
-                if hidden == 2:
-                    self.stats["nb_internal_projections"] += 1
+                    if direct == 2:
+                        self.stats["nb_direct_projections"] += 1
 
-                # Déterminer le type (excitatory par défaut)
-                if proj_nature:
-                    nature = ProjectionNature.EXCITATORY
-                    self.stats["nb_excit_projections"] += 1
+                    if hidden == 2:
+                        self.stats["nb_internal_projections"] += 1
 
-                else:
-                    nature = ProjectionNature.INHIBITORY
-                    self.stats["nb_inhib_projections"] += 1
+                    # Déterminer le type (excitatory par défaut)
+                    if proj_nature:
+                        nature = ProjectionNature.EXCITATORY
+                        self.stats["nb_excit_projections"] += 1
 
-                projection = self.create_projection(
-                    pre_assembly,
-                    post_assembly,
-                    event_manager = self.event_manager,
-                    connection_ratio=1.0,  # Utiliser weight pour ratio
-                    nature=nature,
-                    synapse_config=self.synapse_config
-                )
+                    else:
+                        nature = ProjectionNature.INHIBITORY
+                        self.stats["nb_inhib_projections"] += 1
 
-                if projection is not None:
-                    self.stats["nb_total_projections"] += 1
+                    projection = self.create_projection(
+                        pre_assembly,
+                        post_assembly,
+                        event_manager = self.event_manager,
+                        connection_ratio=1.0,  # Utiliser weight pour ratio
+                        nature=nature,
+                        synapse_config=self.synapse_config
+                    )
 
-                    self.projections.append(projection)
+                    if projection is not None:
+                        self.stats["nb_total_projections"] += 1
+
+                        self.projections.append(projection)
+
+            else:
+                #TODO
+                #print("RELATIVE_ENCODING and VARIABLE_LENGTH_CHROMOSOME not yet coded")
+
+                assert self.chromosome.get_nb_genes() % self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION == 0, \
+                    "Error, {self.chromosome.nb_genes=} should be a multiple of {self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION}"
+
+                nb_projections = self.chromosome.get_nb_genes() // self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION
+
+                # Pour chaque projection codée
+                for proj_id in range(nb_projections):
+                    #print("Projection: ", proj_idx)
+                    pre_id, proj_nature, post_id  = self.chromosome.get_projection(proj_id)
+                    #print("Gene values: ", pre_id, " ", proj_nature," ", post_id)
+
+                    # building projection
+                    direct = 0
+                    hidden = 0
+                    # Mapper les indices aux assemblées
+                    if pre_id < self.config.NB_INPUT_ASSEMBLIES:
+                        pre_assembly = self.input_assemblies[pre_id]
+
+                        self.stats["nb_input_projections"] += 1
+                        direct += 1
+
+                    else:
+                        pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
+                        pre_assembly = self.hidden_assemblies[pre_id]
+                        hidden += 1
+
+                    if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
+                        post_assembly = self.output_assemblies[post_id]
+
+                        self.stats["nb_output_projections"] += 1
+                        direct += 1
+                    else:
+                        post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
+                        post_assembly = self.hidden_assemblies[post_id]
+
+                        hidden += 1
+
+                    if direct == 2:
+                        self.stats["nb_direct_projections"] += 1
+
+                    if hidden == 2:
+                        self.stats["nb_internal_projections"] += 1
+
+                    # Déterminer le type (excitatory par défaut)
+                    if proj_nature:
+                        nature = ProjectionNature.EXCITATORY
+                        self.stats["nb_excit_projections"] += 1
+
+                    else:
+                        nature = ProjectionNature.INHIBITORY
+                        self.stats["nb_inhib_projections"] += 1
+
+                    projection = self.create_projection(
+                        pre_assembly,
+                        post_assembly,
+                        event_manager = self.event_manager,
+                        connection_ratio=1.0,  # Utiliser weight pour ratio
+                        nature=nature,
+                        synapse_config=SynapseConfig()
+                    )
+
+                    if projection is not None:
+                        self.projections.append(projection)
+
+
         else:
 
-            # Pour chaque projection codée
-            projection_complete = False
+            if self.chromosome.chromo_config.RELATIVE_ENCODING:
 
-            pre_id= -1
-            proj_nature = -1
-            post_id=-1
+                print("RELATIVE_ENCODING=True and VARIABLE_LENGTH_CHROMOSOME=False ")
+                # Pour chaque projection codée
+                projection_complete = False
 
-            for gene_id, gene in enumerate(self.chromosome.get_genes()):
+                pre_id= -1
+                proj_nature = -1
+                post_id=-1
 
-                if gene_id %3 == 0:
-                    projection_complete = False
+                for gene_id, gene in enumerate(self.chromosome.get_genes()):
 
-                    pre_id=int(gene*self.config.NB_IN_ASSEMBLIES)
-                    proj_nature = -1
-                    post_id = -1
+                    if gene_id %3 == 0:
+                        projection_complete = False
 
-                elif gene_id %3 == 1:
-                    proj_nature = (gene < 0.5 )
+                        pre_id=int(gene*self.config.NB_IN_ASSEMBLIES)
+                        proj_nature = -1
+                        post_id = -1
 
-                elif gene_id %3 == 2:
-                    post_id = int(gene*self.config.NB_OUT_ASSEMBLIES)
+                    elif gene_id %3 == 1:
+                        proj_nature = (gene < 0.5 )
 
-                if pre_id == -1 or proj_nature == -1 or post_id == -1:
-                    projection_complete = False
-                    continue
+                    elif gene_id %3 == 2:
+                        post_id = int(gene*self.config.NB_OUT_ASSEMBLIES)
 
-                projection_complete = True
+                    if pre_id == -1 or proj_nature == -1 or post_id == -1:
+                        projection_complete = False
+                        continue
 
-                # building projection
-                direct = 0
-                hidden = 0
-                # Mapper les indices aux assemblées
-                if pre_id < self.config.NB_INPUT_ASSEMBLIES:
-                    pre_assembly = self.input_assemblies[pre_id]
+                    projection_complete = True
 
-                    self.stats["nb_input_projections"] += 1
-                    direct += 1
-                else:
-                    pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
-                    pre_assembly = self.hidden_assemblies[pre_id]
+                    # building projection
+                    direct = 0
+                    hidden = 0
+                    # Mapper les indices aux assemblées
+                    if pre_id < self.config.NB_INPUT_ASSEMBLIES:
+                        pre_assembly = self.input_assemblies[pre_id]
 
-                    hidden += 1
+                        self.stats["nb_input_projections"] += 1
+                        direct += 1
+                    else:
+                        pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
+                        pre_assembly = self.hidden_assemblies[pre_id]
 
-                if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
-                    post_assembly = self.output_assemblies[post_id]
+                        hidden += 1
 
-                    self.stats["nb_output_projections"] += 1
-                    direct += 1
-                else:
-                    post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
-                    post_assembly = self.hidden_assemblies[post_id]
+                    if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
+                        post_assembly = self.output_assemblies[post_id]
 
-                    hidden += 1
+                        self.stats["nb_output_projections"] += 1
+                        direct += 1
+                    else:
+                        post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
+                        post_assembly = self.hidden_assemblies[post_id]
 
-                if direct == 2:
-                    self.stats["nb_direct_projections"] += 1
+                        hidden += 1
 
-                if hidden == 2:
-                    self.stats["nb_internal_projections"] += 1
+                    if direct == 2:
+                        self.stats["nb_direct_projections"] += 1
 
-                # Déterminer le type (excitatory par défaut)
-                if proj_nature:
-                    nature = ProjectionNature.EXCITATORY
-                    self.stats["nb_excit_projections"] += 1
+                    if hidden == 2:
+                        self.stats["nb_internal_projections"] += 1
 
-                else:
-                    nature = ProjectionNature.INHIBITORY
-                    self.stats["nb_inhib_projections"] += 1
+                    # Déterminer le type (excitatory par défaut)
+                    if proj_nature:
+                        nature = ProjectionNature.EXCITATORY
+                        self.stats["nb_excit_projections"] += 1
 
-                projection = self.create_projection(
-                    pre_assembly,
-                    post_assembly,
-                    connection_ratio=1.0,  # Utiliser weight pour ratio
-                    nature=nature,
-                    synapse_config=self.synapse_config
-                )
+                    else:
+                        nature = ProjectionNature.INHIBITORY
+                        self.stats["nb_inhib_projections"] += 1
 
-                if projection is not None:
-                    self.projections.append(projection)
+                    projection = self.create_projection(
+                        pre_assembly,
+                        post_assembly,
+                        connection_ratio=1.0,  # Utiliser weight pour ratio
+                        nature=nature,
+                        synapse_config=self.synapse_config
+                    )
 
-                    self.stats["nb_total_projections"] += 1
+                    if projection is not None:
+                        self.projections.append(projection)
+
+                        self.stats["nb_total_projections"] += 1
+
+            else:
+                print("RELATIVE_ENCODING=False and VARIABLE_LENGTH_CHROMOSOME=False ")
+
+                # Pour chaque projection codée
+                for proj_id in range(self.chromosome.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME):
+                    #print("Projection: ", proj_idx)
+                    pre_id, proj_nature, post_id  = self.chromosome.get_projection(proj_id)
+                    #print("Gene values: ", pre_id, " ", proj_nature," ", post_id)
+
+                    # building projection
+                    direct = 0
+                    hidden = 0
+                    # Mapper les indices aux assemblées
+                    if pre_id < self.config.NB_INPUT_ASSEMBLIES:
+                        pre_assembly = self.input_assemblies[pre_id]
+
+                        self.stats["nb_input_projections"] += 1
+                        direct += 1
+
+                    else:
+                        pre_id = pre_id - self.config.NB_INPUT_ASSEMBLIES
+                        pre_assembly = self.hidden_assemblies[pre_id]
+                        hidden += 1
+
+                    if post_id < self.config.NB_OUTPUT_ASSEMBLIES:
+                        post_assembly = self.output_assemblies[post_id]
+
+                        self.stats["nb_output_projections"] += 1
+                        direct += 1
+                    else:
+                        post_id = post_id - self.config.NB_OUTPUT_ASSEMBLIES
+                        post_assembly = self.hidden_assemblies[post_id]
+
+                        hidden += 1
+
+                    if direct == 2:
+                        self.stats["nb_direct_projections"] += 1
+
+                    if hidden == 2:
+                        self.stats["nb_internal_projections"] += 1
+
+                    # Déterminer le type (excitatory par défaut)
+                    if proj_nature:
+                        nature = ProjectionNature.EXCITATORY
+                        self.stats["nb_excit_projections"] += 1
+
+                    else:
+                        nature = ProjectionNature.INHIBITORY
+                        self.stats["nb_inhib_projections"] += 1
+
+                    projection = self.create_projection(
+                        pre_assembly,
+                        post_assembly,
+                        event_manager = self.event_manager,
+                        connection_ratio=1.0,  # Utiliser weight pour ratio
+                        nature=nature,
+                        synapse_config=SynapseConfig()
+                    )
+
+                    if projection is not None:
+                        self.projections.append(projection)
 
     def _reorganise_synapses(self):
         """
