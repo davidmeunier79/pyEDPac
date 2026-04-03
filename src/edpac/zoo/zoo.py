@@ -224,8 +224,8 @@ class Zoo:
 
 
 
-            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
+            else:
+                print("Same nature animal , cannot be eaten , we are no cannibals! "
                 return
 
         self._set_in_grid(pac.x, pac.y, ' ')
