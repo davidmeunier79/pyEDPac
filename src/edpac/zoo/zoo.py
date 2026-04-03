@@ -491,7 +491,9 @@ class Zoo:
         if indiv_path==0:
             indiv_path = os.path.abspath("")
 
-        file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.time}.json")
+
+
+        file_stats = os.path.join(indiv_path, f"Stats_zoo_{zoo.stats["time"]}.json")
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
