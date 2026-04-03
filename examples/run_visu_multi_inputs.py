@@ -103,10 +103,6 @@ def main():
 
     QtWidgets.QApplication.processEvents()
 
-
-
-
-
     print("Running population")
     zoo.population.initialize_all_inputs()
 
@@ -125,9 +121,11 @@ def main():
             loop.quit()
             return
         #
-        global MAX_TIME
+        global TIME
         #
-        print(f"{MAX_TIME=}")
+        print(f"{TIME=}")
+
+        zoo.stats["time"] = TIME
 
         # Update both windows
         zoo_viz.draw_zoo()
@@ -153,6 +151,9 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
+        print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["mean_prey_fitness"]=} {zoo.stats["mean_predator_fitness"]=} {zoo.stats["generation"]=}, {zoo.stats["nb_deads"]=}")
+
+        zoo.save_stats()
 
         if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
@@ -167,12 +168,12 @@ def main():
             loop.quit()
             zoo.population.shutdown()
 
-        MAX_TIME+=1
+        TIME+=1
 
     print("In run_population")
 
-    global MAX_TIME
-    MAX_TIME = 0
+    global TIME
+    TIME = 0
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)

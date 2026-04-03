@@ -32,7 +32,7 @@ class Chromosome:
         self.chromo_config = config or ChromosomeConfig()
         
         if genes is not None:
-            self.genes = np.array(genes, dtype=np.float32)
+            self.genes = np.array(genes, dtype=np.int64)
 
         else:
             # Générer aléatoirement
@@ -58,10 +58,14 @@ class Chromosome:
 
             else:
                 #TODO
-                print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
+                #print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
 
                 nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
-                print(f"After _initialize_random_genes, {nb_projections=}")
+
+                while nb_projections==0:
+                    nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
+
+                #print(f"After _initialize_random_genes, {nb_projections=}")
 
                 list_genes = [
                     np.random.randint(low = 0,
@@ -75,6 +79,7 @@ class Chromosome:
                                       high = network_config.NB_OUT_ASSEMBLIES,
                                       size = nb_projections)
                     ]
+
 
                 genes = np.concatenate(np.array(list_genes, dtype = int).T, axis = 0)
 

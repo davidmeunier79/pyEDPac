@@ -28,8 +28,6 @@ class ParallelZoo(Zoo):
         self.population = ParallelPopulation(pop_config = self.config )
         super().__init__()
 
-        self.stats = {"nb_predators": 0, "nb_preys" : 0}
-
     def init_random_position(self, index):
             added = False
 
@@ -183,49 +181,54 @@ class ParallelZoo(Zoo):
         avail = self.check_available_individual_slot()
 
         if avail == -1: # no available slot
-            print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
+            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
         new_index = self._find_first_avail(avail, target_danger = "1")
 
         if new_index == -1:
-            print("No available slots for prey_reproduction danger, breaking")
+            #print("No available slots for prey_reproduction danger, breaking")
             return
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
 
             print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
-            self.init_nearby_position(new_index, contact_index, pacman_index)
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
 
             self.population.send_chromosome(new_index)
             #self.population.send_init_input(new_index)
 
-            self.nb_deads -= 1
+        else:
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
     def test_predator_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
         avail = self.check_available_individual_slot()
 
         if avail == -1: # no available slot
-            print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
+            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
             return
 
         new_index = self._find_first_avail(avail, target_danger = "-1")
 
         if new_index == -1:
-            print("No available slots for predator_reproduction danger, breaking")
+            #print("No available slots for predator_reproduction danger, breaking")
             return
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             print(f"Predator {new_index=} available, building")
             #self.stats["nb_predators"] += 1
-            self.init_nearby_position(new_index, contact_index, pacman_index)
+
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
 
             self.population.send_chromosome(new_index)
             #self.population.send_init_input(new_index)
 
-            self.nb_deads -= 1
+        else:
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
@@ -246,7 +249,7 @@ class ParallelZoo(Zoo):
         # if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
         #     parent1.life_points -= int(parent1.pacman_config.INITIAL_LIFE_POINTS // 2)
         #     parent2.life_points -= int(parent2.pacman_config.INITIAL_LIFE_POINTS // 2)
-
+        #
         if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
             parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD // 2)
             parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD // 2)
@@ -257,12 +260,14 @@ class ParallelZoo(Zoo):
 
         # compute mix chromosome between two parents
         offspring = self.population.crossover(parent1, parent2)
+        #print("After crossover, offspring = ", offspring.genes)
 
         # Muter
         self.population.mutate(offspring)
+        #print("After mutation, offspring = ", offspring.genes)
         #print(f"{offspring.get_nb_genes()=}")
 
-        self.population.init_new_individual(new_index, offspring.get_genes())
+        self.population.init_new_individual(pacman_index = new_index, genes = offspring.get_genes())
 
         return True
 
@@ -275,7 +280,5 @@ class ParallelZoo(Zoo):
             return avail
         else:
             return -1
-
-
 
 

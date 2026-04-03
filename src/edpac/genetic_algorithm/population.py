@@ -183,36 +183,32 @@ class Population:
                 # print("part1: ", part1.shape)
                 #print("part2: ", part2.shape)
 
-                offspring_genes = np.concatenate((part1, part2), axis = 0)
-                print("offspring_genes: ", offspring_genes.shape)
+                offspring_genes = np.concatenate((part1, part2), axis = 0 , dtype = int)
+                print("offspring_genes: shape = ", offspring_genes.shape, " , dtype = ", offspring_genes.dtype)
                 #print(offspring_genes)
             else:
                 #TODO
-                print("VARIABLE_LENGTH_CHROMOSOME=True and RELATIVE_ENCODING=False are not encoded yet")
 
                 # genes1
                 if len(genes1) % self.chromosome_config.NB_GENES_EACH_PROJECTION != 0:
                     print(f"Error, {len(genes1)=} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION} for projection_encoding")
                 nb_projections1 = len(genes1) // self.chromosome_config.NB_GENES_EACH_PROJECTION
 
-                crossover_point1 = np.random.choice(nb_projections1, 1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION
+                crossover_point1 = int(np.random.choice(nb_projections1, 1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
                 # genes2
                 if len(genes2) % self.chromosome_config.NB_GENES_EACH_PROJECTION != 0:
                     print(f"Error, {len(genes2)=} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION} for projection_encoding")
                 nb_projections2 = len(genes2) // self.chromosome_config.NB_GENES_EACH_PROJECTION
 
-                crossover_point2 = np.random.choice(nb_projections2,1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION
+                crossover_point2 = int(np.random.choice(nb_projections2,1, replace=False)[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
 
                 part1 = genes1[:crossover_point1]
                 part2 = genes2[crossover_point2:]
 
-                # print("part1: ", part1.shape)
-                #print("part2: ", part2.shape)
-
-                offspring_genes = np.concatenate((part1, part2), axis = 0)
-                print("offspring_genes: ", offspring_genes.shape)
+                offspring_genes = np.concatenate((part1, part2), axis = 0 , dtype = int)
+                print("offspring_genes: shape = ", offspring_genes.shape, " , dtype = ", offspring_genes.dtype)
 
                 assert  offspring_genes.shape[0] %  self.chromosome_config.NB_GENES_EACH_PROJECTION ==0, \
                     f"Error, {offspring_genes.shape[0]} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION}"
@@ -228,8 +224,6 @@ class Population:
             offspring_genes = genes1.copy()
             offspring_genes[crossover_point:] = genes2[crossover_point:]
 
-            print("Offspring: ")
-            print(offspring_genes)
             print("offspring_genes: ", offspring_genes.shape)
 
         indiv = Individual(self.chromosome_config, offspring_genes)
@@ -250,7 +244,6 @@ class Population:
 
         else:
             if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
-                print("VARIABLE_LENGTH_CHROMOSOME=TRUE and RELATIVE_ENCODING=FALSE not implemented yet")
 
                 if len(genes) % 3 != 0:
                     print("Error, {nb_genes=} should be a multiple of 3 for projection_encoding")
@@ -259,29 +252,16 @@ class Population:
                 max_val = np.array([network_config.NB_IN_ASSEMBLIES, 2,
                                     network_config.NB_OUT_ASSEMBLIES]*nb_projections, dtype = int)
 
-                mutation_rate = self.mutation_config.MUTATION_RATE
-
-                mask = np.random.rand(len(genes)) < mutation_rate
-
-                print("Nb Mutation", np.sum(mask == True))
-                print("Before mutation: ", genes[mask])
+                mask = np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE
                 genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-                print("After mutation: ", genes[mask])
 
 
             else:
-                print("Mutation")
                 max_val = np.array([network_config.NB_IN_ASSEMBLIES, 2,
                                     network_config.NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
 
-                mutation_rate = self.mutation_config.MUTATION_RATE
-
-                mask = np.random.rand(len(genes)) < mutation_rate
-
-                print("Nb Mutation", np.sum(mask == True))
-                print("Before mutation: ", genes[mask])
+                mask = np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE
                 genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-                print("After mutation: ", genes[mask])
 
 
         # reinit
@@ -300,12 +280,6 @@ class Population:
         for indiv, fitness in zip(self.individuals, list_fitnesses):
 
             indiv.set_fitness(fitness)
-
-    def set_indivual_ages(self):
-
-        for indiv in self.individuals:
-
-            indiv.set_age(self.generation)
 
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""

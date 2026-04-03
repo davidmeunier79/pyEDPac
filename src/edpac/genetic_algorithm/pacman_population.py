@@ -69,7 +69,7 @@ class PacmanPopulation(Population):
 
 
         print(f"Init new individual {pacman_index}")
-        self.individuals[pacman_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config)
+        self.individuals[pacman_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config, genes=genes)
         self.generation +=1
         self.individuals[pacman_index].set_age(self.generation)
 

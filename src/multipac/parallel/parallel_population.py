@@ -82,11 +82,11 @@ class ParallelPopulation(PacmanPopulation):
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'SET_CHROMOSOME', 'data': self.individuals[pacman_index]})
 
-        print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
+        print(f"[ParallelPopulation] Waiting New Worker {pacman_index} SET_CHROMOSOME")
 
         response = pipe.recv()
         if response['type'] == 'READY':
-            print(f"***** [ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
+            print(f"[ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
 
 
     def send_init_input(self, pacman_index):
@@ -97,11 +97,11 @@ class ParallelPopulation(PacmanPopulation):
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'INIT_INPUTS'})
 
-        print(f"***** [ParallelPopulation] Waiting New Worker {pacman_index} INIT_INPUTS")
+        print(f"[ParallelPopulation] Waiting New Worker {pacman_index} INIT_INPUTS")
 
         response = pipe.recv()
         if response['type'] == 'READY':
-            print(f"***** [ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
+            print(f"[ParallelPopulation] Confirmed: New Worker {response['id']} is initialized.")
 
 
     def run_one_step(self, visio_inputs):

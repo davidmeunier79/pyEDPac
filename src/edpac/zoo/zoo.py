@@ -27,7 +27,8 @@ class Zoo:
 
         self.data_dir = self._get_data_dir()
 
-        self.nb_deads = 0
+
+        self.stats = {"time: ": 0 , "nb_predators": 0, "nb_preys" : 0, "mean_predator_fitness" : 0, "mean_prey_fitness": 0, "generation" : 0, "nb_deads": 0}
 
         #
         # # Mapping for clarity
@@ -189,27 +190,28 @@ class Zoo:
         new_y = pac.y + dy
 
         target_char = self._in_grid(new_x, new_y)
+
         if not target_char:
+            print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
             return
 
         if target_char == 'X': # Not a wall
+
+            print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
             return
 
         # Update grid data: old position becomes a dot
         # if this a pacgum, increase life
         if target_char == ".":
-            print("Eating pacgum, Life points: " , pac.life_points)
+            print(f"Pacman {pacman_index} Eating pacgum, Life points: " , pac.life_points)
             pac.eat_pacgum()
 
-        elif target_char == " ":
-            pass
-            #print("Moving forward in empty space")
+        elif target_char != " ":
 
-        else:
             index = char_to_index(target_char)
             animal = index % 2
 
-            print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
+            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
 
             if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
                 #
@@ -223,8 +225,8 @@ class Zoo:
 
 
 
-            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
+            else:
+                print("Same nature animal , cannot be eaten , we are no cannibals!")
                 return
 
         self._set_in_grid(pac.x, pac.y, ' ')
@@ -375,8 +377,28 @@ class Zoo:
             print(f"Error, {char=} could not be found in _grid")
             return (-1, -1)
 
+    def _compute_test_contats(self, pair_contacts):
+
+        print(pair_contacts)
+
+        # remove if one_indiv is dead in the pair
+        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]!=0)]
+
+        checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
+
+        print(checked_pair_contacts)
+
+        for pac1, pac2, nature in pair_contacts:
+            if nature == "1":
+                self.test_prey_reproduction(pac1, pac2)
+
+            elif nature == "-1":
+                self.test_predator_reproduction(pac1, pac2)
+
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+
+        pair_contacts = []
 
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
@@ -401,18 +423,23 @@ class Zoo:
                 animal = contact_index % 2
 
                 if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                    print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                    #print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                     pac.predator_contact()
 
                 elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
-                    print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
-                    self.test_predator_reproduction(contact_index, pacman_index)
+                    #print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                    pair_contacts.append((contact_index, pacman_index, "-1"))
+
+                    #self.test_predator_reproduction(contact_index, pacman_index)
 
                 elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
-                    print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-                    self.test_prey_reproduction(contact_index, pacman_index)
+                    #print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+
+                    pair_contacts.append((contact_index, pacman_index, "1"))
+                    #self.test_prey_reproduction(contact_index, pacman_index)
                 else:
-                    print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
+                    pass
+                    #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
             # naturally losing life each time points
@@ -424,6 +451,19 @@ class Zoo:
             else:
                 pac.fitness = pac.life_points
                 pac.fitness_evaluated = True
+
+                if pac.animal_nature == "-1":
+                    self.stats["mean_predator_fitness"] += pac.get_fitness()
+                    self.stats["nb_predators"] +=1
+                elif pac.animal_nature == "1":
+                    self.stats["mean_prey_fitness"] += pac.get_fitness()
+                    self.stats["nb_preys"] +=1
+
+        self.stats["generation"] = self.population.generation
+
+        self._compute_test_contats(pair_contacts)
+
+
 
         return len([pac for pac in self.population.individuals if pac])
 
@@ -441,5 +481,22 @@ class Zoo:
         self.population.individuals[pacman_index] = 0
 
         # increment nb_deads
-        self.nb_deads += 1
+        self.stats["nb_deads"] += 1
+
+    def save_stats(self, indiv_path=0):
+
+        import json
+        import os
+
+        if indiv_path == 0:
+            indiv_path = os.path.abspath("")
+
+
+
+        file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.stats["time"]}.json")
+
+        with open(file_stats, 'w+') as fp:
+            json.dump(self.stats, fp, indent=4)
+
+
 
