@@ -125,7 +125,7 @@ def main():
         #
         print(f"{TIME=}")
 
-        self.stats["time"] = TIME
+        zoo.stats["time"] = TIME
 
         # Update both windows
         zoo_viz.draw_zoo()
