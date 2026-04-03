@@ -225,7 +225,7 @@ class Zoo:
 
 
             else:
-                print("Same nature animal , cannot be eaten , we are no cannibals! "
+                print("Same nature animal , cannot be eaten , we are no cannibals!")
                 return
 
         self._set_in_grid(pac.x, pac.y, ' ')
