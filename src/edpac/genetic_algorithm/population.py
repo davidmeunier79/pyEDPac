@@ -200,6 +200,7 @@ class Population:
 
             print("Offspring: ")
             print(offspring_genes)
+            print("offspring_genes: ", offspring_genes.shape)
 
         indiv = Individual(self.chromosome_config, offspring_genes)
         return indiv
@@ -212,8 +213,28 @@ class Population:
             individual: Individu à muter
         """
         genes = individual.get_genes()
-        mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
-        genes[mask] = np.random.rand(len(genes))[mask]
+
+        if self.chromosome_config.RELATIVE_ENCODING:
+            mask = np.array(np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE)
+            genes[mask] = np.random.rand(len(genes))[mask]
+        else
+            if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
+                print("VARIABLE_LENGTH_CHROMOSOME=TRUE and RELATIVE_ENCODING=FALSE not implemented yet")
+            else
+
+                print("Mutation")
+                max_val = np.array([NB_IN_ASSEMBLIES, 2,
+                                    NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
+
+                mutation_rate = self.mutation_config.MUTATION_RATE
+
+                mask = np.random.rand(len(genes)) < mutation_rate
+
+                print("Nb Mutation", np.sum(mask == True))
+                print("Before mutation: ", genes[mask])
+                genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
+                print("After mutation: ", genes[mask])
+
 
         # reinit
         individual.set_genes(genes)
