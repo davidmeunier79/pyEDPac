@@ -188,7 +188,6 @@ class Population:
                 #print(offspring_genes)
             else:
                 #TODO
-                print("VARIABLE_LENGTH_CHROMOSOME=True and RELATIVE_ENCODING=False are not encoded yet")
 
                 # genes1
                 if len(genes1) % self.chromosome_config.NB_GENES_EACH_PROJECTION != 0:
@@ -212,7 +211,7 @@ class Population:
                 #print("part2: ", part2.shape)
 
                 offspring_genes = np.concatenate((part1, part2), axis = 0)
-                print("offspring_genes: ", offspring_genes.shape)
+                #print("offspring_genes: ", offspring_genes.shape)
 
                 assert  offspring_genes.shape[0] %  self.chromosome_config.NB_GENES_EACH_PROJECTION ==0, \
                     f"Error, {offspring_genes.shape[0]} should be a multiple of {self.chromosome_config.NB_GENES_EACH_PROJECTION}"
@@ -250,7 +249,6 @@ class Population:
 
         else:
             if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
-                print("VARIABLE_LENGTH_CHROMOSOME=TRUE and RELATIVE_ENCODING=FALSE not implemented yet")
 
                 if len(genes) % 3 != 0:
                     print("Error, {nb_genes=} should be a multiple of 3 for projection_encoding")
@@ -259,29 +257,16 @@ class Population:
                 max_val = np.array([network_config.NB_IN_ASSEMBLIES, 2,
                                     network_config.NB_OUT_ASSEMBLIES]*nb_projections, dtype = int)
 
-                mutation_rate = self.mutation_config.MUTATION_RATE
-
-                mask = np.random.rand(len(genes)) < mutation_rate
-
-                print("Nb Mutation", np.sum(mask == True))
-                print("Before mutation: ", genes[mask])
+                mask = np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE
                 genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-                print("After mutation: ", genes[mask])
 
 
             else:
-                print("Mutation")
                 max_val = np.array([network_config.NB_IN_ASSEMBLIES, 2,
                                     network_config.NB_OUT_ASSEMBLIES]*self.chromosome_config.NB_PROJECTIONS_EACH_CHROMOSOME, dtype = int)
 
-                mutation_rate = self.mutation_config.MUTATION_RATE
-
-                mask = np.random.rand(len(genes)) < mutation_rate
-
-                print("Nb Mutation", np.sum(mask == True))
-                print("Before mutation: ", genes[mask])
+                mask = np.random.rand(len(genes)) < self.mutation_config.MUTATION_RATE
                 genes[mask] = np.random.randint(low = np.zeros(shape = max_val[mask].shape, dtype = int), high = max_val[mask])
-                print("After mutation: ", genes[mask])
 
 
         # reinit

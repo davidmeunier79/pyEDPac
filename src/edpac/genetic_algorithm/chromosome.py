@@ -65,7 +65,7 @@ class Chromosome:
                 while nb_projections==0:
                     nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
 
-                print(f"After _initialize_random_genes, {nb_projections=}")
+                #print(f"After _initialize_random_genes, {nb_projections=}")
 
                 list_genes = [
                     np.random.randint(low = 0,
