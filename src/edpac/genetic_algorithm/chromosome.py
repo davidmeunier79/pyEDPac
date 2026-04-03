@@ -9,7 +9,10 @@ from typing import List, Tuple
 from copy import deepcopy
 from ..config.ga_config import ChromosomeConfig
 
-from ..config.constants import *
+#from ..config.constants import *
+from ..config.network_config import NetworkConfig
+
+network_config = NetworkConfig()
 
 class Chromosome:
     """
@@ -44,17 +47,40 @@ class Chromosome:
         """Générer des gènes aléatoires"""
 
 
-
         if self.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
-            nb_genes = np.random.uniform(size = 1)
-            #print(f"{nb_genes=}")
-            #print(f"{self.chromo_config.NB_GENES_EACH_CHROMOSOME=}")
-            nb_genes  = int(nb_genes[0]*self.chromo_config.NB_GENES_EACH_CHROMOSOME*2)
-            #print(f"{nb_genes=}")
-            genes = np.random.rand(nb_genes)
-            #print(genes.shape)
+            if self.chromo_config.RELATIVE_ENCODING:
+                nb_genes = np.random.uniform(size = 1)
+                #print(f"{nb_genes=}")
+                #print(f"{self.chromo_config.NB_GENES_EACH_CHROMOSOME=}")
+                nb_genes  = int(nb_genes[0]*self.chromo_config.NB_GENES_EACH_CHROMOSOME*2)
+                #print(f"{nb_genes=}")
+                genes = np.random.rand(nb_genes)
+
+            else:
+                #TODO
+                print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
         else:
-            genes = np.random.rand(self.chromo_config.NB_GENES_EACH_CHROMOSOME)
+
+
+            if self.chromo_config.RELATIVE_ENCODING:
+                genes = np.random.rand(self.config.NB_GENES_EACH_CHROMOSOME)
+            else:
+
+                list_genes = [
+                    np.random.randint(low = 0,
+                                      high = network_config.NB_IN_ASSEMBLIES,
+                                      size = self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME),
+                    np.random.randint(low =0 ,
+                                      high = 2,
+                                      size = self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME),
+
+                    np.random.randint(low = 0,
+                                      high = network_config.NB_OUT_ASSEMBLIES,
+                                      size = self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME)
+                    ]
+
+                genes = np.concatenate(np.array(list_genes, dtype = int).T, axis = 0)
+
         return genes
 
 

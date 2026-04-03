@@ -154,34 +154,38 @@ class Population:
 
         if self.chromosome_config.VARIABLE_LENGTH_CHROMOSOME:
 
-            # One-point crossover
+            if self.chromosome_config.RELATIVE_ENCODING:
 
-            crossover_point1 = np.random.choice(len(genes1),
-                    1,
-                    replace=False)
+                # One-point crossover
+                crossover_point1 = np.random.choice(len(genes1),
+                        1,
+                        replace=False)
 
-            crossover_point1 = int(crossover_point1[0] // self.chromosome_config.NB_GENES_EACH_PROJECTION)*self.chromosome_config.NB_GENES_EACH_PROJECTION
+                crossover_point1 = int(crossover_point1[0] // self.chromosome_config.NB_GENES_EACH_PROJECTION)*self.chromosome_config.NB_GENES_EACH_PROJECTION
 
-            crossover_point2 = np.random.choice(
-                    int(float(len(genes2))/self.chromosome_config.NB_GENES_EACH_PROJECTION),
-                    1,
-                    replace=False)
+                crossover_point2 = np.random.choice(
+                        int(float(len(genes2))/self.chromosome_config.NB_GENES_EACH_PROJECTION),
+                        1,
+                        replace=False)
 
-            crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
+                crossover_point2 = int(crossover_point2[0]*self.chromosome_config.NB_GENES_EACH_PROJECTION)
 
 
-            # print(f"crossover_point1: {crossover_point1}")
-            # print(f"crossover_point2: {crossover_point2}")
+                # print(f"crossover_point1: {crossover_point1}")
+                # print(f"crossover_point2: {crossover_point2}")
 
-            part1 = genes1[:crossover_point1]
-            part2 = genes2[crossover_point2:]
+                part1 = genes1[:crossover_point1]
+                part2 = genes2[crossover_point2:]
 
-            # print("part1: ", part1.shape)
-            #print("part2: ", part2.shape)
+                # print("part1: ", part1.shape)
+                #print("part2: ", part2.shape)
 
-            offspring_genes = np.concatenate((part1, part2), axis = 0)
-            print("offspring_genes: ", offspring_genes.shape)
-            #print(offspring_genes)
+                offspring_genes = np.concatenate((part1, part2), axis = 0)
+                print("offspring_genes: ", offspring_genes.shape)
+                #print(offspring_genes)
+            else:
+                #TODO
+                print("VARIABLE_LENGTH_CHROMOSOME=True and RELATIVE_ENCODING=False are not encoded yet")
 
         else:
             # One-point crossover
@@ -194,9 +198,8 @@ class Population:
             offspring_genes = genes1.copy()
             offspring_genes[crossover_point:] = genes2[crossover_point:]
 
-#
-#         print("Offspring: ")
-#         print(offspring_genes)
+            print("Offspring: ")
+            print(offspring_genes)
 
         indiv = Individual(self.chromosome_config, offspring_genes)
         return indiv
