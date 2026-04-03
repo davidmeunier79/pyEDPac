@@ -5,10 +5,10 @@ Population.py - Gestion de la population GA
 import os
 import numpy as np
 from typing import List, Callable, Tuple
-from .individual import Individual
-from ..zoo.pacman import Pacman
-from .chromosome import Chromosome
-from .population import Population
+#from .individual import Individual
+from .pacman import Pacman
+#from .chromosome import Chromosome
+from ..genetic_algorithm.population import Population
 from ..config.ga_config import (
     SelectionConfig, CrossoverConfig,
     MutationConfig, SelectionMode, MutationMode
