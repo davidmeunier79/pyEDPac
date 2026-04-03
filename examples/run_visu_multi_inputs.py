@@ -103,10 +103,6 @@ def main():
 
     QtWidgets.QApplication.processEvents()
 
-
-
-
-
     print("Running population")
     zoo.population.initialize_all_inputs()
 
