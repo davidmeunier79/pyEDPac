@@ -18,7 +18,7 @@ class ZooVisualizer(PixelVisualizer):
         self.cell_size = self.config.ZOO_CELL_SIZE
 
         self.zoo = zoo
-        self.rows, self.cols = self.zoo.grid.shape
+        self.rows, self.cols = self.zoo.rows, self.zoo.cols
 
         #self.zoo = None
         super().__init__(self.rows * self.cell_size, self.cols * self.cell_size,title=title , scale=scale)
@@ -32,7 +32,7 @@ class ZooVisualizer(PixelVisualizer):
         wall_mask = np.ones((self.cell_size, self.cell_size), dtype=np.uint8)
 
         # Find walls in grid_array (assuming grid_array is a numpy array)
-        yy, xx = np.where(self.zoo.grid == b'X')
+        yy, xx = self.zoo._where_in_grid(b'X')
         for y, x in zip(yy, xx):
             self.set_pattern(y * self.cell_size, x * self.cell_size,
                              wall_mask, wall_color, target_buffer=self.background)
@@ -45,7 +45,7 @@ class ZooVisualizer(PixelVisualizer):
         self.refresh_from_background()
 
         # Draw Animals
-        for code in np.unique(self.zoo.grid):
+        for code in np.unique(self.zoo._grid):
             char = code.decode("utf-8")
 
             if char == 'X' or char == " ":
@@ -55,7 +55,8 @@ class ZooVisualizer(PixelVisualizer):
 
                 color = (80, 80, 80)    # Dim gray for dots
                 val = self.zoo.animals["."]
-                pos_y, pos_x = np.where(self.zoo.grid == code)
+                pos_y, pos_x = self.zoo._where_in_grid(code)
+
                 for y, x in zip(pos_y, pos_x):
                     self.set_pattern(y * self.cell_size, x * self.cell_size, val["shape"], color )
 

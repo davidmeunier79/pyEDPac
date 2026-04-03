@@ -7,17 +7,10 @@ sys.path.insert(0, '../src')
 from PySide6.QtCore import QEventLoop, QTimer, Qt
 from PySide6 import QtWidgets
 
-#
-#
-# # Force Qt to use the 'offscreen' platform (no window needed)
-# os.environ["QT_QPA_PLATFORM"] = "offscreen"
-#
-# # Disable DBus warnings on clusters
-# os.environ["QT_NO_GLIB"] = "1"
-
 from joblib import Parallel, delayed
 
 from edpac.zoo.zoo import Zoo, Pacman
+from edpac.zoo.chars import index_to_char, char_to_index
 
 from edpac.genetic_algorithm.population import Population
 from edpac.genetic_algorithm.chromosome import Chromosome
@@ -27,17 +20,14 @@ from edpac.ed_network.ed_synapse import EDSynapse
 
 from edpac.config.constants import MINIMAL_TIME
 
-from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
-from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, PopulationConfigMultiTest
+from edpac.config.ga_config import PopulationConfigMultiTest, SelectionConfigTest
 
 from edpac.tracer.network_tracer import NetworkTracer
 
-
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
-from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
-
 
 from multipac.parallel.parallel_zoo import ParallelZoo
+
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -60,14 +50,24 @@ def main():
         return 0
 
 
+def main():
+
+
 
     # Create objects
-    #################################### Population ######################################
-    zoo = ParallelZoo(config = PopulationConfigMulti())
-    #zoo.load_screen(screen_file="screen.empty")
+    #################################### Zoo ######################################
+    # 1. Initialize Data
+    config = PopulationConfigMultiTest()
 
-    # 3. Initial Draw
-    zoo.init_empty_zoo()
+    config.POPULATION_SIZE = 10
+
+    config.INIT_POPULATION_SIZE = 3
+
+    zoo = ParallelZoo(config = config)
+
+    zoo.load_menagerie(menagerie_file= "menagerie.txt")
+
+    zoo.load_screen(screen_file="screen.empty")
 
     ################################### Zoo Visualizer ################################
     zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo")
@@ -78,38 +78,10 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
+    #zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
-
-
-
-    ####################################### MultiInputVisualizer ########################
-    multi_input_viz = MultiInputVisualizer(zoo.population, title = "EDPac inputs")
-    # Connect the "X" button of the window to our stop function
-    # Note: Use the attribute 'setAttribute(QtCore.Qt.WA_DeleteOnClose)'
-    # if 'destroyed' signal doesn't fire immediately.
-
-    multi_input_viz.setAttribute(Qt.WA_DeleteOnClose)
-    multi_input_viz.destroyed.connect(stop_everything)
-
-    #zoo_viz.init_zoo(zoo)
-    #zoo_viz.draw_static_grid()
-    #zoo_viz.draw_zoo()
-
-    multi_input_viz.display_all_backgrounds()
-    multi_input_viz.show()
-    #multi_input_viz.update_display()
-
-    QtWidgets.QApplication.processEvents()
-
-
-
-
-
-    print("Running population")
-    zoo.population.initialize_all_inputs()
-
 
     # 2. Create a local event loop
     loop = QEventLoop()
@@ -124,54 +96,53 @@ def main():
             timer.stop()
             loop.quit()
             return
-        #
-        # global MAX_TIME
-        #
-        # print(f"{MAX_TIME=}")
+
+        global MAX_TIME
+
+        print(f"{MAX_TIME=}")
+
+
+
+        #zoo.init_empty_zoo()
+        pac = zoo.population.individuals[0]
+        pac.set_animal_nature("1")
+        pac.set_position(10, 11)
+        zoo._set_in_grid(10, 11, index_to_char(0))
+
+
+        pac = zoo.population.individuals[1]
+        pac.set_animal_nature("-1")
+        pac.set_position(5, 18)
+        zoo._set_in_grid(5, 18, index_to_char(1))
+
+
+        pac = zoo.population.individuals[2]
+        pac.set_animal_nature("1")
+        pac.set_position(10, 12)
+        zoo._set_in_grid(10, 12, index_to_char(2))
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        input_percepts = zoo.compute_zoo_interaction()
+        time.sleep(2.5)
 
-        # display percepts in multi_input_viz
-        multi_input_viz.display_all_inputs(input_percepts)
-        multi_input_viz.update_display()
-        QtWidgets.QApplication.processEvents()
+        zoo.population.deploy()
 
-
-        move_pos = zoo.population.run_one_step(input_percepts)
-        print(f"{move_pos=}")
-
-        zoo.compute_move_pos(move_pos)
-
-
-        nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
-
-
-        print(f"******************** {nb_alive_indiv=} ***********************")
-
-
-        if nb_alive_indiv == 0:
-            print("All individuals are dead , Breaking")
-            SIMULATION_ACTIVE = False
+        zoo.test_pacman_contacts()
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        if SIMULATION_ACTIVE==False:
-            loop.quit()
-
-            zoo.population.shutdown()
+        MAX_TIME -= 1
 
     print("In run_population")
-    #
-    # global MAX_TIME
-    # MAX_TIME = 100
+
+    global MAX_TIME
+    MAX_TIME = 100
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)
@@ -198,7 +169,9 @@ def main():
 
 
 
-    print("Evolution finished or aborted.")
+
+
+
 
 if __name__ == "__main__":
     import time

@@ -21,19 +21,25 @@ class MultiPacmanConfig:
     VISIO_COLUMN_DEPTH = 6
     BLURRED_FACTOR = 0.2
 
-    MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    #MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
     INITIAL_LIFE_POINTS = 100
 
-    NB_LIFE_POINTS_PER_PREY = 100
+    #NB_LIFE_POINTS_PER_PREY = 100
     NB_LIFE_POINTS_PER_PREDATOR_CONTACT = 10
 
     # Special 2 populations prey and predators
     NB_LIFE_POINTS_PER_PACGUM_PREY = 5
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR = 1
 
-    NB_LIFE_POINTS_PER_BITE = 5
+    MIN_LIFE_FOR_REPROD = 0
+
+    #MIN_LIFE_FOR_REPROD = INITIAL_LIFE_POINTS // 2
+
+
+    #NB_LIFE_POINTS_PER_BITE = 5
 
 @dataclass
 class PacmanConfig:
@@ -41,7 +47,8 @@ class PacmanConfig:
     VISIO_COLUMN_DEPTH = 6
     BLURRED_FACTOR = 0.2
 
-    MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    #MOTOR_THRESHOLD = 0.5 # if half of the neuron of the output assembly spikes in MINIMAL TIME , trigger output)
+    MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
     INITIAL_LIFE_POINTS = 100

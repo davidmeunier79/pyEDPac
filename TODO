@@ -4,6 +4,8 @@ ligne = y
 col = x
 zoo.grid.shape = rows, cols
 
+x, y = get_position
+self.grid[y, x]
 
 TODO 30/03/2026:
 multi visu inputs

@@ -18,7 +18,8 @@ class Zoo:
         self.cell_size = cell_size
         self.rows = 0
         self.cols = 0
-        self.grid = None  # Now a NumPy array
+
+        self._grid = None  # Now a NumPy array
 
         #self.shapes = {}
         #self.danger = {}
@@ -47,18 +48,6 @@ class Zoo:
 
         data_dir = os.path.join(PROJECT_ROOT, "data")
         return data_dir
-    #
-    # def _get_pacman_pos(self):
-    #     """Locates Pacman ('0') on the grid."""
-    #     x, y = np.where(self.grid == b'0')
-    #
-    #     if len(x) == 1 and len(y) == 1:
-    #         return x[0], y[0]
-    #     else:
-    #         print("Warning, could not find pacman in zoo")
-    #         print(self.grid)
-    #         0/0
-    #         return 0, 0
 
     def _parse_xbm_hex(self, full_path):
         """Unpacks C-style XBM hex data into coordinates."""
@@ -180,11 +169,11 @@ class Zoo:
             self.cols = nb_cols
 
             # Create a numeric numpy grid
-            self.grid = np.zeros((self.rows, self.cols), dtype=bytes)
+            self._grid = np.zeros((self.rows, self.cols), dtype=bytes)
 
             for r, line in enumerate(f.readlines()):
                 for c, char in enumerate(line.strip()):
-                    self.grid[r, c] = char
+                    self._set_in_grid(c, r, char)
 
     def _move_forward(self, pacman_index):
         """Calculates movement based on dir_body and updates grid."""
@@ -196,67 +185,54 @@ class Zoo:
 
         dx, dy = move_map[pac.dir_body]
 
-
         new_x = pac.x + dx
         new_y = pac.y + dy
 
-        #print(f"Testing Moves from ({self.y}, {self.x}) to ({new_y}, {new_x})")
+        target_char = self._in_grid(new_x, new_y)
+        if not target_char:
+            return
 
-        #rows, cols = self.grid.shape
+        if target_char == 'X': # Not a wall
+            return
 
-        # Check for walls in the Zoo grid before moving
+        # Update grid data: old position becomes a dot
+        # if this a pacgum, increase life
+        if target_char == ".":
+            print("Eating pacgum, Life points: " , pac.life_points)
+            pac.eat_pacgum()
 
-        if 0 <= new_y < self.rows and 0 <= new_x < self.cols:
+        elif target_char == " ":
+            pass
+            #print("Moving forward in empty space")
 
-        #if 0 <= new_x < cols and 0 <= new_y < rows: # old version
+        else:
+            index = char_to_index(target_char)
+            animal = index % 2
 
-            target_char = self.grid[new_y][new_x].decode("utf-8")
+            print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
 
-            if target_char == 'X': # Not a wall
+            if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+                #
+                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                # self.population.individuals[index].is_bitten()
+
+                print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                pac.eat_prey(self.population.individuals[index].life_points)
+                print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                self.process_death(index)
+
+
+
+            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
                 return
 
-            # Update grid data: old position becomes a dot
-            # if this a pacgum, increase life
-            if target_char == ".":
-                print("Eating pacgum, Life points: " , pac.life_points)
-                pac.eat_pacgum()
+        self._set_in_grid(pac.x, pac.y, ' ')
 
-            elif target_char == " ":
-                pass
-                #print("Moving forward in empty space")
+        # New position becomes Pacman
+        self._set_in_grid(new_x, new_y, index_to_char(pacman_index))
 
-            else:
-                index = char_to_index(target_char)
-                animal = index % 2
-
-                print(f"**** Pacman {pacman_index } in contact with {target_char} ({index=})")
-
-                if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
-
-                    print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                    self.population.individuals[index].is_bitten()
-
-                    if self.population.individuals[index].life_points < 0:
-                        print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                        pac.eat_prey()
-                        self.population.individuals[index].process_death()
-
-
-
-                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                    print("Predator ", self.animals[animal]["name"], "cannot be eaten !!!! ")
-                    return
-
-            self.grid[pac.y][pac.x] = ' '
-            #print(f"Pacman {pacman_index=} move from {pac.x}, {pac.y} to {new_x}, {new_y}")
-            #pac.x, pac.y = new_x, new_y
-
-            # New position becomes Pacman
-            self.grid[new_y][new_x] = index_to_char(pacman_index)
-
-            #print(self.grid[new_y][new_x])
-
-            pac.set_position(new_x, new_y)
+        pac.set_position(new_x, new_y)
 
 
     def integrate_visio_outputs(self, pac):
@@ -264,7 +240,6 @@ class Zoo:
         Scans the zoo grid in a fan shape based on dir_head.
         Returns a list of 5 shapes (lists of pixel coordinates).
         """
-        #rows, cols = self.grid.shape
 
         ## scanning laterally from higher to lower if dir_head = UP or LEFT ds > 0
         ## scanning laterally from lower to higher if dir_head = DOWN or RIGHT ds < 0
@@ -300,25 +275,27 @@ class Zoo:
                 nx = pac.x + (j * df[0]) + (rel_col * ds[0])
                 ny = pac.y + (j * df[1]) + (rel_col * ds[1])
 
-                if (0<=ny and ny < self.rows) and (0<=nx and nx < self.cols):
+                char = self._in_grid(nx, ny)
 
-                    char = self.grid[ny][nx].decode("utf-8")
+                if not char:
+                    continue
 
-                    if char == '.' or char == ' ':
-                        continue
-                    elif char == 'X':
-                        animal = 'X'
-                    else:
-                        index = char_to_index(char)
-                        animal = index % 2
-                    #print(self.animals.keys())
+                if char == '.' or char == ' ':
+                    continue
 
-                    # 4. Check for Objects (Walls or Animals)
-                    assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
+                elif char == 'X':
+                    animal = 'X'
+                else:
+                    index = char_to_index(char)
+                    animal = index % 2
+                #print(self.animals.keys())
 
-                    found_shape = self.blur_pattern(self.animals[animal]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
+                # 4. Check for Objects (Walls or Animals)
+                assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
 
-                    break
+                found_shape = self.blur_pattern(self.animals[animal]["shape"], float(abs(j))/pac.pacman_config.VISIO_COLUMN_DEPTH * pac.pacman_config.BLURRED_FACTOR)
+
+                break
 
             # If nothing found in this column, it's an empty sensor
             visio_patterns.append(found_shape)
@@ -366,52 +343,89 @@ class Zoo:
             pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
 
 
+    def _in_grid(self, pos_x, pos_y):
+        if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
+            char = self._grid[pos_y][pos_x].decode("utf-8")
+            return char
+        #
+        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+        #     char = self._grid[pos_x][pos_y].decode("utf-8")
+        #     return char
+
+        #print(f"Error, could not find position {pos_x} {pos_y}")
+        return 0
+
+
+    def _set_in_grid(self, pos_x, pos_y, char):
+        if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
+            self._grid[pos_y][pos_x] = char
+        else:
+            print(f"Error, could not add {char} at position {pos_x} {pos_y}")
+        #
+        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
+        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
+        #     self._grid[pos_x][pos_y] = char
+
+    def _where_in_grid(self, char):
+        if char in np.unique(self._grid):
+            yy, xx = np.where(self._grid == char)
+            return yy, xx
+        else:
+            print(f"Error, {char=} could not be found in _grid")
+            return (-1, -1)
 
     def test_pacman_contacts(self):
-
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 
         for pacman_index, pac in enumerate(self.population.individuals):
-            #print(pac)
             if pac==0:
                 continue
 
+            #print(pac)
+
             x, y = pac.get_position()
 
-            rows, cols = self.grid.shape
-
             for dir_x, dir_y in directions:
-                if 0 <= x + dir_x < rows and 0 <= y + dir_y < cols:
 
-                    char_contact = self.grid[x + dir_x][y + dir_y].decode("utf-8")
+                char_contact = self._in_grid(x + dir_x,  y + dir_y)
+                if not char_contact:
+                    continue
 
-                    if char_contact in (".", " ", 'X') :
-                        continue
+                if char_contact in (".", " ", 'X') :
+                    continue
 
-                    else:
-                        contact_index = char_to_index(char_contact)
+                else:
+                    contact_index = char_to_index(char_contact)
 
-                    animal = contact_index % 2
+                animal = contact_index % 2
 
-                    if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                        pac.predator_contact()
-                        print("Contact with predator ", self.animals[animal]["name"], " Life points: " , pac.life_points)
+                if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                    print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                    pac.predator_contact()
 
-                    elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
-                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
-                        self.test_predator_reproduction(contact_index, pacman_index)
+                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                    print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                    self.test_predator_reproduction(contact_index, pacman_index)
+
+                elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                    print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+                    self.test_prey_reproduction(contact_index, pacman_index)
+                else:
+                    print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
-                    elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
-                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-                        self.test_prey_reproduction(contact_index, pacman_index)
+            # naturally losing life each time points
+            pac.life_points -= 1
 
             if pac.life_points < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
+            else:
+                pac.fitness = pac.life_points
+                pac.fitness_evaluated = True
 
-        print(f"******************** {self.nb_deads=} ***********************")
-
+        return len([pac for pac in self.population.individuals if pac])
 
     def process_death(self, pacman_index):
         #print(f"process_death of indiv {pacman_index=}")
@@ -421,11 +435,11 @@ class Zoo:
 
         # remove from zoo
         x, y = self.population.individuals[pacman_index].get_position()
-        self.grid[y, x] = " "
+        self._set_in_grid(x, y, " ")
 
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
 
         # increment nb_deads
         self.nb_deads += 1
-        print(f"******************** {self.nb_deads=} ***********************")
+

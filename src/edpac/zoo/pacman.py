@@ -86,11 +86,10 @@ class Pacman(Individual):
                       'nb_bites': 0
                       }
 
-
     def set_animal_nature(self, animal_nature):
         self.animal_nature = animal_nature
 
-    def get_animal_nature(self, animal_nature):
+    def get_animal_nature(self):
         return self.animal_nature
 
     def get_position(self):
@@ -133,23 +132,25 @@ class Pacman(Individual):
             self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
             
         elif self.animal_nature == "-1":
-            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
+            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR
+        else:
+            print(f"Warning, {self.animal_nature=} is not defined for Pacman.eat_pacgum")
 
         self.stats["nb_eaten_pacgums"] += 1
 
-    def eat_prey(self):
-        if animal_nature == "-1":
-            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PREY
+    def eat_prey(self, extra_life):
+        if self.animal_nature == "-1":
+            self.life_points += extra_life
             self.stats["nb_eaten_preys"] += 1
         else:
             print(f"!!!!!! Warning, animal with nature = {animal_nature} eats a prey")
-
-    def is_bitten(self):
-        if self.animal_nature == "1":
-            self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_BITE
-            self.stats["nb_bites"] += 1
-        else:
-            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is bitten")
+    #
+    # def is_bitten(self):
+    #     if self.animal_nature == "1":
+    #         self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_BITE
+    #         self.stats["nb_bites"] += 1
+    #     else:
+    #         print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is bitten")
 
     def integrate_motor_outputs(self, motor_values):
         """
@@ -235,3 +236,9 @@ class Pacman(Individual):
 
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
+
+
+    def __repr__(self):
+        fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"
+        return f"Pacman(id={self.id}, nature={self.animal_nature}, {fitness_str}, age={self.age})"
+

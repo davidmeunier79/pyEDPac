@@ -39,12 +39,14 @@ class ParallelZoo(Zoo):
                 pos_x = random.randrange(1, self.cols-2)
 
                 #print(f"{pos_y=}, {pos_x=}")
-                char = self.grid[pos_y, pos_x].decode("utf-8")
+                char = self._in_grid(pos_x, pos_y)
+                if not char:
+                    continue
 
                 if char == '.' or char == ' ':
 
                     print(f"Setting position for pacman {index}: {pos_y, pos_x}")
-                    self.grid[pos_y, pos_x] = index_to_char(index)
+                    self._set_in_grid(pos_x, pos_y, index_to_char(index))
                     animal = index % 2
 
                     animal_nature = self.animals[animal]["danger"]
@@ -58,6 +60,44 @@ class ParallelZoo(Zoo):
                     self.population.individuals[index].set_position(y=pos_y,x=pos_x)
                     added = True
 
+    def init_nearby_position(self, new_index, parent1_index, parent2_index):
+
+            parent1 = self.population.individuals[parent1_index]
+            parent2 = self.population.individuals[parent2_index]
+
+            assert parent1 and parent2, f"Issue with init_nearby_position, {parent1=} ,  {parent2=}"
+
+            directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+
+            for parent in [parent1, parent2]:
+
+                x, y = parent.get_position()
+
+                for dir_x, dir_y in directions:
+
+                    char_contact = self._in_grid(x + dir_x, y + dir_y)
+                    if not char_contact:
+                        continue
+
+                    if char_contact in (".", " ") :
+                        print(f"Position of new_individual:  {x + dir_x} {y + dir_y}")
+                        self.population.individuals[new_index].set_position(x + dir_x, y + dir_y)
+
+                        self._set_in_grid(x + dir_x, y + dir_y, index_to_char(new_index))
+
+                        animal = new_index % 2
+                        animal_nature = self.animals[animal]["danger"]
+                        assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
+                            f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
+
+                        self.population.individuals[new_index].set_animal_nature(animal_nature)
+                        return
+
+            print("Could not find nearby empty position {x=} {y=} for new indiv {new_index}")
+            print("Initing random_position")
+            self.init_random_position(new_index)
+
+
     def generate_zoo_positions(self):
         #
         # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
@@ -70,7 +110,7 @@ class ParallelZoo(Zoo):
             if self.population.individuals[i]:
                 self.init_random_position(i)
 
-        print(self.grid)
+        print(self._grid)
 
     def init_empty_zoo(self):
 
@@ -152,18 +192,16 @@ class ParallelZoo(Zoo):
             print("No available slots for prey_reproduction danger, breaking")
             return
 
-        print(f"Prey {new_index=} available, building")
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+
+            print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
-            self.init_random_position(new_index)
+            self.init_nearby_position(new_index, contact_index, pacman_index)
 
             self.population.send_chromosome(new_index)
-            self.population.send_init_input(new_index)
+            #self.population.send_init_input(new_index)
 
             self.nb_deads -= 1
-
-        print(f"******************** {self.nb_deads=} ***********************")
-
 
     def test_predator_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
@@ -179,28 +217,42 @@ class ParallelZoo(Zoo):
             print("No available slots for predator_reproduction danger, breaking")
             return
 
-        print(f"Predator {new_index=} available, building")
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            print(f"Predator {new_index=} available, building")
             #self.stats["nb_predators"] += 1
-            self.init_random_position(new_index)
+            self.init_nearby_position(new_index, contact_index, pacman_index)
 
             self.population.send_chromosome(new_index)
-            self.population.send_init_input(new_index)
-            self.nb_deads -= 1
+            #self.population.send_init_input(new_index)
 
-        print(f"******************** {self.nb_deads=} ***********************")
+            self.nb_deads -= 1
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
+        # non empty parents
         if self.population.individuals[contact_index] == 0:
+            print(f"Error: for reproduction, indiv {contact_index} should not be empty")
             return False
 
         parent1 = self.population.individuals[contact_index]
 
         if self.population.individuals[pacman_index] == 0:
+            print(f"Error: for reproduction, indiv {pacman_index} should not be empty")
             return False
 
         parent2 = self.population.individuals[pacman_index]
+
+        # parents with enough life_points get exhaust if reproduction happens
+        if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
+            parent1.life_points -= int(parent1.pacman_config.INITIAL_LIFE_POINTS // 2)
+            parent2.life_points -= int(parent2.pacman_config.INITIAL_LIFE_POINTS // 2)
+        # if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
+        #     parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD // 2)
+        #     parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD // 2)
+
+        else:
+            print(f"Not enough life points to reproduce {parent1.life_points} {parent2.life_points}")
+            return False
 
         # compute mix chromosome between two parents
         offspring = self.population.crossover(parent1, parent2)
