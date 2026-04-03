@@ -459,7 +459,7 @@ class Zoo:
                     self.stats["mean_prey_fitness"] += pac.get_fitness()
                     self.stats["nb_preys"] +=1
 
-        self.stats["generation"] = self.generation
+        self.stats["generation"] = self.population.generation
         self.stats["nb_deads"] = self.nb_deads
 
         self._compute_test_contats(pair_contacts)

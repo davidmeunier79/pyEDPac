@@ -281,12 +281,6 @@ class Population:
 
             indiv.set_fitness(fitness)
 
-    def set_indivual_ages(self):
-
-        for indiv in self.individuals:
-
-            indiv.set_age(self.generation)
-
     def get_best(self) -> Individual:
         """Retourner le meilleur individu"""
         return max(self.individuals, key=lambda x: x.get_fitness())
