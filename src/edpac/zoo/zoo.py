@@ -400,7 +400,6 @@ class Zoo:
 
         pair_contacts = []
 
-        self.stats["mean_fitness"]
         for pacman_index, pac in enumerate(self.population.individuals):
             if pac==0:
                 continue
