@@ -260,10 +260,11 @@ class ParallelZoo(Zoo):
 
         # compute mix chromosome between two parents
         offspring = self.population.crossover(parent1, parent2)
+        print("After crossover, offspring = ", offspring.genes)
 
         # Muter
         self.population.mutate(offspring)
-        print("offspring = ", offspring.genes)
+        print("After mutation, offspring = ", offspring.genes)
         print(f"{offspring.get_nb_genes()=}")
 
         self.population.init_new_individual(pacman_index = new_index, genes = offspring.get_genes())
