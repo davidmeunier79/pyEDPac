@@ -152,7 +152,8 @@ def main():
         print(f"******************** {nb_alive_indiv=} ***********************")
 
         print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["mean_prey_fitness"]=} {zoo.stats["mean_predator_fitness"]=} {zoo.stats["generation"]=}, {zoo.stats["nb_deads"]=}")
-        zoo.save_stats("test_stats")
+
+        zoo.save_stats()
 
         if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
