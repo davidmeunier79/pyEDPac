@@ -263,7 +263,7 @@ class ParallelZoo(Zoo):
 
         # Muter
         self.population.mutate(offspring)
-        print("offspring = ", offspring)
+        print("offspring = ", offspring.genes)
         print(f"{offspring.get_nb_genes()=}")
 
         self.population.init_new_individual(pacman_index = new_index, genes = offspring.get_genes())
