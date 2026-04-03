@@ -483,12 +483,12 @@ class Zoo:
         # increment nb_deads
         self.stats["nb_deads"] += 1
 
-    def save_stats(self, indiv_path):
+    def save_stats(self, indiv_path=0):
 
         import json
         import os
 
-        if indiv_path==0:
+        if indiv_path == 0:
             indiv_path = os.path.abspath("")
 
 
