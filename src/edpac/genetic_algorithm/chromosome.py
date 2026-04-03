@@ -58,9 +58,13 @@ class Chromosome:
 
             else:
                 #TODO
-                print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
+                #print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
 
                 nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
+
+                while nb_projections==0:
+                    nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
+
                 print(f"After _initialize_random_genes, {nb_projections=}")
 
                 list_genes = [
@@ -75,6 +79,7 @@ class Chromosome:
                                       high = network_config.NB_OUT_ASSEMBLIES,
                                       size = nb_projections)
                     ]
+
 
                 genes = np.concatenate(np.array(list_genes, dtype = int).T, axis = 0)
 
