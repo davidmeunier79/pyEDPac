@@ -183,7 +183,7 @@ class Population:
                 # print("part1: ", part1.shape)
                 #print("part2: ", part2.shape)
 
-                offspring_genes = np.concatenate((part1, part2), axis = 0, , dtype = int)
+                offspring_genes = np.concatenate((part1, part2), axis = 0 , dtype = int)
                 print("offspring_genes: shape = ", offspring_genes.shape, " , dtype = ", offspring_genes.dtype)
                 #print(offspring_genes)
             else:
