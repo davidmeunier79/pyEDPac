@@ -59,6 +59,26 @@ class Chromosome:
             else:
                 #TODO
                 print("_initialize_random_genes VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING not implemented yet")
+
+                nb_projections = int(np.random.uniform(size = 1)[0]*self.chromo_config.NB_PROJECTIONS_EACH_CHROMOSOME*2)
+                print(f"After _initialize_random_genes, {nb_projections=}")
+
+                list_genes = [
+                    np.random.randint(low = 0,
+                                      high = network_config.NB_IN_ASSEMBLIES,
+                                      size = nb_projections),
+                    np.random.randint(low =0 ,
+                                      high = 2,
+                                      size = nb_projections),
+
+                    np.random.randint(low = 0,
+                                      high = network_config.NB_OUT_ASSEMBLIES,
+                                      size = nb_projections)
+                    ]
+
+                genes = np.concatenate(np.array(list_genes, dtype = int).T, axis = 0)
+
+                assert len(genes) % self.chromo_config.NB_GENES_EACH_PROJECTION == 0, f"Error, {len(genes)=} should be a multiple of {self.chromo_config.NB_GENES_EACH_PROJECTION}"
         else:
 
 
@@ -118,7 +138,7 @@ class Chromosome:
         start_idx = projection_idx * self.chromo_config.NB_GENES_EACH_PROJECTION
         
         # Décoder les gènes
-        genes_slice = self.genes[start_idx:start_idx + 3]
+        genes_slice = self.genes[start_idx:start_idx + NB_GENES_EACH_PROJECTION]
         
         return genes_slice
 

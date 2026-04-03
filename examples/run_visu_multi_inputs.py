@@ -125,9 +125,9 @@ def main():
             loop.quit()
             return
         #
-        # global MAX_TIME
+        global MAX_TIME
         #
-        # print(f"{MAX_TIME=}")
+        print(f"{MAX_TIME=}")
 
         # Update both windows
         zoo_viz.draw_zoo()
@@ -165,13 +165,14 @@ def main():
 
         if SIMULATION_ACTIVE==False:
             loop.quit()
-
             zoo.population.shutdown()
 
+        MAX_TIME+=1
+
     print("In run_population")
-    #
-    # global MAX_TIME
-    # MAX_TIME = 100
+
+    global MAX_TIME
+    MAX_TIME = 0
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)
