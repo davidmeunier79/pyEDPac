@@ -39,7 +39,7 @@ sys.path.insert(0, '../src')
 
 from edpac.config.constants import NB_VISIO_INPUTS, MINIMAL_TIME
 from edpac.config.network_config import NetworkConfig
-from edpac.config.ga_config import ParallelZooConfig
+from edpac.config.ga_config import PopulationConfig
 
 #from edpac.genetic_algorithm.pacman_population import PacmanParallelZoo
 
@@ -49,8 +49,8 @@ from multipac.parallel.parallel_network import worker_loop
 
 # --- The Centralized ParallelZoo ---
 class ParallelZoo(EvoZoo):
-    def __init__(self, pop_config : ParallelZooConfig = None):
-        self.pop_config = pop_config or ParallelZooConfig()
+    def __init__(self, pop_config : PopulationConfig = None):
+        self.pop_config = pop_config or PopulationConfig()
 
         self.num_agents = self.pop_config.POPULATION_SIZE
         self.pipes = []

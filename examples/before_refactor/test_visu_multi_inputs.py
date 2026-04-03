@@ -63,13 +63,11 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(pop_config = PopulationConfigMultiTest())
+    zoo = ParallelZoo(config = PopulationConfigMultiTest())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
     zoo.init_empty_zoo()
-    zoo.deploy() # parallel zoo
-    zoo.distribute_chromosomes() #parallel zoo
 
     ################################### Zoo Visualizer ################################
     zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo")
@@ -107,7 +105,7 @@ def main():
 
 
     print("Running population")
-    zoo.initialize_all_inputs()
+    zoo.population.initialize_all_inputs()
 
 
     # 2. Create a local event loop
@@ -143,7 +141,7 @@ def main():
         multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        move_pos = zoo.run_one_step(input_percepts)
+        move_pos = zoo.population.run_one_step(input_percepts)
         print(f"{move_pos=}")
 
         zoo.compute_move_pos(move_pos)
@@ -166,7 +164,7 @@ def main():
             print(f"In shutting_down at {MAX_TIME=}")
             loop.quit()
 
-            zoo.shutdown()
+            zoo.population.shutdown()
 
 
     print("In run_population")

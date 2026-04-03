@@ -138,7 +138,7 @@ def main():
             print(f"In shutting_down at {MAX_TIME=}")
             loop.quit()
 
-            zoo.population.shutdown()
+            zoo.shutdown()
 
 
     print("In run_population")

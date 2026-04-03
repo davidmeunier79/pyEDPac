@@ -63,11 +63,13 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(config = PopulationConfigMulti())
+    zoo = ParallelZoo(pop_config = PopulationConfigMulti())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
     zoo.init_empty_zoo()
+    zoo.deploy() # parallel zoo
+    zoo.distribute_chromosomes() #parallel zoo
 
     ################################### Zoo Visualizer ################################
     zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo")
@@ -104,7 +106,7 @@ def main():
     QtWidgets.QApplication.processEvents()
 
     print("Running population")
-    zoo.population.initialize_all_inputs()
+    zoo.initialize_all_inputs()
 
 
     # 2. Create a local event loop
@@ -140,7 +142,7 @@ def main():
         QtWidgets.QApplication.processEvents()
 
 
-        move_pos = zoo.population.run_one_step(input_percepts)
+        move_pos = zoo.run_one_step(input_percepts)
         print(f"{move_pos=}")
 
         zoo.compute_move_pos(move_pos)
@@ -166,7 +168,7 @@ def main():
 
         if SIMULATION_ACTIVE==False:
             loop.quit()
-            zoo.population.shutdown()
+            zoo.shutdown()
 
         TIME+=1
 

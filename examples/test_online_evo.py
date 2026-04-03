@@ -32,12 +32,12 @@ from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, Popu
 
 from edpac.tracer.network_tracer import NetworkTracer
 
+
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
 from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
+
 from multipac.parallel.parallel_zoo import ParallelZoo
-
-
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -80,10 +80,10 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-    #zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
+
 
 
     ####################################### MultiInputVisualizer ########################
@@ -101,10 +101,9 @@ def main():
 
     multi_input_viz.display_all_backgrounds()
     multi_input_viz.show()
-
     #multi_input_viz.update_display()
-    QtWidgets.QApplication.processEvents()
 
+    QtWidgets.QApplication.processEvents()
 
     print("Running population")
     zoo.initialize_all_inputs()
@@ -123,56 +122,60 @@ def main():
             timer.stop()
             loop.quit()
             return
+        #
+        global TIME
+        #
+        print(f"{TIME=}")
 
-        global MAX_TIME
-
-        print(MAX_TIME)
-
-        zoo.test_pacman_contacts()  # Update the model()
-
-        # Update both windows
-        #zoo_viz.draw_zoo()
-        #zoo_viz.update_display()
-        #QtWidgets.QApplication.processEvents()
-
-        input_percepts = zoo.compute_zoo_interaction()
-        #print(f"{input_percepts=}")
-
-        # display percepts in multi_input_viz
-        multi_input_viz.display_all_inputs(input_percepts)
-        multi_input_viz.update_display()
-        QtWidgets.QApplication.processEvents()
-
-        move_pos = zoo.run_one_step(input_percepts)
-        print(f"{move_pos=}")
-
-        zoo.compute_move_pos(move_pos)
+        zoo.stats["time"] = TIME
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        time.sleep(2.5)
+        input_percepts = zoo.compute_zoo_interaction()
 
-        if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
+        # display percepts in multi_input_viz
+        multi_input_viz.display_all_inputs(input_percepts)
+        multi_input_viz.update_display()
+        QtWidgets.QApplication.processEvents()
+
+
+        move_pos = zoo.run_one_step(input_percepts)
+        print(f"{move_pos=}")
+
+        zoo.compute_move_pos(move_pos)
+
+
+        nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
+
+
+        print(f"******************** {nb_alive_indiv=} ***********************")
+
+        print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["mean_prey_fitness"]=} {zoo.stats["mean_predator_fitness"]=} {zoo.stats["generation"]=}, {zoo.stats["nb_deads"]=}")
+
+        zoo.save_stats()
+
+        if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
-
             SIMULATION_ACTIVE = False
 
-        MAX_TIME -= 1
+        # Update both windows
+        zoo_viz.draw_zoo()
+        zoo_viz.update_display()
+        QtWidgets.QApplication.processEvents()
 
-        if MAX_TIME < 0 or SIMULATION_ACTIVE==False:
-            print(f"In shutting_down at {MAX_TIME=}")
+        if SIMULATION_ACTIVE==False:
             loop.quit()
-
             zoo.shutdown()
 
+        TIME+=1
 
     print("In run_population")
 
-    global MAX_TIME
-    MAX_TIME = 1000
+    global TIME
+    TIME = 0
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)
