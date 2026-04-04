@@ -191,32 +191,19 @@ class ParallelZoo(EvoZoo):
                 # Maybe use the previous frame's command or stay still
                 results[i] = None
 
-                if self.population.individuals[i]==0:
-                    percept = -1
-                else:
-                    percept = 1
+            pac = self.population.individuals[i]
 
-            if percept:
-                try:
-                    pipe.send({'type': 'TASK', 'data': percept})
+            if pac:
 
-                except BrokenPipeError:
+                pac.fitness = pac.life_points
+                pac.fitness_evaluated = True
 
-                    print(f"{percept=}")
-
-                if percept != -1:
-                    pac = self.population.individuals[i]
-                    assert pac , f"*** Error with pac {i}, should be implemented"
-
-                    pac.fitness = pac.life_points
-                    pac.fitness_evaluated = True
-
-                    if pac.animal_nature == "-1":
-                        self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-                        self.stats["nb_predators"][-1] +=1
-                    elif pac.animal_nature == "1":
-                        self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-                        self.stats["nb_preys"][-1] +=1
+                if pac.animal_nature == "-1":
+                    self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_predators"][-1] +=1
+                elif pac.animal_nature == "1":
+                    self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_preys"][-1] +=1
 
 
         return results
