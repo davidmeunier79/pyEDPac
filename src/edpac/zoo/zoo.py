@@ -28,7 +28,7 @@ class Zoo:
         self.data_dir = self._get_data_dir()
 
 
-        self.stats = {"time: ": 0 , "nb_predators": 0, "nb_preys" : 0, "mean_predator_fitness" : 0, "mean_prey_fitness": 0, "generation" : 0, "nb_deads": 0}
+        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": []}
 
         #
         # # Mapping for clarity
@@ -36,6 +36,16 @@ class Zoo:
         # self.EMPTY = ' '
         # self.DOT = '.'
 
+    def init_stats(self):
+
+        self.stats["time"].append(0)
+        self.stats["nb_predators"].append(0)
+        self.stats["nb_preys"].append(0)
+        self.stats["mean_predator_fitness"].append(0)
+        self.stats["mean_prey_fitness"].append(0)
+
+        self.stats["generation"].append(0)
+        self.stats["nb_deads"].append(0)
 
     def _get_data_dir(self):
 
@@ -377,24 +387,6 @@ class Zoo:
             print(f"Error, {char=} could not be found in _grid")
             return (-1, -1)
 
-    def _compute_test_contacts(self, pair_contacts):
-
-        print(pair_contacts)
-
-        # remove if one_indiv is dead in the pair
-        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]!=0)]
-
-        checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
-
-        print(checked_pair_contacts)
-
-        for pac1, pac2, nature in pair_contacts:
-            if nature == "1":
-                self.test_prey_reproduction(pac1, pac2)
-
-            elif nature == "-1":
-                self.test_predator_reproduction(pac1, pac2)
-
     def test_contacts(self, pacman_index):
 
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
@@ -450,17 +442,35 @@ class Zoo:
             #self.init_new_individual(pacman_index)
             self.process_death(pacman_index)
             return 0
-        else:
-            pac.fitness = pac.life_points
-            pac.fitness_evaluated = True
+            #
+            # if pac.animal_nature == "-1":
+            #     self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+            #     self.stats["nb_predators"][-1] +=1
+            # elif pac.animal_nature == "1":
+            #     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+            #     self.stats["nb_preys"][-1] +=1
 
-            if pac.animal_nature == "-1":
-                self.stats["mean_predator_fitness"] += pac.get_fitness()
-                self.stats["nb_predators"] +=1
-            elif pac.animal_nature == "1":
-                self.stats["mean_prey_fitness"] += pac.get_fitness()
-                self.stats["nb_preys"] +=1
         return 1
+
+    ## all pacmal are tested at once
+    def _compute_test_contacts(self, pair_contacts):
+
+        print(pair_contacts)
+
+        # remove if one_indiv is dead in the pair
+        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]!=0)]
+
+        checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
+
+        print(checked_pair_contacts)
+
+        for pac1, pac2, nature in pair_contacts:
+            if nature == "1":
+                self.test_prey_reproduction(pac1, pac2)
+
+            elif nature == "-1":
+                self.test_predator_reproduction(pac1, pac2)
+
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 
@@ -520,13 +530,15 @@ class Zoo:
                 pac.fitness_evaluated = True
 
                 if pac.animal_nature == "-1":
-                    self.stats["mean_predator_fitness"] += pac.get_fitness()
-                    self.stats["nb_predators"] +=1
+                    self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_predators"][-1] +=1
                 elif pac.animal_nature == "1":
-                    self.stats["mean_prey_fitness"] += pac.get_fitness()
-                    self.stats["nb_preys"] +=1
+                    self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_preys"][-1] +=1
 
-        self.stats["generation"] = self.population.generation
+        self.stats["mean_predator_fitness"][-1] /= self.stats["nb_predators"][-1]
+        self.stats["mean_prey_fitness"][-1] /= self.stats["nb_preys"][-1]
+        self.stats["generation"][-1] = self.population.generation
 
         self._compute_test_contacts(pair_contacts)
 
@@ -548,12 +560,13 @@ class Zoo:
         self.population.individuals[pacman_index] = 0
 
         # increment nb_deads
-        self.stats["nb_deads"] += 1
+        self.stats["nb_deads"][-1] += 1
 
     def save_stats(self, indiv_path=0):
 
         import json
         import os
+        import pandas as pd
 
         if indiv_path == 0:
             indiv_path = os.path.abspath("")
@@ -563,11 +576,9 @@ class Zoo:
             except OSError:
                 print(f"{os.path.abspath(indiv_path)} already exists")
 
+        file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
 
-        file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.stats["time"]}.json")
+        df = pd.DataFrame(self.stats)
+        df = df.set_index("time")
 
-        with open(file_stats, 'w+') as fp:
-            json.dump(self.stats, fp, indent=4)
-
-
-
+        df.to_csv(file_stats , header = True)

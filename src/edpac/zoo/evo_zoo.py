@@ -46,11 +46,11 @@ class EvoZoo(Zoo):
                     animal = index % 2
 
                     animal_nature = self.animals[animal]["danger"]
-
-                    if animal_nature == "1":
-                        self.stats["nb_preys"] += 1
-                    elif animal_nature == "-1":
-                        self.stats["nb_predators"] += 1
+                    #
+                    # if animal_nature == "1":
+                    #     self.stats["nb_preys"] += 1
+                    # elif animal_nature == "-1":
+                    #     self.stats["nb_predators"] += 1
 
                     self.population.individuals[index].set_animal_nature(animal_nature)
                     self.population.individuals[index].set_position(y=pos_y,x=pos_x)
@@ -156,7 +156,15 @@ class EvoZoo(Zoo):
 
         input_percept = self.integrate_visio_outputs(pac= pacman)
 
+
+        if all([percept is None for percept in input_percept]):
+
+            #print(f"Pacman {i}: sending empty inputs")
+
+            input_percepts = 1
+
         return input_percept
+
 
     def print_pacman_positions(self):
 
