@@ -151,7 +151,11 @@ def main():
         multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
+        #nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
+
+        self.stats["generation"] = self.population.generation
+
+        nb_alive_indiv = len([pac for pac in self.population.individuals if pac])
 
 
         print(f"******************** {nb_alive_indiv=} ***********************")
