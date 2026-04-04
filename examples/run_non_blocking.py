@@ -63,7 +63,7 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(pop_config = PopulationConfigMultiTest())
+    zoo = ParallelZoo(pop_config = PopulationConfigMulti())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
