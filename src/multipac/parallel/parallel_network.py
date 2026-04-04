@@ -39,7 +39,6 @@ def worker_loop(pipe, agent_id):
             # SEND: Acknowledgment back to Zoo
             #pipe.send({'type': 'READY', 'id': agent_id})
 
-
         elif cmd == 'INIT_INPUTS':
             # RECEIVE: Chromosome from Zoo
             net_process.network.initialize_inputs()
