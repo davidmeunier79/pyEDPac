@@ -5,7 +5,10 @@ pillow==12.1.1
 pyqtgraph==0.14.0
 matplotlib==3.10.8
 joblib==1.5.3
+# multipac
 pandas==3.0.2
+seaborn-0.13.2
+
 
 
 
