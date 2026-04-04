@@ -154,8 +154,11 @@ class ParallelZoo(EvoZoo):
                     if res['type'] != 'RESULT':
                         continue
 
-
                     if len(res['data']):
+
+                        if self.population.individuals[i]==0:
+                            continue
+
                         pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
 
                         if pos:
