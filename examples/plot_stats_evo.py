@@ -21,30 +21,30 @@ if __name__ == "__main__":
 
     print(df)
 
-    # # plot
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1, 1, 1)
-    #
-    # ax.plot(df.index, df["nb_preys"], color = "blue")
-    #
-    # ax.plot(df.index, df["nb_predators"], color = "red")
-    #
-    # ax.grid()
-    # plt.show()
+    # plot nb indiv
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
 
+    ax.plot(df.index, df["nb_preys"], color = "blue")
 
+    ax.plot(df.index, df["nb_predators"], color = "red")
+
+    ax.grid()
+    plt.show()
+
+    fig.savefig(os.path.join(indiv_path, "Nb_indiv.png"))
+
+    # plot mean fitness
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
     ax.plot(df.index, df["mean_prey_fitness"], color = "blue")
-
     ax.plot(df.index, df["mean_predator_fitness"], color = "red")
 
     ax.grid()
     plt.show()
 
-    #plot_file = f"Weight_{self.synapse.id}.png"
-    #fig.savefig(os.path.join(target_dir, plot_file))
+    fig.savefig(os.path.join(indiv_path, "Mean_fitness.png"))
 
     #
     # plt.figure(figsize=(12, 6))
