@@ -57,7 +57,7 @@ def worker_loop(pipe, agent_id, timeout=0.001):
             elif cmd == 'TASK':
 
                 if msg['data'] == -1:
-                    print(f"[Worker {agent_id}] Receiving DEAD inputs")
+                    #print(f"[Worker {agent_id}] Receiving DEAD inputs")
 
                     net_process.network = 0
                     #print("Receiving Dead visio inputs")
@@ -66,7 +66,7 @@ def worker_loop(pipe, agent_id, timeout=0.001):
 
                 elif msg['data'] == 1:
 
-                    print(f"[Worker {agent_id}] Receiving empty inputs")
+                    #print(f"[Worker {agent_id}] Receiving empty inputs")
 
                     result = net_process.network.compute_one_wave()
 
@@ -76,7 +76,7 @@ def worker_loop(pipe, agent_id, timeout=0.001):
                 else:
                     # Simulate a sensory-motor cycle
 
-                    print(f"[Worker {agent_id}] Receiving DATA inputs")
+                    #print(f"[Worker {agent_id}] Receiving DATA inputs")
 
                     #print("Receiving visio inputs")
                     result = net_process.network.compute_one_wave(msg['data'])
@@ -90,7 +90,7 @@ def worker_loop(pipe, agent_id, timeout=0.001):
         else:
             if net_process.network:
 
-                print(f"[Worker {agent_id}] Running without message")
+                #print(f"[Worker {agent_id}] Running without message")
                 result = net_process.network.compute_one_wave()
 
                 #print("Sending outputs")
