@@ -21,19 +21,50 @@ if __name__ == "__main__":
 
     print(df)
 
-    plt.figure(figsize=(12, 6))
+    # plot
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
 
-    sns.set_theme(style="dark")
+    ax.plot(df.index, df["nb_preys"], color = "blue")
 
-    # Plot each year's time series in its own facet
+    ax.plot(df.index, df["nb_predators"], color = "red")
 
-    sns.lineplot(data=df, x="time", y="nb_preys")
+    ax.grid()
 
-
-    plt.title('EvoStats')
-    plt.xlabel('time')
-    plt.ylabel("nb_preys")
     plt.show()
+
+    #plot_file = f"Weight_{self.synapse.id}.png"
+    #fig.savefig(os.path.join(target_dir, plot_file))
+
+    #
+    # plt.figure(figsize=(12, 6))
+    #
+    # sns.set_theme(style="dark")
+    #
+    # # Plot each year's time series in its own facet
+    # sns.lineplot(data=df, x="time", y="nb_preys")
+    #
+    # plt.title('nb_preys across simulation time')
+    # plt.xlabel('time')
+    # plt.ylabel("nb_preys")
+    # plt.show()
+    #
+    #
+    # plt.figure(figsize=(12, 6))
+    #
+    # sns.set_theme(style="dark")
+    #
+    # # Plot each year's time series in its own facet
+    # sns.lineplot(data=df, x="time", y="nb_preys", hue = 'blue')
+    #
+    # sns.lineplot(data=df, x="time", y="nb_predators", hue = 'red')
+    #
+    # plt.title('EvoStats')
+    # plt.xlabel('time')
+    # plt.ylabel("nb individuals")
+    # plt.show()
+    #
+
 #
 #     g = sns.relplot(
 #         data=df,
