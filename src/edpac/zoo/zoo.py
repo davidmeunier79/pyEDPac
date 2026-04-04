@@ -449,6 +449,7 @@ class Zoo:
         if pac.life_points < 0:
             #self.init_new_individual(pacman_index)
             self.process_death(pacman_index)
+            return 0
         else:
             pac.fitness = pac.life_points
             pac.fitness_evaluated = True
@@ -459,7 +460,7 @@ class Zoo:
             elif pac.animal_nature == "1":
                 self.stats["mean_prey_fitness"] += pac.get_fitness()
                 self.stats["nb_preys"] +=1
-
+        return 1
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 

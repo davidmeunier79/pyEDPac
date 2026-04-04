@@ -151,34 +151,40 @@ class ParallelZoo(EvoZoo):
             if pipe.poll(timeout):
                 try:
                     res = pipe.recv()
-                    if res['type'] == 'RESULT':
+                    if res['type'] != 'RESULT':
+                        continue
 
-                        if len(res['data']):
-                            pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
 
-                            if pos:
-                                print(f"**** Move forward for agent {i}")
-                                self._move_forward(i)
-                        else:
-                            self.process_death(i)
+                    if len(res['data']):
+                        pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
 
-                        # computing contacts
-                        self.test_contacts(i)
+                        if pos:
+                            print(f"**** Move forward for agent {i}")
+                            self._move_forward(i)
+                    else:
+                        self.process_death(i)
+                        continue
 
-                        percept = self.compute_percept(i)
+                    # computing contacts
+                    res = self.test_contacts(i)
 
-                        results[i] = percept
+                    if not res:
+                        continue
 
-                        try:
-                            pipe.send({'type': 'TASK', 'data': percept})
+                    percept = self.compute_percept(i)
 
-                        except BrokenPipeError:
-                            if visio_input == -1:
-                                print("Dead visio inputs")
-                            elif visio_input == 1:
-                                print("Empty visio inputs")
+                    results[i] = percept
 
-                            print(f"{visio_input=}")
+                    try:
+                        pipe.send({'type': 'TASK', 'data': percept})
+
+                    except BrokenPipeError:
+                        if visio_input == -1:
+                            print("Dead visio inputs")
+                        elif visio_input == 1:
+                            print("Empty visio inputs")
+
+                        print(f"{visio_input=}")
 
                 except EOFError:
                     print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
