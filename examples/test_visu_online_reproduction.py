@@ -57,13 +57,13 @@ def main():
     # Create objects
     #################################### Zoo ######################################
     # 1. Initialize Data
-    config = PopulationConfigMultiTest()
+    pop_config = PopulationConfigMultiTest()
 
-    config.POPULATION_SIZE = 10
+    pop_config.POPULATION_SIZE = 10
 
-    config.INIT_POPULATION_SIZE = 3
+    pop_config.INIT_POPULATION_SIZE = 3
 
-    zoo = ParallelZoo(config = config)
+    zoo = ParallelZoo(pop_config = pop_config)
 
     zoo.load_menagerie(menagerie_file= "menagerie.txt")
 
@@ -128,7 +128,7 @@ def main():
 
         time.sleep(2.5)
 
-        zoo.population.deploy()
+        zoo.deploy()
 
         zoo.test_pacman_contacts()
 

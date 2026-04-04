@@ -61,11 +61,13 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(config = PopulationConfigMultiTest())
+    zoo = ParallelZoo(pop_config = PopulationConfigMultiTest())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
-    zoo.init_empty_zoo()
+    zoo.init_empty_zoo() # zoo
+    zoo.deploy() # parallel zoo
+    zoo.distribute_chromosomes() #parallel zoo
 
     ################################### Zoo Visualizer ################################
     zoo_viz = ZooVisualizer(zoo, title = "EDPac zoo")
@@ -87,7 +89,7 @@ def main():
 
 
     print("Running population")
-    zoo.population.initialize_all_inputs()
+    zoo.initialize_all_inputs()
 
 
     # 2. Create a local event loop
@@ -116,7 +118,7 @@ def main():
         input_percepts = zoo.compute_zoo_interaction()
         #print(f"{input_percepts=}")
 
-        move_pos = zoo.population.run_one_step(input_percepts)
+        move_pos = zoo.run_one_step(input_percepts)
         print(f"{move_pos=}")
 
         zoo.compute_move_pos(move_pos)
@@ -136,7 +138,7 @@ def main():
             print(f"In shutting_down at {MAX_TIME=}")
             loop.quit()
 
-            zoo.population.shutdown()
+            zoo.shutdown()
 
 
     print("In run_population")
