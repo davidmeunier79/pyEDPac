@@ -129,10 +129,8 @@ def main():
 
         # If the window was closed, stop this individual's evaluation
         if not SIMULATION_ACTIVE:
-            zoo.save_stats("test_stats")
             timer.stop()
             loop.quit()
-            zoo.shutdown()
             return
         #
         global TIME
@@ -174,6 +172,7 @@ def main():
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
 
+
         TIME+=1
 
 
@@ -196,6 +195,9 @@ def main():
 
     # 4. BLOCK here until loop.quit() is called
     loop.exec()
+
+    zoo.shutdown()
+    zoo.save_stats("test_stats")
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
