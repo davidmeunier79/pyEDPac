@@ -556,7 +556,11 @@ class Zoo:
 
         if indiv_path == 0:
             indiv_path = os.path.abspath("")
-
+        else:
+            try:
+                os.makedirs(os.path.abspath(indiv_path))
+            except OSError:
+                print(f"{os.path.abspath(indiv_path)} already exists")
 
 
         file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.stats["time"]}.json")
