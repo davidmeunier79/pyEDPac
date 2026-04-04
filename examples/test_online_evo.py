@@ -106,7 +106,7 @@ def main():
     QtWidgets.QApplication.processEvents()
 
     print("Running population")
-    zoo.initialize_all_inputs()
+    #zoo.initialize_all_inputs()
 
 
     # 2. Create a local event loop
@@ -119,6 +119,9 @@ def main():
 
         # If the window was closed, stop this individual's evaluation
         if not SIMULATION_ACTIVE:
+            zoo.save_stats("test_stats")
+
+            zoo.shutdown()
             timer.stop()
             loop.quit()
             return
@@ -155,8 +158,6 @@ def main():
 
         print(f"{zoo.stats["nb_preys"]=} {zoo.stats["nb_predators"]=} {zoo.stats["mean_prey_fitness"]=} {zoo.stats["mean_predator_fitness"]=} {zoo.stats["generation"]=}, {zoo.stats["nb_deads"]=}")
 
-        zoo.save_stats("test_stats")
-
         if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
@@ -165,10 +166,6 @@ def main():
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
-
-        if SIMULATION_ACTIVE==False:
-            loop.quit()
-            zoo.shutdown()
 
         TIME+=1
 

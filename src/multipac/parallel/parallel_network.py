@@ -22,31 +22,44 @@ class ParallelNetwork():
         self.network = EvoNetwork(chromosome)
         print(f"[Worker {self.agent_id}] Network built with {len(chromosome.genes)} genes.")
 
-def worker_loop(pipe, agent_id, timeout=0.001):
+def worker_loop(pipe, agent_id):
     """The main loop for the worker process."""
     net_process = ParallelNetwork(agent_id)
 
     while True:
 
-        if pipe.poll(timeout):
+        msg = pipe.recv()
+        cmd = msg.get('type')
 
-            msg = pipe.recv()
-            cmd = msg.get('type')
+        if cmd == 'SET_CHROMOSOME':
+            # RECEIVE: Chromosome from Zoo
+            chromosome = msg['data']
+            net_process.build_from_chromosome(chromosome)
 
-            if cmd == 'SET_CHROMOSOME':
-                # RECEIVE: Chromosome from Zoo
-                chromosome = msg['data']
-                net_process.build_from_chromosome(chromosome)
-
-                # SEND: Acknowledgment back to Zoo
-                #pipe.send({'type': 'READY', 'id': agent_id})
+            # SEND: Acknowledgment back to Zoo
+            #pipe.send({'type': 'READY', 'id': agent_id})
 
 
-            elif cmd == 'INIT_INPUTS':
-                # RECEIVE: Chromosome from Zoo
-                net_process.network.initialize_inputs()
-                # SEND: Acknowledgment back to Zoo
-                #pipe.send({'type': 'READY', 'id': agent_id})
+        elif cmd == 'INIT_INPUTS':
+            # RECEIVE: Chromosome from Zoo
+            net_process.network.initialize_inputs()
+            # SEND: Acknowledgment back to Zoo
+            #pipe.send({'type': 'READY', 'id': agent_id})
+
+            #print("Receiving empty inputs")
+            result = net_process.network.compute_one_wave()
+
+            #print("Sending outputs")
+            pipe.send({'type': 'RESULT', 'data': result})
+
+        elif cmd == 'TASK':
+
+            if msg['data'] == -1:
+                #print("Receiving Dead visio inputs")
+                #print("Sending empty outputs")
+                pipe.send({'type': 'RESULT', 'data': []})
+
+            elif msg['data'] == 1:
 
                 #print("Receiving empty inputs")
                 result = net_process.network.compute_one_wave()
@@ -54,45 +67,14 @@ def worker_loop(pipe, agent_id, timeout=0.001):
                 #print("Sending outputs")
                 pipe.send({'type': 'RESULT', 'data': result})
 
-            elif cmd == 'TASK':
+            else:
+                # Simulate a sensory-motor cycle
 
-                if msg['data'] == -1:
-                    #print(f"[Worker {agent_id}] Receiving DEAD inputs")
-
-                    net_process.network = 0
-                    #print("Receiving Dead visio inputs")
-                    #print("Sending empty outputs")
-                    pipe.send({'type': 'RESULT', 'data': []})
-
-                elif msg['data'] == 1:
-
-                    #print(f"[Worker {agent_id}] Receiving empty inputs")
-
-                    result = net_process.network.compute_one_wave()
-
-                    #print("Sending outputs")
-                    pipe.send({'type': 'RESULT', 'data': result})
-
-                else:
-                    # Simulate a sensory-motor cycle
-
-                    #print(f"[Worker {agent_id}] Receiving DATA inputs")
-
-                    #print("Receiving visio inputs")
-                    result = net_process.network.compute_one_wave(msg['data'])
-
-                    #print("Sending outputs")
-                    pipe.send({'type': 'RESULT', 'data': result})
-
-            elif cmd == 'TERMINATE':
-                break
-
-        else:
-            if net_process.network:
-
-                #print(f"[Worker {agent_id}] Running without message")
-                result = net_process.network.compute_one_wave()
+                #print("Receiving visio inputs")
+                result = net_process.network.compute_one_wave(msg['data'])
 
                 #print("Sending outputs")
                 pipe.send({'type': 'RESULT', 'data': result})
 
+        elif cmd == 'TERMINATE':
+            break
