@@ -63,7 +63,7 @@ def main():
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(pop_config = PopulationConfigMultiTest())
+    zoo = ParallelZoo(pop_config = PopulationConfigMulti())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
@@ -109,6 +109,15 @@ def main():
     zoo.initialize_all_inputs()
 
 
+    input_percepts = zoo.compute_zoo_interaction()
+
+    # display percepts in multi_input_viz
+    multi_input_viz.display_all_inputs(input_percepts)
+    multi_input_viz.update_display()
+    QtWidgets.QApplication.processEvents()
+
+    zoo.send_first_wave(input_percepts)
+
     # 2. Create a local event loop
     loop = QEventLoop()
 
@@ -134,22 +143,18 @@ def main():
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        input_percepts = zoo.compute_zoo_interaction()
+
+        input_percepts = zoo.run_one_non_blocking_step()
 
         # display percepts in multi_input_viz
         multi_input_viz.display_all_inputs(input_percepts)
         multi_input_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
+        #nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
 
-        move_pos = zoo.run_one_step(input_percepts)
-        print(f"{move_pos=}")
-
-        zoo.compute_move_pos(move_pos)
-
-
-        nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
-
+        zoo.stats["generation"] = zoo.population.generation
+        nb_alive_indiv = len([pac for pac in zoo.population.individuals if pac])
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
@@ -160,11 +165,11 @@ def main():
         if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
-
-        # Update both windows
-        zoo_viz.draw_zoo()
-        zoo_viz.update_display()
-        QtWidgets.QApplication.processEvents()
+        #
+        # # Update both windows
+        # zoo_viz.draw_zoo()
+        # zoo_viz.update_display()
+        # QtWidgets.QApplication.processEvents()
 
         if SIMULATION_ACTIVE==False:
             loop.quit()

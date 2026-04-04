@@ -143,6 +143,21 @@ class EvoZoo(Zoo):
 
         return input_percepts
 
+    def compute_percept(self, pacman_index):
+
+        pacman=self.population.individuals[pacman_index]
+
+        if pacman == 0:
+            print(f"Pacman {pacman_index} is empty, skipping")
+
+            return -1
+
+        #print(f"Position pacman {i}: ", pacman.get_position())
+
+        input_percept = self.integrate_visio_outputs(pac= pacman)
+
+        return input_percept
+
     def print_pacman_positions(self):
 
         for i,pacman in enumerate(self.population.individuals):

@@ -377,7 +377,7 @@ class Zoo:
             print(f"Error, {char=} could not be found in _grid")
             return (-1, -1)
 
-    def _compute_test_contats(self, pair_contacts):
+    def _compute_test_contacts(self, pair_contacts):
 
         print(pair_contacts)
 
@@ -395,12 +395,79 @@ class Zoo:
             elif nature == "-1":
                 self.test_predator_reproduction(pac1, pac2)
 
+    def test_contacts(self, pacman_index):
+
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+
+        pac = self.population.individuals[pacman_index]
+
+        if pac==0:
+            print(f"Warning, pac {pacman_index=} should be implemented")
+            return
+
+        #print(pac)
+
+        x, y = pac.get_position()
+
+        for dir_x, dir_y in directions:
+
+            char_contact = self._in_grid(x + dir_x,  y + dir_y)
+            if not char_contact:
+                continue
+
+            if char_contact in (".", " ", 'X') :
+                continue
+
+            else:
+                contact_index = char_to_index(char_contact)
+
+            animal = contact_index % 2
+
+            if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                pac.predator_contact()
+
+            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                #pair_contacts.append((contact_index, pacman_index, "-1"))
+
+                self.test_predator_reproduction(contact_index, pacman_index)
+
+            elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+
+                #pair_contacts.append((contact_index, pacman_index, "1"))
+                self.test_prey_reproduction(contact_index, pacman_index)
+            else:
+                pass
+                #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
+
+
+        # naturally losing life each time points
+        pac.life_points -= 1
+
+        if pac.life_points < 0:
+            #self.init_new_individual(pacman_index)
+            self.process_death(pacman_index)
+            return 0
+        else:
+            pac.fitness = pac.life_points
+            pac.fitness_evaluated = True
+
+            if pac.animal_nature == "-1":
+                self.stats["mean_predator_fitness"] += pac.get_fitness()
+                self.stats["nb_predators"] +=1
+            elif pac.animal_nature == "1":
+                self.stats["mean_prey_fitness"] += pac.get_fitness()
+                self.stats["nb_preys"] +=1
+        return 1
     def test_pacman_contacts(self):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 
         pair_contacts = []
 
         for pacman_index, pac in enumerate(self.population.individuals):
+
             if pac==0:
                 continue
 
@@ -461,7 +528,7 @@ class Zoo:
 
         self.stats["generation"] = self.population.generation
 
-        self._compute_test_contats(pair_contacts)
+        self._compute_test_contacts(pair_contacts)
 
 
 
@@ -490,7 +557,11 @@ class Zoo:
 
         if indiv_path == 0:
             indiv_path = os.path.abspath("")
-
+        else:
+            try:
+                os.makedirs(os.path.abspath(indiv_path))
+            except OSError:
+                print(f"{os.path.abspath(indiv_path)} already exists")
 
 
         file_stats = os.path.join(indiv_path, f"Stats_zoo_{self.stats["time"]}.json")

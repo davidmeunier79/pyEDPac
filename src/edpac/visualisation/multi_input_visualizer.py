@@ -78,10 +78,10 @@ class MultiInputVisualizer(InputVisualizer):
 
         self.refresh_from_background()
 
-        assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=}"
+        assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
 
         for i, sensor_values in enumerate(all_sensor_values):
-            if sensor_values == -1 or sensor_values == 1:
+            if sensor_values == -1 or sensor_values == 1 or sensor_values is None:
                 ## empty sensor_values
                 self._draw_panel_background(pacman_index = i)
             else:

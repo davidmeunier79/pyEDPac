@@ -51,12 +51,12 @@ from multipac.parallel.parallel_network import worker_loop
 class ParallelZoo(EvoZoo):
     def __init__(self, pop_config : PopulationConfig = None):
         self.pop_config = pop_config or PopulationConfig()
+        super().__init__(self.pop_config)
 
         self.num_agents = self.pop_config.POPULATION_SIZE
         self.pipes = []
         self.processes = []
 
-        super().__init__(pop_config)
 
     def deploy(self):
         print(f"[ParallelZoo] Deploying {self.num_agents} individuals...")
@@ -77,16 +77,16 @@ class ParallelZoo(EvoZoo):
             pipe.send({'type': 'SET_CHROMOSOME', 'data': self.population.individuals[i]})
 
             print(f"[ParallelZoo] Waiting Worker {i}")
-
-        # Synchronize: Wait for all "READY" signals
-        for i, pipe in enumerate(self.pipes):
-
-            if not self.population.individuals[i]:
-                continue
-
-            response = pipe.recv()
-            if response['type'] == 'READY':
-                print(f"[ParallelZoo] Confirmed: Worker {response['id']} chromosome is ready.")
+        #
+        # # Synchronize: Wait for all "READY" signals
+        # for i, pipe in enumerate(self.pipes):
+        #
+        #     if not self.population.individuals[i]:
+        #         continue
+        #
+        #     response = pipe.recv()
+        #     if response['type'] == 'READY':
+        #         print(f"[ParallelZoo] Confirmed: Worker {response['id']} chromosome is ready.")
 
 
     def initialize_all_inputs(self):
@@ -98,16 +98,16 @@ class ParallelZoo(EvoZoo):
             pipe.send({'type': 'INIT_INPUTS'})
 
             print(f"[ParallelZoo] Waiting Worker {i} INIT_INPUTS")
-
-        # Synchronize: Wait for all "READY" signals
-        for i, pipe in enumerate(self.pipes):
-            if not self.population.individuals[i]:
-                continue
-
-            response = pipe.recv()
-            if response['type'] == 'READY':
-                print(f"[ParallelZoo] Confirmed: Worker {response['id']} is initialized.")
-
+        #
+        # # Synchronize: Wait for all "READY" signals
+        # for i, pipe in enumerate(self.pipes):
+        #     if not self.population.individuals[i]:
+        #         continue
+        #
+        #     response = pipe.recv()
+        #     if response['type'] == 'READY':
+        #         print(f"[ParallelZoo] Confirmed: Worker {response['id']} is initialized.")
+        #
 
     def send_chromosome(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
@@ -117,28 +117,117 @@ class ParallelZoo(EvoZoo):
         pipe.send({'type': 'SET_CHROMOSOME', 'data': self.population.individuals[pacman_index]})
 
         print(f"[ParallelZoo] Waiting New Worker {pacman_index} SET_CHROMOSOME")
-
-        response = pipe.recv()
-        if response['type'] == 'READY':
-            print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
-
-
-    def send_init_input(self, pacman_index):
-        assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
-
-        assert  self.population.individuals[pacman_index], f"Error, empty individual {pacman_index} sending INIT_INPUTS "
+    #
+    #     response = pipe.recv()
+    #     if response['type'] == 'READY':
+    #         print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
+    #
+    #
+    # def send_init_input(self, pacman_index):
+    #     assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+    #
+    #     assert  self.population.individuals[pacman_index], f"Error, empty individual {pacman_index} sending INIT_INPUTS "
 
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'INIT_INPUTS'})
 
         print(f"[ParallelZoo] Waiting New Worker {pacman_index} INIT_INPUTS")
+        #
+        # response = pipe.recv()
+        # if response['type'] == 'READY':
+        #     print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
 
-        response = pipe.recv()
-        if response['type'] == 'READY':
-            print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
+
+    def run_one_non_blocking_step(self, timeout=0.001):
+        """
+        Collects outputs from all workers without
+        locking the Master process.
+        """
+        results = [None] * self.num_agents
+
+        for i, pipe in enumerate(self.pipes):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+            if pipe.poll(timeout):
+                try:
+                    res = pipe.recv()
+                    if res['type'] != 'RESULT':
+                        continue
+
+                    if len(res['data']):
+
+                        if self.population.individuals[i]==0:
+                            continue
+
+                        pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
+
+                        if pos:
+                            print(f"**** Move forward for agent {i}")
+                            self._move_forward(i)
+                    else:
+                        self.process_death(i)
+                        continue
+
+                    # computing contacts
+                    res = self.test_contacts(i)
+
+                    if not res:
+                        continue
+
+                    percept = self.compute_percept(i)
+
+                    results[i] = percept
+
+                    try:
+                        pipe.send({'type': 'TASK', 'data': percept})
+
+                    except BrokenPipeError:
+                        if visio_input == -1:
+                            print("Dead visio inputs")
+                        elif visio_input == 1:
+                            print("Empty visio inputs")
+
+                        print(f"{visio_input=}")
+
+                except EOFError:
+                    print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
+            else:
+                # Optional: Handle the "Lagging Agent" case
+                # Maybe use the previous frame's command or stay still
+                results[i] = None
+
+        return results
+
+    def send_first_wave(self, visio_inputs):
+        assert len(visio_inputs) == len(self.pipes), f"Error with visio_inputs {len(visio_inputs)=} == {len(self.pipes)=}"
+
+        for pipe, visio_input in zip(self.pipes, visio_inputs):
+            #print(visio_input)
+
+            try:
+                pipe.send({'type': 'TASK', 'data': visio_input})
+
+            except BrokenPipeError:
+                if visio_input == -1:
+                    print("Dead visio inputs")
+                elif visio_input == 1:
+                    print("Empty visio inputs")
+
+                print(f"{visio_input=}")
+        #print(f"[ParallelZoo] Agent {i} moved")
 
 
-    def run_one_step(self, visio_inputs):
+
+    def run_one_step(self, motor_outputs):
+
+        for i, motor in motor_outputs:
+
+            pos = self.population.individuals[i].integrate_motor_outputs(motor)
+
+            if pos:
+                print(f"**** Move forward for agent {i}")
+                move_pos[i] = pos
+
         #print("\n[ParallelZoo] Running a test neural computation step...")
         #test_input = [np.zeros(shape=(NetworkConfig.VISIO_SQRT_NB_NEURONS, NetworkConfig.VISIO_SQRT_NB_NEURONS)) for i in range(NB_VISIO_INPUTS)]
 
