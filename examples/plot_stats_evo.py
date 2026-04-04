@@ -21,16 +21,26 @@ if __name__ == "__main__":
 
     print(df)
 
-    # plot
+    # # plot
+    # fig = plt.figure()
+    # ax = fig.add_subplot(1, 1, 1)
+    #
+    # ax.plot(df.index, df["nb_preys"], color = "blue")
+    #
+    # ax.plot(df.index, df["nb_predators"], color = "red")
+    #
+    # ax.grid()
+    # plt.show()
+
+
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
-    ax.plot(df.index, df["nb_preys"], color = "blue")
+    ax.plot(df.index, df["mean_prey_fitness"], color = "blue")
 
-    ax.plot(df.index, df["nb_predators"], color = "red")
+    ax.plot(df.index, df["mean_predator_fitness"], color = "red")
 
     ax.grid()
-
     plt.show()
 
     #plot_file = f"Weight_{self.synapse.id}.png"
