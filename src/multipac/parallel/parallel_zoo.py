@@ -184,6 +184,15 @@ class ParallelZoo(EvoZoo):
 
                         results[i] = percept
 
+                    if percept:
+                        try:
+                            pipe.send({'type': 'TASK', 'data': percept})
+
+                        except BrokenPipeError:
+
+                            print(f"{percept=}")
+
+
                 except EOFError:
                     print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
             else:
@@ -204,7 +213,6 @@ class ParallelZoo(EvoZoo):
                 elif pac.animal_nature == "1":
                     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_preys"][-1] +=1
-
 
         return results
 
