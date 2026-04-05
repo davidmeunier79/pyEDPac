@@ -32,7 +32,7 @@ class MultiPacmanConfig:
     NB_LIFE_POINTS_PER_PREY_BITE = 100
 
     # Special 2 populations prey and predators
-    NB_LIFE_POINTS_PER_PACGUM_PREY = 10
+    NB_LIFE_POINTS_PER_PACGUM_PREY = 20
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR = 4
 
     MIN_LIFE_FOR_REPROD = 0
