@@ -79,7 +79,8 @@ class PopulationConfigMulti:
     # # # # Taille population
     POPULATION_SIZE: int = 63
 
-    INIT_POPULATION_SIZE : int = 50
+    INIT_PREY_POPULATION_SIZE : int = 25
+    INIT_PREDATOR_POPULATION_SIZE : int = 15
 
 
 @dataclass
@@ -88,7 +89,8 @@ class PopulationConfigMultiTest:
     # # # # Taille population
     POPULATION_SIZE: int = 20
 
-    INIT_POPULATION_SIZE : int = 14
+    INIT_PREY_POPULATION_SIZE : int = 7
+    INIT_PREDATOR_POPULATION_SIZE : int = 5
 
 
 

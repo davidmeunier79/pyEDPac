@@ -77,8 +77,11 @@ class Pacman(Individual):
         #self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
-        self.dir_body = Direction.RIGHT  # Default Right
-        self.dir_head = Direction.RIGHT  # Default Right
+        if self.pacman_config.RANDOM_INIT_DIRECTION:
+            self.dir_body, self.dir_head = np.random.randint(low=0, high=4, size = 2)
+        else:
+            self.dir_body = Direction.RIGHT  # Default Right
+            self.dir_head = Direction.RIGHT  # Default Right
 
         self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0,
                       "nb_contact_predators": 0, "nb_contact_preys": 0,

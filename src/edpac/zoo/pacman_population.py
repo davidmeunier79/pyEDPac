@@ -51,16 +51,28 @@ class PacmanPopulation(Population):
                  mutation_config)
 
         # Créer population initiale
-        self.individuals: List[Pacman] = [
-            Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
-            for _ in range(self.config.INIT_POPULATION_SIZE)
-        ]
-
-        for _ in range(self.config.INIT_POPULATION_SIZE, self.config.POPULATION_SIZE):
-            self.individuals.append(0)
+        self.init_pacman_population(chromosome_config)
 
         self.set_chromosome_lengths()
         print(self.lengths)
+
+    def init_pacman_population(self, chromosome_config):
+        self.individuals = []
+
+        while len(self.individuals) < self.config.POPULATION_SIZE:
+
+            if len(self.individuals) < self.config.INIT_PREDATOR_POPULATION_SIZE:
+                pac_predator = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                pac_predator.set_animal_nature("-1")
+                self.individuals.append(pac_predator)
+
+            elif len(self.individuals) < self.config.INIT_PREDATOR_POPULATION_SIZE + self.config.INIT_PREY_POPULATION_SIZE:
+                pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                pac_prey.set_animal_nature("1")
+                self.individuals.append(pac_prey)
+
+            else:
+                self.individuals.append(0)
 
     def init_new_individual(self, pacman_index, genes):
 

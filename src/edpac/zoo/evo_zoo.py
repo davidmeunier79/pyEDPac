@@ -52,7 +52,7 @@ class EvoZoo(Zoo):
                     # elif animal_nature == "-1":
                     #     self.stats["nb_predators"] += 1
 
-                    self.population.individuals[index].set_animal_nature(animal_nature)
+                    #self.population.individuals[index].set_animal_nature(animal_nature)
                     self.population.individuals[index].set_position(y=pos_y,x=pos_x)
                     added = True
 
