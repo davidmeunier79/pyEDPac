@@ -200,7 +200,7 @@ def main():
     zoo.shutdown()
 
     print("save stats")
-    zoo.save_stats("test_stats_4hidden_80proj")
+    zoo.save_stats("test_stats")
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
