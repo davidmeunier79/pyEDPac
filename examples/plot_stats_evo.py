@@ -9,7 +9,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def plot_evo_stats(stats_path)
+def plot_evo_stats(stats_path):
 
     file_stats = os.path.join(stats_path, f"Stats_evo.csv")
 
