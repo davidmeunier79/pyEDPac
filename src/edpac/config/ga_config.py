@@ -66,7 +66,7 @@ class PopulationConfigTest:
 
 
         # Taille population
-    POPULATION_SIZE: int = 6
+    POPULATION_SIZE: int = 10
     ELITE_SIZE: int = 1        # Meilleurs individus conservés
 
     # Génération
@@ -86,9 +86,9 @@ class PopulationConfigMulti:
 class PopulationConfigMultiTest:
     """Configuration de la population"""
     # # # # Taille population
-    POPULATION_SIZE: int = 10
+    POPULATION_SIZE: int = 20
 
-    INIT_POPULATION_SIZE : int = 6
+    INIT_POPULATION_SIZE : int = 14
 
 
 
