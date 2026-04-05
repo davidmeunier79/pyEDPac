@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
 
 
-    indiv_path = os.path.abspath("test_stats_4hidden_80proj_pac_regrowth2_pacgum50")
-
+    indiv_path = os.path.abspath("test_stats_4hidden_80proj_pac_regrowth2_pacgum50_min_life_prey_pred")
     file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
 
     df = pd.read_csv(file_stats)
