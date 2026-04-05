@@ -94,6 +94,7 @@ class ParallelZoo(EvoZoo):
         for i, pipe in enumerate(self.pipes):
             if not self.population.individuals[i]:
                 continue
+
             # Pass the specific chromosome for this ID
             pipe.send({'type': 'INIT_INPUTS'})
 
@@ -109,6 +110,25 @@ class ParallelZoo(EvoZoo):
         #         print(f"[ParallelZoo] Confirmed: Worker {response['id']} is initialized.")
         #
 
+    def send_death_signal(self, pacman_index):
+        assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
+
+        pipe = self.pipes[pacman_index]
+        pipe.send({'type': 'DEAD_CHROMOSOME', 'data': pacman_index})
+
+        print(f"[ParallelZoo] Waiting Worker {pacman_index} DEAD_CHROMOSOME")
+
+        wait_response = True
+
+        while wait_response:
+            print(f"[ParallelZoo] Confirmed: Worker {pacman_index} waiting DEAD_CHROMOSOME response.")
+            response = pipe.recv()
+            if response['type'] == 'READY':
+                print(f"[ParallelZoo] Confirmed: Worker {response['id']} is DEAD_CHROMOSOME.")
+                wait_response = False
+            else:
+                print(f"*[ParallelZoo] Not Confirmed DEAD_CHROMOSOME: Worker send {response=} ")
+
     def send_chromosome(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
         assert  self.population.individuals[pacman_index], f"Error, sending empty chromosome {pacman_index}"
@@ -117,12 +137,14 @@ class ParallelZoo(EvoZoo):
         pipe.send({'type': 'SET_CHROMOSOME', 'data': self.population.individuals[pacman_index]})
 
         print(f"[ParallelZoo] Waiting New Worker {pacman_index} SET_CHROMOSOME")
-    #
-    #     response = pipe.recv()
-    #     if response['type'] == 'READY':
-    #         print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
-    #
-    #
+
+        response = pipe.recv()
+        if response['type'] == 'READY':
+            print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
+        else:
+
+            print(f"*[ParallelZoo] Not Confirmed: New Worker send {response=} ")
+
     # def send_init_input(self, pacman_index):
     #     assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
     #
@@ -132,11 +154,11 @@ class ParallelZoo(EvoZoo):
         pipe.send({'type': 'INIT_INPUTS'})
 
         print(f"[ParallelZoo] Waiting New Worker {pacman_index} INIT_INPUTS")
-        #
-        # response = pipe.recv()
-        # if response['type'] == 'READY':
-        #     print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
-
+#
+#         response = pipe.recv()
+#         if response['type'] == 'READY':
+#             print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
+#
 
     def run_one_non_blocking_step(self, timeout=0.001):
         """

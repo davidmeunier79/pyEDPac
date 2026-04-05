@@ -559,8 +559,13 @@ class Zoo:
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
 
+        self.send_death_signal(pacman_index)
         # increment nb_deads
         self.stats["nb_deads"][-1] += 1
+
+
+    def send_death_signal(self, pacman_index):
+        print("Error, should be implemented in inherited class")
 
     def save_stats(self, indiv_path=0):
 
