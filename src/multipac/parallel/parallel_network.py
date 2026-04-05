@@ -57,7 +57,7 @@ def worker_loop(pipe, agent_id):
                 assert agent_id == net_process.agent_id, \
                     f"***[Worker {net_process.agent_id}] Error, receives DEAD_CHROMOSOME for {agent_id=}"
 
-                print(f"***[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
+                print(f"[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
 
                 net_process.network = 0
 
