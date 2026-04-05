@@ -248,6 +248,8 @@ class ParallelZoo(EvoZoo):
                     #self.init_new_individual(pacman_index)
                     self.process_death(i)
 
+            self.add_random_pacgums()
+
         return results
 
     def send_first_wave(self, visio_inputs):

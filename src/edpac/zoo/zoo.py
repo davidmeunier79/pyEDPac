@@ -6,7 +6,7 @@ from math import floor
 import numpy as np
 import pathlib
 
-from edpac.config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS
+from edpac.config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS, REGROWTH_PACGUM_RATE
 
 from .chars import char_to_index, index_to_char
 from .pacman import Pacman, Direction
@@ -385,7 +385,7 @@ class Zoo:
             return yy, xx
         else:
             print(f"Error, {char=} could not be found in _grid")
-            return (-1, -1)
+            return ([-1], [-1])
 
     def test_contacts(self, pacman_index):
 
@@ -534,6 +534,25 @@ class Zoo:
 
 
         return len([pac for pac in self.population.individuals if pac])
+
+    def add_random_pacgums(self):
+        """
+        Adding some pacgums in empty locations
+        """
+        xx, yy = self._where_in_grid(b" ")
+
+        if xx[0] == -1 and yy[0] == -1:
+            print("No empy space found, skipping")
+            return
+
+        print(f"Found {len(xx)} empty locations in zoo")
+        assert len(xx) == len(yy), f"Error with _where_in_grid,  {len(xx)=} != {len(yy)=}"
+        keep = REGROWTH_PACGUM_RATE < np.random.uniform(size = len(xx))
+
+        print(f"Adding {np.sum(keep)=} pacgums")
+
+        self._grid[xx[keep], yy[keep]] = "."
+
 
     def process_death(self, pacman_index):
         #print(f"process_death of indiv {pacman_index=}")
