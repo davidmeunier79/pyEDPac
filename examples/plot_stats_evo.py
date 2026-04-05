@@ -46,6 +46,20 @@ if __name__ == "__main__":
 
     fig.savefig(os.path.join(indiv_path, "Mean_fitness.png"))
 
+
+
+    # plot mean fitness
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    ax.plot(df.index, df["nb_deads"], color = "blue")
+    ax.plot(df.index, df["nb_added_pacgums"], color = "red")
+
+    ax.grid()
+    plt.show()
+
+    fig.savefig(os.path.join(indiv_path, "Mean_Growth.png"))
+
     #
     # plt.figure(figsize=(12, 6))
     #
