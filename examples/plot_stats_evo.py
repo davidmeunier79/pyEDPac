@@ -74,6 +74,4 @@ if __name__ == "__main__":
     # Parse and execute
     args = parser.parse_args()
 
-    start_time = time.time()
     plot_evo_stats(args.stats_path)
-    print("--- %s seconds ---" % (time.time() - start_time))
