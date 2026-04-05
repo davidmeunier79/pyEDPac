@@ -269,6 +269,8 @@ class EvoZoo(Zoo):
         if parent1.animal_nature == "-1" and parent2.animal_nature == "-1":
 
             if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent2.life_points:
+
+                print(f"Enough life points to reproduce predators: {parent1.life_points} {parent2.life_points}")
                 parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2)
                 parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2)
 
@@ -280,6 +282,7 @@ class EvoZoo(Zoo):
         elif parent1.animal_nature == "1" and parent2.animal_nature == "1":
 
             if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent2.life_points:
+                print(f"Enough life points to reproduce preys: {parent1.life_points} {parent2.life_points}")
                 parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2)
                 parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2)
 
