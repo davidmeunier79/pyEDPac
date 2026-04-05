@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
     # Define the parameter
     parser.add_argument(
-        "--indiv_path",
+        "--stats_path",
         type=str,
         required=True,
         help="Path to the individual .npy or chromosome file"
@@ -233,5 +233,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_time = time.time()
-    main(args.indiv_path)
+    main(args.stats_path)
     print("--- %s seconds ---" % (time.time() - start_time))

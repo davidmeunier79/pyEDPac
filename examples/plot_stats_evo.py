@@ -9,9 +9,9 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def plot_evo_stats(indiv_path)
+def plot_evo_stats(stats_path)
 
-    file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
+    file_stats = os.path.join(stats_path, f"Stats_evo.csv")
 
     df = pd.read_csv(file_stats)
     df = df.set_index("time")
@@ -29,7 +29,7 @@ def plot_evo_stats(indiv_path)
     ax.grid()
     plt.show()
 
-    fig.savefig(os.path.join(indiv_path, "Nb_indiv.png"))
+    fig.savefig(os.path.join(stats_path, "Nb_indiv.png"))
 
     # plot mean fitness
     fig = plt.figure()
@@ -41,7 +41,7 @@ def plot_evo_stats(indiv_path)
     ax.grid()
     plt.show()
 
-    fig.savefig(os.path.join(indiv_path, "Mean_fitness.png"))
+    fig.savefig(os.path.join(stats_path, "Mean_fitness.png"))
 
 
 
@@ -55,7 +55,7 @@ def plot_evo_stats(indiv_path)
     ax.grid()
     plt.show()
 
-    fig.savefig(os.path.join(indiv_path, "Mean_Growth.png"))
+    fig.savefig(os.path.join(stats_path, "Mean_Growth.png"))
 
 
 if __name__ == "__main__":
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     # Define the parameter
     parser.add_argument(
-        "--indiv_path",
+        "--stats_path",
         type=str,
         required=True,
         help="Path to the individual .npy or chromosome file"
@@ -75,5 +75,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_time = time.time()
-    plot_evo_stats(args.indiv_path)
+    plot_evo_stats(args.stats_path)
     print("--- %s seconds ---" % (time.time() - start_time))
