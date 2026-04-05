@@ -547,10 +547,10 @@ class Zoo:
 
         print(f"Found {len(xx)} empty locations in zoo")
         assert len(xx) == len(yy), f"Error with _where_in_grid,  {len(xx)=} != {len(yy)=}"
-        keep = REGROWTH_PACGUM_RATE < np.random.uniform(size = len(xx))
+        keep =  np.random.uniform(size = len(xx)) < REGROWTH_PACGUM_RATE
 
         nb_added_pacgums = np.sum(keep)
-        print()
+
         print(f"Adding {nb_added_pacgums} pacgums")
 
         self._grid[xx[keep], yy[keep]] = "."
