@@ -80,7 +80,8 @@ class Pacman(Individual):
         self.dir_body = Direction.RIGHT  # Default Right
         self.dir_head = Direction.RIGHT  # Default Right
 
-        self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0, "nb_contact_predators": 0,
+        self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0,
+                      "nb_contact_predators": 0, "nb_contact_preys": 0,
                       "nb_move_forward": 0, "nb_body_turns": 0,
                       "nb_head_forward": 0, "nb_head_turns": 0,
                       'nb_bites': 0
@@ -123,6 +124,14 @@ class Pacman(Individual):
         if self.animal_nature == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
             self.stats["nb_contact_predators"] += 1
+
+        else:
+            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")
+
+    def bite_prey(self):
+        if self.animal_nature == "-1":
+            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PREY_BITE
+            self.stats["nb_contact_preys"] += 1
 
         else:
             print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")

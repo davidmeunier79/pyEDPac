@@ -25,14 +25,16 @@ class MultiPacmanConfig:
     MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
-    INITIAL_LIFE_POINTS = 100
+    INITIAL_LIFE_POINTS = 1000
 
     #NB_LIFE_POINTS_PER_PREY = 100
-    NB_LIFE_POINTS_PER_PREDATOR_CONTACT = 20
+    NB_LIFE_POINTS_PER_PREDATOR_CONTACT = 200
+
+    NB_LIFE_POINTS_PER_PREY_BITE = 200
 
     # Special 2 populations prey and predators
-    NB_LIFE_POINTS_PER_PACGUM_PREY = 10
-    NB_LIFE_POINTS_PER_PACGUM_PREDATOR = 4
+    NB_LIFE_POINTS_PER_PACGUM_PREY = 100
+    NB_LIFE_POINTS_PER_PACGUM_PREDATOR = 40
 
     MIN_LIFE_FOR_REPROD = 0
     #MIN_LIFE_FOR_REPROD = INITIAL_LIFE_POINTS // 2
@@ -50,7 +52,7 @@ class PacmanConfig:
     MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
-    INITIAL_LIFE_POINTS = 200
+    INITIAL_LIFE_POINTS = 100
 
     NB_LIFE_POINTS_PER_PACGUM = 2
     NB_LIFE_POINTS_PER_PREY = 100
