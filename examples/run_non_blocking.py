@@ -53,7 +53,7 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def main():
+def main(stats_path):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -200,7 +200,7 @@ def main():
     zoo.shutdown()
 
     print("save stats")
-    zoo.save_stats("test_stats_4hidden_80proj_pac_regrowth2_pacgum50_min_life_prey0_pred500")
+    zoo.save_stats(stats_path)
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
@@ -216,6 +216,21 @@ def main():
 
 if __name__ == "__main__":
     import time
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process a specific individual genome/path.")
+
+    # Define the parameter
+    parser.add_argument(
+        "--indiv_path",
+        type=str,
+        required=True,
+        help="Path to the individual .npy or chromosome file"
+    )
+
+    # Parse and execute
+    args = parser.parse_args()
+
     start_time = time.time()
-    main()
+    main(args.indiv_path)
     print("--- %s seconds ---" % (time.time() - start_time))
