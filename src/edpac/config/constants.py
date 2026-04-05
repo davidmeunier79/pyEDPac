@@ -21,5 +21,5 @@ MINIMAL_TIME = 5
 MOTOR_SQRT_NB_NEURONS=5
 VISIO_SQRT_NB_NEURONS=20
 
-# rate of renewal of pacgums
-REGROWTH_PACGUM_RATE = 0.001
+# rate of renewal of pacgums in zoo
+REGROWTH_PACGUM_RATE = 0.00001
