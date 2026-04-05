@@ -76,4 +76,9 @@ def worker_loop(pipe, agent_id):
                 pipe.send({'type': 'RESULT', 'data': result})
 
         elif cmd == 'TERMINATE':
+
+            print(f"[Worker {net_process.agent_id}] shutdown")
+            net_process.network = 0
+            del(net_process.network)
+
             break
