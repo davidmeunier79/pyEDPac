@@ -240,6 +240,14 @@ class ParallelZoo(EvoZoo):
                     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_preys"][-1] +=1
 
+
+                # naturally losing life each time points
+                pac.life_points -= 1
+
+                if pac.life_points < 0:
+                    #self.init_new_individual(pacman_index)
+                    self.process_death(i)
+
         return results
 
     def send_first_wave(self, visio_inputs):

@@ -435,21 +435,6 @@ class Zoo:
                 #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
-        # naturally losing life each time points
-        pac.life_points -= 1
-
-        if pac.life_points < 0:
-            #self.init_new_individual(pacman_index)
-            self.process_death(pacman_index)
-            return 0
-            #
-            # if pac.animal_nature == "-1":
-            #     self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-            #     self.stats["nb_predators"][-1] +=1
-            # elif pac.animal_nature == "1":
-            #     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-            #     self.stats["nb_preys"][-1] +=1
-
         return 1
 
     ## all pacmal are tested at once
