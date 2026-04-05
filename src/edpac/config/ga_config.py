@@ -42,7 +42,7 @@ class ChromosomeConfig:
             #NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*50 # corresponds to initial value
             NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*25 # corresponds to initial value
         else:
-            NB_PROJECTIONS_EACH_CHROMOSOME: int = 20  # Nombre de projections
+            NB_PROJECTIONS_EACH_CHROMOSOME: int = 80  # Nombre de projections
             NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 
     else:
