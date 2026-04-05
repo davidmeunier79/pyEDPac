@@ -43,7 +43,7 @@ class EvoZoo(Zoo):
 
                     print(f"Setting position for pacman {index}: {pos_y, pos_x}")
                     self._set_in_grid(pos_x, pos_y, index_to_char(index))
-                    animal = get_animal_from_index(index)
+                    animal = self.get_animal_from_index(index)
 
                     animal_nature = self.animals[animal]["danger"]
                     #
@@ -81,7 +81,7 @@ class EvoZoo(Zoo):
 
                         self._set_in_grid(x + dir_x, y + dir_y, index_to_char(new_index))
 
-                        animal = new_index % 2
+                        animal = self.get_animal_from_index(new_index)
                         animal_nature = self.animals[animal]["danger"]
                         assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
                             f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
