@@ -183,9 +183,20 @@ class EvoZoo(Zoo):
             elif pos == -1:
                 self.process_death(pacman_index)
 #
+
+    # TODO
+    def get_animal_from_index(self, index):
+        return index % 2
+
+#         assert 0 <= index < population.pop_config.POPULATION_SIZE
+#
+#         if  index < population.pop_config.INIT_PREY_POPULATION_SIZE
+#             return 0
+#         elif se
+
     def _find_first_avail(self, avail, target_danger):
 
-        all_dangers = [self.animals[new_index % 2]["danger"] for new_index in avail]
+        all_dangers = [self.animals[index % 2]["danger"] for index in avail]
 
         for i, danger in enumerate(all_dangers):
             if danger == target_danger:

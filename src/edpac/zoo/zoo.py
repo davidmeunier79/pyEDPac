@@ -219,6 +219,8 @@ class Zoo:
         elif target_char != " ":
 
             index = char_to_index(target_char)
+
+
             animal = index % 2
 
             print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
@@ -246,6 +248,8 @@ class Zoo:
 
         pac.set_position(new_x, new_y)
 
+    def get_animal_from_index(self, index):
+        print(*"Error, should be implemented in inherited class")
 
     def integrate_visio_outputs(self, pac):
         """

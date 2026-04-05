@@ -50,6 +50,9 @@ class PacmanPopulation(Population):
                  crossover_config,
                  mutation_config)
 
+        self.nb_preys = 0
+        self.nb_predators = 0
+
         # Créer population initiale
         self.init_pacman_population(chromosome_config)
 
@@ -60,19 +63,24 @@ class PacmanPopulation(Population):
         self.individuals = []
 
         while len(self.individuals) < self.config.POPULATION_SIZE:
+            if len(self.individuals) % 2 == 1:
+                if self.nb_preys < self.config.INIT_PREY_POPULATION_SIZE:
+                    pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                    pac_prey.set_animal_nature("1")
+                    self.individuals.append(pac_prey)
 
-            if len(self.individuals) < self.config.INIT_PREDATOR_POPULATION_SIZE:
-                pac_predator = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
-                pac_predator.set_animal_nature("-1")
-                self.individuals.append(pac_predator)
-
-            elif len(self.individuals) < self.config.INIT_PREDATOR_POPULATION_SIZE + self.config.INIT_PREY_POPULATION_SIZE:
-                pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
-                pac_prey.set_animal_nature("1")
-                self.individuals.append(pac_prey)
+                    self.nb_preys += 1
+                else:
+                    self.individuals.append(0)
 
             else:
-                self.individuals.append(0)
+                if self.nb_predators < self.config.INIT_PREY_POPULATION_SIZE:
+                    pac_predator = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                    pac_predator.set_animal_nature("-1")
+                    self.individuals.append(pac_predator)
+                    self.nb_predators += 1
+                else:
+                    self.individuals.append(0)
 
     def init_new_individual(self, pacman_index, genes):
 

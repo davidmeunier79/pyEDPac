@@ -56,8 +56,16 @@ class PacmanConfig:
     NB_LIFE_POINTS_PER_PACGUM: int = 2
     NB_LIFE_POINTS_PER_PREY: int = 100
     NB_LIFE_POINTS_PER_PREDATOR: int = 10
-
-    #REGROWTH_PACGUM_RATE = 0.001 # rate of renewal of pacgums # now in constants
+#TODO
+# Unused but could
+#
+# @dataclass
+# class ZooConfig:
+#     NB_LIFE_POINTS_PER_PACGUM: int = 2
+#     NB_LIFE_POINTS_PER_PREY: int = 100
+#     NB_LIFE_POINTS_PER_PREDATOR: int = 10
+#
+#     #REGROWTH_PACGUM_RATE = 0.001 # rate of renewal of pacgums # now in constants
 @dataclass
 class ZooVisualizerConfig:
     ZOO_NB_ROWS: int = 22
