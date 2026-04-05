@@ -28,7 +28,7 @@ class Zoo:
         self.data_dir = self._get_data_dir()
 
 
-        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": []}
+        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": [], "nb_added_pacgums": []}
 
         #
         # # Mapping for clarity
@@ -46,7 +46,7 @@ class Zoo:
 
         self.stats["generation"].append(0)
         self.stats["nb_deads"].append(0)
-
+        self.stats["nb_added_pacgums"].append(0)
     def _get_data_dir(self):
 
         # 1. Get the absolute path of constants.py
@@ -384,7 +384,7 @@ class Zoo:
             yy, xx = np.where(self._grid == char)
             return yy, xx
         else:
-            print(f"Error, {char=} could not be found in _grid")
+            #print(f"Error, {char=} could not be found in _grid")
             return ([-1], [-1])
 
     def test_contacts(self, pacman_index):
@@ -542,8 +542,8 @@ class Zoo:
         xx, yy = self._where_in_grid(b" ")
 
         if xx[0] == -1 and yy[0] == -1:
-            print("No empy space found, skipping")
-            return
+            #print("No empy space found, skipping")
+            return 0
 
         print(f"Found {len(xx)} empty locations in zoo")
         assert len(xx) == len(yy), f"Error with _where_in_grid,  {len(xx)=} != {len(yy)=}"
@@ -552,6 +552,8 @@ class Zoo:
         print(f"Adding {np.sum(keep)=} pacgums")
 
         self._grid[xx[keep], yy[keep]] = "."
+
+        return np.sum(keep)
 
 
     def process_death(self, pacman_index):

@@ -166,7 +166,7 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
-        print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}")
+        print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}, nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
 
         if nb_alive_indiv == 0 or TIME > 500:
             print("All individuals are dead , Breaking")

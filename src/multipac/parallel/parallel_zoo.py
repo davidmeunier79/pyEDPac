@@ -248,7 +248,8 @@ class ParallelZoo(EvoZoo):
                     #self.init_new_individual(pacman_index)
                     self.process_death(i)
 
-            self.add_random_pacgums()
+            nb_added_pacgums = self.add_random_pacgums()
+            self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
 
         return results
 
