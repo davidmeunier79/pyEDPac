@@ -42,8 +42,7 @@ class ChromosomeConfig:
             #NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*50 # corresponds to initial value
             NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*25 # corresponds to initial value
         else:
-
-            NB_PROJECTIONS_EACH_CHROMOSOME: int = 360  # Nombre de projections
+            NB_PROJECTIONS_EACH_CHROMOSOME: int = 720  # Nombre de projections
             NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 
     else:
@@ -67,7 +66,7 @@ class PopulationConfigTest:
 
 
         # Taille population
-    POPULATION_SIZE: int = 6
+    POPULATION_SIZE: int = 10
     ELITE_SIZE: int = 1        # Meilleurs individus conservés
 
     # Génération
@@ -87,9 +86,9 @@ class PopulationConfigMulti:
 class PopulationConfigMultiTest:
     """Configuration de la population"""
     # # # # Taille population
-    POPULATION_SIZE: int = 10
+    POPULATION_SIZE: int = 20
 
-    INIT_POPULATION_SIZE : int = 6
+    INIT_POPULATION_SIZE : int = 14
 
 
 

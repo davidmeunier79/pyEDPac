@@ -25,7 +25,7 @@ class SynapseConfig:
     
     # STDP (Spike-Timing-Dependent Plasticity)
     ONLINE_LEARNING: bool = True
-
+    #ONLINE_LEARNING: bool = False
 
     EXCIT_ALPHA: float = 0.5    # Coefficient apprentissage excitateur
 

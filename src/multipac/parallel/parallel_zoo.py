@@ -148,6 +148,9 @@ class ParallelZoo(EvoZoo):
         for i, pipe in enumerate(self.pipes):
             # poll(timeout) checks if data is waiting
             # timeout=0 makes it an instantaneous check
+
+            percept = 0
+
             if pipe.poll(timeout):
                 try:
                     res = pipe.recv()
@@ -157,37 +160,38 @@ class ParallelZoo(EvoZoo):
                     if len(res['data']):
 
                         if self.population.individuals[i]==0:
-                            continue
+                            percept=-1
+                        else:
 
-                        pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
+                            pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
 
-                        if pos:
-                            print(f"**** Move forward for agent {i}")
-                            self._move_forward(i)
+                            if pos:
+                                print(f"**** Move forward for agent {i}")
+                                self._move_forward(i)
                     else:
                         self.process_death(i)
-                        continue
+                        percept = -1
 
-                    # computing contacts
-                    res = self.test_contacts(i)
+                    if percept != -1:
 
-                    if not res:
-                        continue
+                        # computing contacts
+                        res = self.test_contacts(i)
 
-                    percept = self.compute_percept(i)
+                        if not res:
+                            continue
 
-                    results[i] = percept
+                        percept = self.compute_percept(i)
 
-                    try:
-                        pipe.send({'type': 'TASK', 'data': percept})
+                        results[i] = percept
 
-                    except BrokenPipeError:
-                        if visio_input == -1:
-                            print("Dead visio inputs")
-                        elif visio_input == 1:
-                            print("Empty visio inputs")
+                    if percept:
+                        try:
+                            pipe.send({'type': 'TASK', 'data': percept})
 
-                        print(f"{visio_input=}")
+                        except BrokenPipeError:
+
+                            print(f"{percept=}")
+
 
                 except EOFError:
                     print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
@@ -195,6 +199,20 @@ class ParallelZoo(EvoZoo):
                 # Optional: Handle the "Lagging Agent" case
                 # Maybe use the previous frame's command or stay still
                 results[i] = None
+
+            pac = self.population.individuals[i]
+
+            if pac:
+
+                pac.fitness = pac.life_points
+                pac.fitness_evaluated = True
+
+                if pac.animal_nature == "-1":
+                    self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_predators"][-1] +=1
+                elif pac.animal_nature == "1":
+                    self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                    self.stats["nb_preys"][-1] +=1
 
         return results
 
@@ -218,18 +236,9 @@ class ParallelZoo(EvoZoo):
 
 
 
-    def run_one_step(self, motor_outputs):
-
-        for i, motor in motor_outputs:
-
-            pos = self.population.individuals[i].integrate_motor_outputs(motor)
-
-            if pos:
-                print(f"**** Move forward for agent {i}")
-                move_pos[i] = pos
+    def run_one_step(self, visio_inputs):
 
         #print("\n[ParallelZoo] Running a test neural computation step...")
-        #test_input = [np.zeros(shape=(NetworkConfig.VISIO_SQRT_NB_NEURONS, NetworkConfig.VISIO_SQRT_NB_NEURONS)) for i in range(NB_VISIO_INPUTS)]
 
         assert len(visio_inputs) == len(self.pipes), f"Error with visio_inputs {len(visio_inputs)=} == {len(self.pipes)=}"
 
@@ -240,10 +249,6 @@ class ParallelZoo(EvoZoo):
                 pipe.send({'type': 'TASK', 'data': visio_input})
 
             except BrokenPipeError:
-                if visio_input == -1:
-                    print("Dead visio inputs")
-                elif visio_input == 1:
-                    print("Empty visio inputs")
 
                 print(f"{visio_input=}")
 

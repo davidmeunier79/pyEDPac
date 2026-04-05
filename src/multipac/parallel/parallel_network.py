@@ -27,6 +27,7 @@ def worker_loop(pipe, agent_id):
     net_process = ParallelNetwork(agent_id)
 
     while True:
+
         msg = pipe.recv()
         cmd = msg.get('type')
 
@@ -37,7 +38,6 @@ def worker_loop(pipe, agent_id):
 
             # SEND: Acknowledgment back to Zoo
             #pipe.send({'type': 'READY', 'id': agent_id})
-
 
         elif cmd == 'INIT_INPUTS':
             # RECEIVE: Chromosome from Zoo
