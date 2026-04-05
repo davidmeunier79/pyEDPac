@@ -50,7 +50,7 @@ class PacmanConfig:
     MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
-    INITIAL_LIFE_POINTS = 100
+    INITIAL_LIFE_POINTS = 200
 
     NB_LIFE_POINTS_PER_PACGUM = 2
     NB_LIFE_POINTS_PER_PREY = 100
