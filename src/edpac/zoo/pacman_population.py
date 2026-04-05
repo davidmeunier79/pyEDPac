@@ -64,7 +64,7 @@ class PacmanPopulation(Population):
 
         while len(self.individuals) < self.config.POPULATION_SIZE:
             if len(self.individuals) % 2 == 1:
-                if self.nb_preys < self.config.INIT_PREY_POPULATION_SIZE:
+                if self.nb_preys < self.config.INIT_PREDATOR_POPULATION_SIZE:
                     pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
                     pac_prey.set_animal_nature("1")
                     self.individuals.append(pac_prey)
