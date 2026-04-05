@@ -420,7 +420,7 @@ class Zoo:
                 pac.predator_contact()
 
             if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
-                print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                print(f"Bite prey {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                 pac.bite_prey()
 
             elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
