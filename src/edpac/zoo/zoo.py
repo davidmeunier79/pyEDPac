@@ -549,11 +549,13 @@ class Zoo:
         assert len(xx) == len(yy), f"Error with _where_in_grid,  {len(xx)=} != {len(yy)=}"
         keep = REGROWTH_PACGUM_RATE < np.random.uniform(size = len(xx))
 
-        print(f"Adding {np.sum(keep)=} pacgums")
+        nb_added_pacgums = np.sum(keep)
+        print()
+        print(f"Adding {nb_added_pacgums} pacgums")
 
         self._grid[xx[keep], yy[keep]] = "."
 
-        return np.sum(keep)
+        return nb_added_pacgums
 
 
     def process_death(self, pacman_index):
