@@ -43,7 +43,7 @@ class EvoZoo(Zoo):
 
                     print(f"Setting position for pacman {index}: {pos_y, pos_x}")
                     self._set_in_grid(pos_x, pos_y, index_to_char(index))
-                    animal = index % 2
+                    animal = get_animal_from_index(index)
 
                     animal_nature = self.animals[animal]["danger"]
                     #
@@ -221,8 +221,8 @@ class EvoZoo(Zoo):
 
             print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
+            self.init_nearby_position(new_index, contact_index, pacman_index)
+            #self.init_random_position(new_index)
 
             self.send_chromosome(new_index)
             #self.population.send_init_input(new_index)
@@ -248,8 +248,8 @@ class EvoZoo(Zoo):
             print(f"Predator {new_index=} available, building")
             #self.stats["nb_predators"] += 1
 
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
+            self.init_nearby_position(new_index, contact_index, pacman_index)
+            #self.init_random_position(new_index)
 
             self.send_chromosome(new_index)
             #self.population.send_init_input(new_index)

@@ -35,8 +35,8 @@ class MultiPacmanConfig:
     NB_LIFE_POINTS_PER_PACGUM_PREY: int = 50
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR: int = 1
 
-    MIN_LIFE_FOR_REPROD_PREY: int = 0
-    MIN_LIFE_FOR_REPROD_PREDATOR: int = 1000
+    MIN_LIFE_FOR_REPROD_PREY: int = 100
+    MIN_LIFE_FOR_REPROD_PREDATOR: int = 500
 
     # random otherwise all bodies and heads are facing RIGHT
     RANDOM_INIT_DIRECTION: bool = True
