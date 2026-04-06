@@ -221,8 +221,8 @@ class EvoZoo(Zoo):
 
             print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
-            self.init_nearby_position(new_index, contact_index, pacman_index)
-            #self.init_random_position(new_index)
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
 
             self.send_chromosome(new_index)
             #self.population.send_init_input(new_index)
