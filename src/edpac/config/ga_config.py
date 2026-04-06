@@ -42,7 +42,7 @@ class ChromosomeConfig:
             #NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*50 # corresponds to initial value
             NB_GENES_EACH_CHROMOSOME=NB_PROJECTIONS_PER_HIDDEN_ASSEMBLY*NB_GENES_EACH_PROJECTION*25 # corresponds to initial value
         else:
-            NB_PROJECTIONS_EACH_CHROMOSOME: int = 720  # Nombre de projections
+            NB_PROJECTIONS_EACH_CHROMOSOME: int = 80  # Nombre de projections
             NB_GENES_EACH_CHROMOSOME: int = NB_PROJECTIONS_EACH_CHROMOSOME*NB_GENES_EACH_PROJECTION
 
     else:
@@ -79,7 +79,8 @@ class PopulationConfigMulti:
     # # # # Taille population
     POPULATION_SIZE: int = 63
 
-    INIT_POPULATION_SIZE : int = 50
+    INIT_PREY_POPULATION_SIZE : int = 30
+    INIT_PREDATOR_POPULATION_SIZE : int = 25
 
 
 @dataclass
@@ -88,7 +89,8 @@ class PopulationConfigMultiTest:
     # # # # Taille population
     POPULATION_SIZE: int = 20
 
-    INIT_POPULATION_SIZE : int = 14
+    INIT_PREY_POPULATION_SIZE : int = 7
+    INIT_PREDATOR_POPULATION_SIZE : int = 5
 
 
 

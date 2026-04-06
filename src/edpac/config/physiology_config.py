@@ -41,8 +41,6 @@ class NeuronConfig:
     # Potentiel de repos
     RESTING_POTENTIAL: float = 0.0  # mV
 
-    MEMBRANE_TIME_CONSTANT = 10.0  # ms (tau)
-
     # Seuil
     #NB_MEAN_PSPS_TO_SPIKE: int = 20  # Nombre de PSPs pour spike
     #THRESHOLD_REF: float = 100.0     # Seuil de référence
@@ -52,6 +50,8 @@ class NeuronConfig:
     # Refractory periods
     ABSOLUTE_REFRACTORY: int = 5     # ms (si défini)
     #RELATIVE_REFRACTORY: int = 10     # ms (si défini)
+
+    MEMBRANE_TIME_CONSTANT = 10.0  # ms (tau)
 
 
     #BURSTY_MODE: bool = True          # Bursting neurons

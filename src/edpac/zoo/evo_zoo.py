@@ -43,7 +43,7 @@ class EvoZoo(Zoo):
 
                     print(f"Setting position for pacman {index}: {pos_y, pos_x}")
                     self._set_in_grid(pos_x, pos_y, index_to_char(index))
-                    animal = index % 2
+                    animal = self.get_animal_from_index(index)
 
                     animal_nature = self.animals[animal]["danger"]
                     #
@@ -52,7 +52,7 @@ class EvoZoo(Zoo):
                     # elif animal_nature == "-1":
                     #     self.stats["nb_predators"] += 1
 
-                    self.population.individuals[index].set_animal_nature(animal_nature)
+                    #self.population.individuals[index].set_animal_nature(animal_nature)
                     self.population.individuals[index].set_position(y=pos_y,x=pos_x)
                     added = True
 
@@ -81,7 +81,7 @@ class EvoZoo(Zoo):
 
                         self._set_in_grid(x + dir_x, y + dir_y, index_to_char(new_index))
 
-                        animal = new_index % 2
+                        animal = self.get_animal_from_index(new_index)
                         animal_nature = self.animals[animal]["danger"]
                         assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
                             f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
@@ -183,9 +183,20 @@ class EvoZoo(Zoo):
             elif pos == -1:
                 self.process_death(pacman_index)
 #
+
+    # TODO
+    def get_animal_from_index(self, index):
+        return index % 2
+
+#         assert 0 <= index < population.pop_config.POPULATION_SIZE
+#
+#         if  index < population.pop_config.INIT_PREY_POPULATION_SIZE
+#             return 0
+#         elif se
+
     def _find_first_avail(self, avail, target_danger):
 
-        all_dangers = [self.animals[new_index % 2]["danger"] for new_index in avail]
+        all_dangers = [self.animals[index % 2]["danger"] for index in avail]
 
         for i, danger in enumerate(all_dangers):
             if danger == target_danger:
@@ -262,16 +273,35 @@ class EvoZoo(Zoo):
         parent2 = self.population.individuals[pacman_index]
 
         # parents with enough life_points get exhaust if reproduction happens
-        # if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
+        # if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent2.life_points:
         #     parent1.life_points -= int(parent1.pacman_config.INITIAL_LIFE_POINTS // 2)
         #     parent2.life_points -= int(parent2.pacman_config.INITIAL_LIFE_POINTS // 2)
         #
-        if parent1.pacman_config.MIN_LIFE_FOR_REPROD <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD <= parent2.life_points:
-            parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD // 2)
-            parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD // 2)
+        if parent1.animal_nature == "-1" and parent2.animal_nature == "-1":
 
+            if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent2.life_points:
+
+                print(f"Enough life points to reproduce predators: {parent1.life_points} {parent2.life_points}")
+                parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2)
+                parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2)
+
+            else:
+                print(f"Not enough life points to reproduce predators{parent1.life_points} {parent2.life_points}")
+                return False
+
+
+        elif parent1.animal_nature == "1" and parent2.animal_nature == "1":
+
+            if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent1.life_points and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent2.life_points:
+                print(f"Enough life points to reproduce preys: {parent1.life_points} {parent2.life_points}")
+                parent1.life_points -= int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2)
+                parent2.life_points -= int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2)
+
+            else:
+                print(f"Not enough life points to reproduce preys{parent1.life_points} {parent2.life_points}")
+                return False
         else:
-            print(f"Not enough life points to reproduce {parent1.life_points} {parent2.life_points}")
+            print(f"*Warning , animal_nature {parent1.animal_nature} {parent1.animal_nature} do not match")
             return False
 
         # compute mix chromosome between two parents

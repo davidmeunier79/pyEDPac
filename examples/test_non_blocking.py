@@ -53,7 +53,8 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def main():
+def main(stats_path):
+
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
@@ -166,7 +167,7 @@ def main():
 
         print(f"******************** {nb_alive_indiv=} ***********************")
 
-        print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}")
+        print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}, nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
 
         if nb_alive_indiv == 0 or TIME > 500:
             print("All individuals are dead , Breaking")
@@ -200,7 +201,7 @@ def main():
     zoo.shutdown()
 
     print("save stats")
-    zoo.save_stats("test_stats")
+    zoo.save_stats(stats_path)
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
@@ -216,6 +217,21 @@ def main():
 
 if __name__ == "__main__":
     import time
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process a specific individual genome/path.")
+
+    # Define the parameter
+    parser.add_argument(
+        "--stats_path",
+        type=str,
+        required=True,
+        help="Path to the individual .npy or chromosome file"
+    )
+
+    # Parse and execute
+    args = parser.parse_args()
+
     start_time = time.time()
-    main()
+    main(args.stats_path)
     print("--- %s seconds ---" % (time.time() - start_time))

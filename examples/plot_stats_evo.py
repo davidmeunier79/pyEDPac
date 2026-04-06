@@ -9,12 +9,9 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-if __name__ == "__main__":
+def plot_evo_stats(stats_path):
 
-
-    indiv_path = os.path.abspath("test_stats")
-
-    file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
+    file_stats = os.path.join(stats_path, f"Stats_evo.csv")
 
     df = pd.read_csv(file_stats)
     df = df.set_index("time")
@@ -32,7 +29,7 @@ if __name__ == "__main__":
     ax.grid()
     plt.show()
 
-    fig.savefig(os.path.join(indiv_path, "Nb_indiv.png"))
+    fig.savefig(os.path.join(stats_path, "Nb_indiv.png"))
 
     # plot mean fitness
     fig = plt.figure()
@@ -44,62 +41,37 @@ if __name__ == "__main__":
     ax.grid()
     plt.show()
 
-    fig.savefig(os.path.join(indiv_path, "Mean_fitness.png"))
+    fig.savefig(os.path.join(stats_path, "Mean_fitness.png"))
 
-    #
-    # plt.figure(figsize=(12, 6))
-    #
-    # sns.set_theme(style="dark")
-    #
-    # # Plot each year's time series in its own facet
-    # sns.lineplot(data=df, x="time", y="nb_preys")
-    #
-    # plt.title('nb_preys across simulation time')
-    # plt.xlabel('time')
-    # plt.ylabel("nb_preys")
-    # plt.show()
-    #
-    #
-    # plt.figure(figsize=(12, 6))
-    #
-    # sns.set_theme(style="dark")
-    #
-    # # Plot each year's time series in its own facet
-    # sns.lineplot(data=df, x="time", y="nb_preys", hue = 'blue')
-    #
-    # sns.lineplot(data=df, x="time", y="nb_predators", hue = 'red')
-    #
-    # plt.title('EvoStats')
-    # plt.xlabel('time')
-    # plt.ylabel("nb individuals")
-    # plt.show()
-    #
 
-#
-#     g = sns.relplot(
-#         data=df,
-#         x="time", y="nb_preys", linewidth=4, zorder=5,
-#         col_wrap=3, height=2, aspect=1.5, legend=False,
-#     )
-    #
-    # # Iterate over each subplot to customize further
-    # for year, ax in g.axes_dict.items():
-    #
-    #     # Add the title as an annotation within the plot
-    #     ax.text(.8, .85, year, transform=ax.transAxes, fontweight="bold")
-    #
-    #     # Plot every year's time series in the background
-    #     sns.lineplot(
-    #         data=flights, x="month", y="passengers", units="year",
-    #         estimator=None, color=".7", linewidth=1, ax=ax,
-    #     )
-    #
-    # # Reduce the frequency of the x axis ticks
-    # ax.set_xticks(ax.get_xticks()[::2])
-    #
-    # # Tweak the supporting aspects of the plot
-    # g.set_titles("")
-    # g.set_axis_labels("", "Passengers")
-    # g.tight_layout()
-    #
-    #
+
+    # plot mean fitness
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    ax.plot(df.index, df["nb_deads"], color = "blue")
+    ax.plot(df.index, df["nb_added_pacgums"], color = "red")
+
+    ax.grid()
+    plt.show()
+
+    fig.savefig(os.path.join(stats_path, "Mean_Growth.png"))
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process a specific individual genome/path.")
+
+    # Define the parameter
+    parser.add_argument(
+        "--stats_path",
+        type=str,
+        required=True,
+        help="Path to the individual .npy or chromosome file"
+    )
+
+    # Parse and execute
+    args = parser.parse_args()
+
+    plot_evo_stats(args.stats_path)

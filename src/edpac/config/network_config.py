@@ -31,7 +31,7 @@ class NetworkConfig:
     NB_OUTPUT_ASSEMBLIES = NB_MOTOR_PATTERNS  # Number of motor patterns
 
     # Network topology
-    SQRT_NB_ASSEMBLIES = 10
+    SQRT_NB_ASSEMBLIES = 2
     NB_ASSEMBLIES = SQRT_NB_ASSEMBLIES * SQRT_NB_ASSEMBLIES
 
     SQRT_NB_NEURONS = 5

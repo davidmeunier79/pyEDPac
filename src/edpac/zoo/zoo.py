@@ -6,7 +6,7 @@ from math import floor
 import numpy as np
 import pathlib
 
-from edpac.config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS
+from edpac.config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS, REGROWTH_PACGUM_RATE
 
 from .chars import char_to_index, index_to_char
 from .pacman import Pacman, Direction
@@ -28,7 +28,7 @@ class Zoo:
         self.data_dir = self._get_data_dir()
 
 
-        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": []}
+        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": [], "nb_added_pacgums": []}
 
         #
         # # Mapping for clarity
@@ -46,7 +46,7 @@ class Zoo:
 
         self.stats["generation"].append(0)
         self.stats["nb_deads"].append(0)
-
+        self.stats["nb_added_pacgums"].append(0)
     def _get_data_dir(self):
 
         # 1. Get the absolute path of constants.py
@@ -219,6 +219,8 @@ class Zoo:
         elif target_char != " ":
 
             index = char_to_index(target_char)
+
+
             animal = index % 2
 
             print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
@@ -246,6 +248,8 @@ class Zoo:
 
         pac.set_position(new_x, new_y)
 
+    def get_animal_from_index(self, index):
+        print(*"Error, should be implemented in inherited class")
 
     def integrate_visio_outputs(self, pac):
         """
@@ -384,8 +388,8 @@ class Zoo:
             yy, xx = np.where(self._grid == char)
             return yy, xx
         else:
-            print(f"Error, {char=} could not be found in _grid")
-            return (-1, -1)
+            #print(f"Error, {char=} could not be found in _grid")
+            return ([-1], [-1])
 
     def test_contacts(self, pacman_index):
 
@@ -419,6 +423,10 @@ class Zoo:
                 print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                 pac.predator_contact()
 
+            if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+                print(f"Bite prey {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+                pac.bite_prey()
+
             elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
                 print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                 #pair_contacts.append((contact_index, pacman_index, "-1"))
@@ -434,21 +442,6 @@ class Zoo:
                 pass
                 #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
-
-        # naturally losing life each time points
-        pac.life_points -= 1
-
-        if pac.life_points < 0:
-            #self.init_new_individual(pacman_index)
-            self.process_death(pacman_index)
-            return 0
-            #
-            # if pac.animal_nature == "-1":
-            #     self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-            #     self.stats["nb_predators"][-1] +=1
-            # elif pac.animal_nature == "1":
-            #     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-            #     self.stats["nb_preys"][-1] +=1
 
         return 1
 
@@ -546,6 +539,29 @@ class Zoo:
 
         return len([pac for pac in self.population.individuals if pac])
 
+    def add_random_pacgums(self):
+        """
+        Adding some pacgums in empty locations
+        """
+        xx, yy = self._where_in_grid(b" ")
+
+        if xx[0] == -1 and yy[0] == -1:
+            #print("No empy space found, skipping")
+            return 0
+
+        #print(f"Found {len(xx)} empty locations in zoo")
+        assert len(xx) == len(yy), f"Error with _where_in_grid,  {len(xx)=} != {len(yy)=}"
+        keep =  np.random.uniform(size = len(xx)) < REGROWTH_PACGUM_RATE
+
+        nb_added_pacgums = np.sum(keep)
+
+        #print(f"Adding {nb_added_pacgums} pacgums")
+
+        self._grid[xx[keep], yy[keep]] = "."
+
+        return nb_added_pacgums
+
+
     def process_death(self, pacman_index):
         #print(f"process_death of indiv {pacman_index=}")
         if self.population.individuals[pacman_index] == 0:
@@ -559,8 +575,13 @@ class Zoo:
         #remove from list_indivuals
         self.population.individuals[pacman_index] = 0
 
+        self.send_death_signal(pacman_index)
         # increment nb_deads
         self.stats["nb_deads"][-1] += 1
+
+
+    def send_death_signal(self, pacman_index):
+        print("Error, should be implemented in inherited class")
 
     def save_stats(self, indiv_path=0):
 
