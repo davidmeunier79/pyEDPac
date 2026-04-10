@@ -4,11 +4,18 @@ PhysiologyConfig.py - Remplace DefinePhysiology.h
 Configuration physiologique des neurones et synapses
 """
 
+import sys
+sys.path.insert(0, '../src')
+
 from dataclasses import dataclass
+
 from typing import Optional
+from edpac.config.base_config import BaseConfig
+
+
 
 @dataclass
-class SynapseConfig:
+class SynapseConfig(BaseConfig):
     """Configuration des synapses"""
     # Paramètres de délai
     DELAY: int = 10              # Délai max excitateur (ms)
@@ -36,7 +43,7 @@ class SynapseConfig:
     #TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
 
 @dataclass
-class NeuronConfig:
+class NeuronConfig(BaseConfig):
     """Configuration des neurones"""
     # Potentiel de repos
     RESTING_POTENTIAL: float = 0.0  # mV
@@ -64,7 +71,7 @@ class NeuronConfig:
     #INHIBITION_RESET_MODE: bool = True
 
 @dataclass
-class EventManagerConfig:
+class EventManagerConfig(BaseConfig):
     """Configuration du gestionnaire d'événements"""
     DELAY_STEP: int = 5
     PSP_EVENT_PACKAGE_SIZE: int = 10000

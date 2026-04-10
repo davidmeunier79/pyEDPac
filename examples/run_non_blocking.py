@@ -32,12 +32,17 @@ from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, Popu
 
 from edpac.tracer.network_tracer import NetworkTracer
 
-
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
 from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
-
 from multipac.parallel.parallel_zoo import ParallelZoo
+
+from edpac.config.config_manager import save_configs
+
+
+
+
+
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -58,8 +63,6 @@ def main(stats_path):
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
         return 0
-
-
 
     # Create objects
     #################################### Population ######################################
@@ -201,6 +204,11 @@ def main(stats_path):
 
     print("save stats")
     zoo.save_stats(stats_path)
+
+    zoo.population.save_individuals(stats_path)
+
+    print("save config")
+    save_configs(stats_path)
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'

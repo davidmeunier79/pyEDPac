@@ -11,8 +11,11 @@ Toutes les constantes globales du projet
 
 # Pacman parameters (from DefineZoo.h concept)
 
+import sys
+sys.path.insert(0, '../src')
+
 from dataclasses import dataclass
-from .constants import VISIO_SQRT_NB_NEURONS
+from edpac.config.constants import VISIO_SQRT_NB_NEURONS
 
 
 @dataclass

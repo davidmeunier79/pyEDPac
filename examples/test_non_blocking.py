@@ -32,12 +32,17 @@ from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, Popu
 
 from edpac.tracer.network_tracer import NetworkTracer
 
-
 from edpac.visualisation.zoo_visualizer import ZooVisualizer
 from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
-
 from multipac.parallel.parallel_zoo import ParallelZoo
+
+from edpac.config.config_manager import save_configs
+
+
+
+
+
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
 
@@ -55,12 +60,9 @@ def stop_everything():
 
 def main(stats_path):
 
-
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
         return 0
-
-
 
     # Create objects
     #################################### Population ######################################
@@ -169,7 +171,7 @@ def main(stats_path):
 
         print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}, nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
 
-        if nb_alive_indiv == 0 or TIME > 500:
+        if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
 
@@ -202,6 +204,11 @@ def main(stats_path):
 
     print("save stats")
     zoo.save_stats(stats_path)
+
+    zoo.population.save_individuals(stats_path)
+
+    print("save config")
+    save_configs(stats_path)
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'

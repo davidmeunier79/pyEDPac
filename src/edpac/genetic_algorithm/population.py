@@ -98,9 +98,9 @@ class Population:
         
         Utilise le mode de sélection configuré
         """
-        if self.selection_config.SELECTION_MODE == SelectionMode.TOURNAMENT:
+        if self.selection_config.SELECTION_MODE == "TOURNAMENT":
             return self._tournament_selection()
-        elif self.selection_config.SELECTION_MODE == SelectionMode.ROULETTE_WHEEL:
+        elif self.selection_config.SELECTION_MODE == "ROULETTE_WHEEL":
             return self._roulette_wheel_selection()
         else:
             return self._rank_selection()

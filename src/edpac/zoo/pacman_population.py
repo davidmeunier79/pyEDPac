@@ -3,6 +3,8 @@ Population.py - Gestion de la population GA
 """
 
 import os
+import json
+
 import numpy as np
 from typing import List, Callable, Tuple
 #from .individual import Individual
@@ -11,7 +13,7 @@ from .pacman import Pacman
 from ..genetic_algorithm.population import Population
 from ..config.ga_config import (
     SelectionConfig, CrossoverConfig,
-    MutationConfig, SelectionMode, MutationMode
+    MutationConfig
 )
 
 from ..config.constants import *
@@ -50,6 +52,8 @@ class PacmanPopulation(Population):
                  crossover_config,
                  mutation_config)
 
+        self.dead_individuals = {}
+
         self.nb_preys = 0
         self.nb_predators = 0
 
@@ -66,6 +70,7 @@ class PacmanPopulation(Population):
             if len(self.individuals) % 2 == 1:
                 if self.nb_preys < self.config.INIT_PREDATOR_POPULATION_SIZE:
                     pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                    pac_prey.set_age(self.generation)
                     pac_prey.set_animal_nature("-1")
                     self.individuals.append(pac_prey)
 
@@ -77,21 +82,40 @@ class PacmanPopulation(Population):
                 if self.nb_predators < self.config.INIT_PREY_POPULATION_SIZE:
                     pac_predator = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
                     pac_predator.set_animal_nature("1")
+                    pac_predator.set_age(self.generation)
                     self.individuals.append(pac_predator)
                     self.nb_predators += 1
                 else:
                     self.individuals.append(0)
 
-    def init_new_individual(self, pacman_index, genes):
+    def store_dead_individual(self,  pac : Pacman):
 
-        #print(f"Saving old individual {pacman_index}")
-        #print(self.individuals[pacman_index].save_stats())
+        if pac.get_age() in self.dead_individuals.keys():
+            self.dead_individuals[pac.get_age()].append(pac.to_dict())
+        else:
+            self.dead_individuals[pac.get_age()] = [pac.to_dict()]
+
+    def save_individuals(self, stats_path):
+        print(self.dead_individuals)
+
+        # 5. Save to JSON
+        output_file = os.path.join(stats_path , "all_individuals.json")
+
+        with open(output_file, 'w') as f:
+            json.dump(self.dead_individuals, f, indent=4)
 
 
-        print(f"Init new individual {pacman_index}")
-        self.individuals[pacman_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config, genes=genes)
+
+    def init_new_individual(self, new_index, genes):
+
+        #print(f"Saving old individual {new_index}")
+        #print(self.individuals[new_index].save_stats())
+
+
+        print(f"Init new individual {new_index}")
+        self.individuals[new_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config, genes=genes)
         self.generation +=1
-        self.individuals[pacman_index].set_age(self.generation)
+        self.individuals[new_index].set_age(self.generation)
 
         
     def __repr__(self):

@@ -213,7 +213,7 @@ class Zoo:
         # Update grid data: old position becomes a dot
         # if this a pacgum, increase life
         if target_char == ".":
-            print(f"Pacman {pacman_index} Eating pacgum, Life points: " , pac.life_points)
+            print(f"Pacman {pacman_index} Eating pacgum, Life points: " , pac.get_life_points())
             pac.eat_pacgum()
 
         elif target_char != " ":
@@ -225,14 +225,14 @@ class Zoo:
 
             print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
 
-            if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
                 #
                 # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
                 # self.population.individuals[index].is_bitten()
 
-                print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                pac.eat_prey(self.population.individuals[index].life_points)
-                print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.get_life_points())
+                pac.eat_prey(self.population.individuals[index].get_life_points())
+                print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.get_life_points())
                 self.process_death(index)
 
 
@@ -419,21 +419,21 @@ class Zoo:
 
             animal = contact_index % 2
 
-            if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+            if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
+                print(f"Contact with predator {self.animals[animal]["name"]}")
                 pac.predator_contact()
 
-            if self.animals[animal]["danger"] == "1" and pac.animal_nature == "-1":
-                print(f"Bite prey {self.animals[animal]["name"]}, Life points: {pac.life_points}")
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
+                print(f"Bite prey {self.animals[animal]["name"]}")
                 pac.bite_prey()
 
-            elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+            elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
                 print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                 #pair_contacts.append((contact_index, pacman_index, "-1"))
 
                 self.test_predator_reproduction(contact_index, pacman_index)
 
-            elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+            elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
                 print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
 
                 #pair_contacts.append((contact_index, pacman_index, "1"))
@@ -493,7 +493,6 @@ class Zoo:
                 animal = contact_index % 2
 
                 if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
-                    #print(f"Contact with predator {self.animals[animal]["name"]}, Life points: {pac.life_points}")
                     pac.predator_contact()
 
                 elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
@@ -513,13 +512,13 @@ class Zoo:
 
 
             # naturally losing life each time points
-            pac.life_points -= 1
+            pac.add_life_points(-1)
 
-            if pac.life_points < 0:
+            if pac.get_life_points() < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(pacman_index)
             else:
-                pac.fitness = pac.life_points
+                pac.fitness = pac.get_life_points()
                 pac.fitness_evaluated = True
 
                 if pac.animal_nature == "-1":
@@ -573,6 +572,7 @@ class Zoo:
         self._set_in_grid(x, y, " ")
 
         #remove from list_indivuals
+        self.population.store_dead_individual(self.population.individuals[pacman_index])
         self.population.individuals[pacman_index] = 0
 
         self.send_death_signal(pacman_index)

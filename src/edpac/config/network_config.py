@@ -4,10 +4,16 @@ NetworkConfig.py - Remplace DefineEDNetwork.h
 Configuration du réseau neuronal
 """
 
-from dataclasses import dataclass
+import sys
+sys.path.insert(0, '../src')
+
+from dataclasses import dataclass, field
+
 from enum import Enum
 
-from .constants import NB_VISIO_INPUTS, NB_MOTOR_PATTERNS
+from edpac.config.constants import NB_VISIO_INPUTS, NB_MOTOR_PATTERNS
+
+from edpac.config.base_config import BaseConfig
 
 class ProjectionNature(Enum):
     """Type de projection (synapses)"""
@@ -21,7 +27,7 @@ class AssemblyNature(Enum):
     HIDDEN = "hidden"
 
 @dataclass
-class NetworkConfig:
+class NetworkConfig(BaseConfig):
     """Configuration du réseau"""
     # Projection mode
     TOPOLOGICAL_PROJECTION: bool = True
@@ -48,7 +54,7 @@ class NetworkConfig:
 
 
 @dataclass
-class NetworkVisualizerConfig:
+class NetworkVisualizerConfig(BaseConfig):
     # for visio config
     GAP_INPUT_ASSEMBLY = 5 # gap in visu between assemblies
     GAP_HIDDEN_ASSEMBLY = 5

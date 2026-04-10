@@ -208,7 +208,6 @@ class EDNetwork(Network):
 
             if nb_events == 0:
                 print("No more events in event manager, breaking")
-                #zoo.pacman.life_points = -100
                 return []
             else:
                 pass
