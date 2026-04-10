@@ -305,9 +305,9 @@ class EvoZoo(Zoo):
         #print("After mutation, offspring = ", offspring.genes)
         #print(f"{offspring.get_nb_genes()=}")
 
-        self.population.init_new_individual(pacman_index = new_index, genes = offspring.get_genes())
+        self.population.init_new_individual(new_index = new_index, genes = offspring.get_genes())
 
-        self.population.individuals[pacman_index].set_parents((parent1.id, parent2.id))
+        self.population.individuals[new_index].set_parents((parent1.id, parent2.id))
 
         return True
 

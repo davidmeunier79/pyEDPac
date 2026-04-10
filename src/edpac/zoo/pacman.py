@@ -89,8 +89,7 @@ class Pacman(Individual):
         self.stats = {"nb_eaten_preys": 0, "nb_eaten_pacgums": 0,
                       "nb_contact_predators": 0, "nb_contact_preys": 0,
                       "nb_move_forward": 0, "nb_body_turns": 0,
-                      "nb_head_forward": 0, "nb_head_turns": 0,
-                      'nb_bites': 0
+                      "nb_head_forward": 0, "nb_head_turns": 0
                       }
 
     def add_life_points(self, value):
@@ -137,7 +136,7 @@ class Pacman(Individual):
 
     def predator_contact(self):
         if self.get_animal_nature() == "1":
-            self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
+            self.add_life_points(-self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT)
             self.stats["nb_contact_predators"] += 1
 
         else:
@@ -146,7 +145,6 @@ class Pacman(Individual):
     def bite_prey(self):
         if self.get_animal_nature() == "-1":
             self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PREY_BITE)
-
             self.stats["nb_contact_preys"] += 1
 
         else:
@@ -154,15 +152,10 @@ class Pacman(Individual):
 
     def eat_pacgum(self):
         if self.get_animal_nature() == "1":
-
             self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY)
 
-
-            
         elif self.get_animal_nature() == "-1":
-
             self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR)
-
 
         else:
             print(f"Warning, {self.get_animal_nature()=} is not defined for Pacman.eat_pacgum")
@@ -263,7 +256,8 @@ class Pacman(Individual):
 
     def to_dict(self):
         return {"id": self.id,
-                "parents": self.parents,
+                "parents": self.get_parents(),
+                "age": self.get_age(),
                 "_max_life_points": self._max_life_points,
                 "stats": self.stats,
                 "nb_genes": self.get_nb_genes(),
@@ -271,5 +265,5 @@ class Pacman(Individual):
 
     def __repr__(self):
         fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"
-        return f"Pacman(id={self.id}, nature={self.get_animal_nature()}, {fitness_str}, age={self.age})"
+        return f"Pacman(id={self.id}, nature={self.get_animal_nature()}, {fitness_str}, age={self.get_age()})"
 

@@ -70,6 +70,7 @@ class PacmanPopulation(Population):
             if len(self.individuals) % 2 == 1:
                 if self.nb_preys < self.config.INIT_PREDATOR_POPULATION_SIZE:
                     pac_prey = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
+                    pac_prey.set_age(self.generation)
                     pac_prey.set_animal_nature("-1")
                     self.individuals.append(pac_prey)
 
@@ -81,6 +82,7 @@ class PacmanPopulation(Population):
                 if self.nb_predators < self.config.INIT_PREY_POPULATION_SIZE:
                     pac_predator = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=chromosome_config)
                     pac_predator.set_animal_nature("1")
+                    pac_predator.set_age(self.generation)
                     self.individuals.append(pac_predator)
                     self.nb_predators += 1
                 else:
@@ -88,10 +90,10 @@ class PacmanPopulation(Population):
 
     def store_dead_individual(self,  pac : Pacman):
 
-        if self.generation in self.dead_individuals.keys():
-            self.dead_individuals[self.generation].append(pac.to_dict())
+        if pac.get_age() in self.dead_individuals.keys():
+            self.dead_individuals[pac.get_age()].append(pac.to_dict())
         else:
-            self.dead_individuals[self.generation] = [pac.to_dict()]
+            self.dead_individuals[pac.get_age()] = [pac.to_dict()]
 
     def save_individuals(self, stats_path):
         print(self.dead_individuals)
@@ -104,16 +106,16 @@ class PacmanPopulation(Population):
 
 
 
-    def init_new_individual(self, pacman_index, genes):
+    def init_new_individual(self, new_index, genes):
 
-        #print(f"Saving old individual {pacman_index}")
-        #print(self.individuals[pacman_index].save_stats())
+        #print(f"Saving old individual {new_index}")
+        #print(self.individuals[new_index].save_stats())
 
 
-        print(f"Init new individual {pacman_index}")
-        self.individuals[pacman_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config, genes=genes)
+        print(f"Init new individual {new_index}")
+        self.individuals[new_index] = Pacman(pacman_config = MultiPacmanConfig(), chromo_config=self.chromosome_config, genes=genes)
         self.generation +=1
-        self.individuals[pacman_index].set_age(self.generation)
+        self.individuals[new_index].set_age(self.generation)
 
         
     def __repr__(self):
