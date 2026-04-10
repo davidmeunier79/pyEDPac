@@ -11,7 +11,7 @@ from .pacman import Pacman
 from ..genetic_algorithm.population import Population
 from ..config.ga_config import (
     SelectionConfig, CrossoverConfig,
-    MutationConfig, SelectionMode, MutationMode
+    MutationConfig
 )
 
 from ..config.constants import *
