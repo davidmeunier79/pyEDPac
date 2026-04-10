@@ -293,7 +293,7 @@ class EvoZoo(Zoo):
                 print(f"Not enough life points to reproduce preys{parent1.get_life_points()} {parent2.get_life_points()}")
                 return False
         else:
-            print(f"*Warning , animal_nature {parent1.animal_nature} {parent1.animal_nature} do not match")
+            print(f"*Warning , animal_nature {parent1.get_animal_nature()} {parent2.get_animal_nature()} do not match")
             return False
 
         # compute mix chromosome between two parents

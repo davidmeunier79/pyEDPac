@@ -1,35 +1,3 @@
-# import multiprocessing as mp
-# import numpy as np
-# import random
-#
-# import sys
-# sys.path.insert(0, '../src')
-#
-#
-# from edpac.config.constants import NB_VISIO_INPUTS, MINIMAL_TIME
-# from edpac.config.network_config import NetworkConfig
-# from edpac.config.ga_config import ParallelZooConfig
-#
-# from edpac.genetic_algorithm.population import ParallelZoo
-#
-# from multipac.parallel.parallel_network import worker_loop
-#
-# #from multipac.parallel.parallel_population import ParallelZoo
-#
-# from edpac.zoo.zoo import Zoo
-#
-# from edpac.zoo.chars import char_to_index, index_to_char
-#
-# # --- The Centralized ParallelZoo ---
-#
-#
-#
-
-
-
-
-
-
 import multiprocessing as mp
 import numpy as np
 
@@ -77,16 +45,16 @@ class ParallelZoo(EvoZoo):
             print(f"[ParallelZoo] sending chrosomose to Worker {i} ")
             pipe.send({'type': 'SET_CHROMOSOME', 'data': self.population.individuals[i]})
 
-
-        # Synchronize: Wait for all "READY" signals
-        for i, pipe in enumerate(self.pipes):
-
-            if not self.population.individuals[i]:
-                continue
-
-            response = pipe.recv()
-            if response['type'] == 'READY':
-                print(f"[ParallelZoo] Confirmed: Worker {response['id']} chromosome is ready.")
+        #
+        # # Synchronize: Wait for all "READY" signals
+        # for i, pipe in enumerate(self.pipes):
+        #
+        #     if not self.population.individuals[i]:
+        #         continue
+        #
+        #     response = pipe.recv()
+        #     if response['type'] == 'READY':
+        #         print(f"[ParallelZoo] Confirmed: Worker {response['id']} chromosome is ready.")
 
 
     def initialize_all_inputs(self):
@@ -138,16 +106,17 @@ class ParallelZoo(EvoZoo):
 
         print(f"[ParallelZoo] sending chrosomose to Worker {pacman_index} ")
 
-        wait_response = True
-
-        while wait_response:
-            print(f"[ParallelZoo] Confirmed: Worker {pacman_index} waiting SET_CHROMOSOME response.")
-            response = pipe.recv()
-            if response['type'] == 'READY':
-                print(f"[ParallelZoo] Confirmed: Worker {response['id']} is SET_CHROMOSOME.")
-                wait_response = False
-            else:
-                print(f"*[ParallelZoo] Not Confirmed SET_CHROMOSOME: Worker send {response=} ")
+        #
+        # wait_response = True
+        #
+        # while wait_response:
+        #     print(f"[ParallelZoo] Confirmed: Worker {pacman_index} waiting SET_CHROMOSOME response.")
+        #     response = pipe.recv()
+        #     if response['type'] == 'READY':
+        #         print(f"[ParallelZoo] Confirmed: Worker {response['id']} is SET_CHROMOSOME.")
+        #         wait_response = False
+        #     else:
+        #         print(f"*[ParallelZoo] Not Confirmed SET_CHROMOSOME: Worker send {response=} ")
 
     # def send_init_input(self, pacman_index):
     #     assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
