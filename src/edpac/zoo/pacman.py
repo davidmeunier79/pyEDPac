@@ -65,7 +65,7 @@ class Pacman(Individual):
 
         #self.chromo_config = chromo_config or ChromosomeConfig()
 
-        self.animal_nature = 0
+        self._animal_nature = 0
 
         super().__init__(chromo_config, genes)
         self.x = x
@@ -73,7 +73,10 @@ class Pacman(Individual):
 
         self.motor_threshold = self.pacman_config.MOTOR_THRESHOLD
 
-        self.life_points = self.pacman_config.INITIAL_LIFE_POINTS
+        self._life_points = self.pacman_config.INITIAL_LIFE_POINTS
+
+        self._max_life_points = self.pacman_config.INITIAL_LIFE_POINTS
+
         #self.zoo = zoo
 
         # Directions: 0: Up, 1: Down, 2: Left, 3: Right
@@ -90,11 +93,20 @@ class Pacman(Individual):
                       'nb_bites': 0
                       }
 
+    def add_life_points(self, value):
+        self._life_points += value
+
+        if self._max_life_points < self._life_points:
+            self._max_life_points = self._life_points
+
+    def get_life_points(self):
+        return self._life_points
+
     def set_animal_nature(self, animal_nature):
-        self.animal_nature = animal_nature
+        self._animal_nature = animal_nature
 
     def get_animal_nature(self):
-        return self.animal_nature
+        return self._animal_nature
 
     def get_position(self):
         return (self.x, self.y)
@@ -124,45 +136,45 @@ class Pacman(Individual):
         return left if turn_type == -1 else right
 
     def predator_contact(self):
-        if self.animal_nature == "1":
+        if self.get_animal_nature() == "1":
             self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_PREDATOR_CONTACT
             self.stats["nb_contact_predators"] += 1
 
         else:
-            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")
+            print(f"!!!!!! Warning, animal with nature = {self.get_animal_nature()} is having predator_contact")
 
     def bite_prey(self):
-        if self.animal_nature == "-1":
-            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PREY_BITE
+        if self.get_animal_nature() == "-1":
+            self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PREY_BITE)
+
             self.stats["nb_contact_preys"] += 1
 
         else:
-            print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is having predator_contact")
+            print(f"!!!!!! Warning, animal with nature = {self.get_animal_nature()} is having predator_contact")
 
     def eat_pacgum(self):
-        if self.animal_nature == "1":
-            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY
+        if self.get_animal_nature() == "1":
+
+            self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY)
+
+
             
-        elif self.animal_nature == "-1":
-            self.life_points += self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR
+        elif self.get_animal_nature() == "-1":
+
+            self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR)
+
+
         else:
-            print(f"Warning, {self.animal_nature=} is not defined for Pacman.eat_pacgum")
+            print(f"Warning, {self.get_animal_nature()=} is not defined for Pacman.eat_pacgum")
 
         self.stats["nb_eaten_pacgums"] += 1
 
     def eat_prey(self, extra_life):
-        if self.animal_nature == "-1":
-            self.life_points += extra_life
+        if self.get_animal_nature() == "-1":
+            self.add_life_points(extra_life)
             self.stats["nb_eaten_preys"] += 1
         else:
-            print(f"!!!!!! Warning, animal with nature = {animal_nature} eats a prey")
-    #
-    # def is_bitten(self):
-    #     if self.animal_nature == "1":
-    #         self.life_points -= self.pacman_config.NB_LIFE_POINTS_PER_BITE
-    #         self.stats["nb_bites"] += 1
-    #     else:
-    #         print(f"!!!!!! Warning, animal with nature = {self.animal_nature} is bitten")
+            print(f"!!!!!! Warning, animal with nature = {get_animal_nature()} eats a prey")
 
     def integrate_motor_outputs(self, motor_values):
         """
@@ -249,8 +261,14 @@ class Pacman(Individual):
         with open(file_stats, 'w+') as fp:
             json.dump(self.stats, fp, indent=4)
 
+    def to_dict(self):
+        return {"id": self.id,
+                "_max_life_points": self._max_life_points,
+                "stats": self.stats,
+                "nb_genes": self.get_nb_genes(),
+                "genes": self.genes.tolist()}
 
     def __repr__(self):
         fitness_str = f"f={self.fitness:.3f}" if self.fitness_evaluated else "unevaluated"
-        return f"Pacman(id={self.id}, nature={self.animal_nature}, {fitness_str}, age={self.age})"
+        return f"Pacman(id={self.id}, nature={self.get_animal_nature()}, {fitness_str}, age={self.age})"
 

@@ -205,6 +205,8 @@ def main(stats_path):
     print("save stats")
     zoo.save_stats(stats_path)
 
+    zoo.population.save_individuals(stats_path)
+
     print("save config")
     save_configs(stats_path)
 

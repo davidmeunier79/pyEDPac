@@ -230,21 +230,21 @@ class ParallelZoo(EvoZoo):
 
             if pac:
 
-                pac.fitness = pac.life_points
+                pac.fitness = pac.get_life_points()
                 pac.fitness_evaluated = True
 
-                if pac.animal_nature == "-1":
+                if pac.get_animal_nature() == "-1":
                     self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_predators"][-1] +=1
-                elif pac.animal_nature == "1":
+                elif pac.get_animal_nature() == "1":
                     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_preys"][-1] +=1
 
 
                 # naturally losing life each time points
-                pac.life_points -= 1
+                pac.add_life_points(-1)
 
-                if pac.life_points < 0:
+                if pac.get_life_points() < 0:
                     #self.init_new_individual(pacman_index)
                     self.process_death(i)
 

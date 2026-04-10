@@ -3,6 +3,8 @@ Population.py - Gestion de la population GA
 """
 
 import os
+import json
+
 import numpy as np
 from typing import List, Callable, Tuple
 #from .individual import Individual
@@ -50,6 +52,8 @@ class PacmanPopulation(Population):
                  crossover_config,
                  mutation_config)
 
+        self.dead_individuals = {}
+
         self.nb_preys = 0
         self.nb_predators = 0
 
@@ -81,6 +85,24 @@ class PacmanPopulation(Population):
                     self.nb_predators += 1
                 else:
                     self.individuals.append(0)
+
+    def store_dead_individual(self,  pac : Pacman):
+
+        if self.generation in self.dead_individuals.keys():
+            self.dead_individuals[self.generation].append(pac.to_dict())
+        else:
+            self.dead_individuals[self.generation] = [pac.to_dict()]
+
+    def save_individuals(self, stats_path):
+        print(self.dead_individuals)
+
+        # 5. Save to JSON
+        output_file = os.path.join(stats_path , "all_individuals.json")
+
+        with open(output_file, 'w') as f:
+            json.dump(self.dead_individuals, f, indent=4)
+
+
 
     def init_new_individual(self, pacman_index, genes):
 
