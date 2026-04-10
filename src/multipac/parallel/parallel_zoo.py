@@ -147,8 +147,14 @@ class ParallelZoo(EvoZoo):
             percept = 0
 
             if pipe.poll(timeout):
+
                 try:
-                    res = pipe.recv()
+
+                    while pipe.poll(timeout):
+
+                        res = pipe.recv()
+
+
                     if res['type'] != 'RESULT':
                         continue
 
@@ -180,6 +186,7 @@ class ParallelZoo(EvoZoo):
                         results[i] = percept
 
                     if percept:
+
                         try:
                             pipe.send({'type': 'TASK', 'data': percept})
 
