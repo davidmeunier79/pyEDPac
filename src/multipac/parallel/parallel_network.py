@@ -19,9 +19,9 @@ class ParallelNetwork():
     def build_from_chromosome(self, chromosome):
         # In your real code: self.network = EvoNetwork(chromosome)
         # Here we simulate the complexity of building a network
-        print(f"[Worker {self.agent_id}] Building chromosome")
+        print(f"[Worker {self.agent_id}] Building chromosome {chromosome}")
         self.network = EvoNetwork(chromosome)
-        print(f"[Worker {self.agent_id}] Network built")
+        print(f"[Worker {self.agent_id}] Network built {self.network}")
 
 def worker_loop(pipe, agent_id):
     """The main loop for the worker process."""

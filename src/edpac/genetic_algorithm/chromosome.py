@@ -167,4 +167,4 @@ class Chromosome:
         return Chromosome(self.chromo_config, self.genes.copy())
     
     def __repr__(self):
-        return f"Chromosome(genes_len={len(self.genes)}, avg={self.genes.mean():.3f})"
+        return f"Chromosome(genes_len={len(self.genes)})"
