@@ -60,9 +60,9 @@ def worker_loop(pipe, agent_id):
                 print(f"[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
 
                 net_process.network = 0
-
-                #SEND: Acknowledgment back to Zoo
-                pipe.send({'type': 'READY', 'id': agent_id})
+                #
+                # #SEND: Acknowledgment back to Zoo
+                # pipe.send({'type': 'READY', 'id': agent_id})
 
             elif cmd == 'INIT_INPUTS':
                 # RECEIVE: Chromosome from Zoo
