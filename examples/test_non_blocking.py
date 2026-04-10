@@ -37,7 +37,7 @@ from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
 from multipac.parallel.parallel_zoo import ParallelZoo
 
-from edpac.config.config_manager import save_config
+from edpac.config.config_manager import save_configs
 
 
 
@@ -63,8 +63,6 @@ def main(stats_path):
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
         return 0
-
-
 
     # Create objects
     #################################### Population ######################################
@@ -208,7 +206,7 @@ def main(stats_path):
     zoo.save_stats(stats_path)
 
     print("save config")
-    save_config(stats_path)
+    save_configs(stats_path)
 
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'

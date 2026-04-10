@@ -7,7 +7,7 @@ import inspect
 
 from .base_config import BaseConfig
 
-def save_config(stats_path, config_dir="edpac/config"):
+def save_configs(stats_path, config_dir="edpac/config"):
     """
     Loops over all *_config.py files in config_dir and saves
     their class attributes as JSON in stats_path.
@@ -35,6 +35,8 @@ def save_config(stats_path, config_dir="edpac/config"):
 
     print(list(config_path.glob("*_config.py")))
 
+    all_configs = {}
+
     # 1. Loop over files ending in _config.py
     for config_file in config_path.glob("*_config.py"):
         print(config_file.name)
@@ -59,11 +61,8 @@ def save_config(stats_path, config_dir="edpac/config"):
             # We only want classes defined in that file,
             # and (optionally) inheriting from BaseConfig
             if issubclass(obj, BaseConfig) and obj is not BaseConfig:
-            #if obj.__module__ == module_name:
-                json_filename = f"{module_name}_{name}.json".lower()
-                target_file = stats_dir / json_filename
 
-                # 4. Save to JSON
+                # 4. Save as dict
                 # If you use BaseConfig, call .to_dict().
                 # Otherwise, use a fallback vars() filter.
                 if hasattr(obj, 'to_dict'):
@@ -72,7 +71,11 @@ def save_config(stats_path, config_dir="edpac/config"):
                     data = {k: v for k, v in vars(obj).items()
                             if not k.startswith('__') and not callable(v)}
 
-                with open(target_file, 'w') as f:
-                    json.dump(data, f, indent=4)
+                all_configs[name] = data
 
-                print(f"[Config] Saved {name} from {config_file.name} to {json_filename}")
+    # 5. Save to JSON
+    output_file = stats_dir / "all_config.json"
+
+    with open(output_file, 'w') as f:
+        json.dump(all_configs, f, indent=4)
+
