@@ -263,6 +263,7 @@ class Pacman(Individual):
 
     def to_dict(self):
         return {"id": self.id,
+                "parents": self.parents,
                 "_max_life_points": self._max_life_points,
                 "stats": self.stats,
                 "nb_genes": self.get_nb_genes(),

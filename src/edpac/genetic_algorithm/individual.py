@@ -44,6 +44,8 @@ class Individual(Chromosome):
         # Statistiques
         self.age = 0
         self.stats = {"fitness": -float('inf'),  "nb_genes": -1}
+
+        self._parents = 0
         
 
     def evaluate(self, eval_func) -> float:
@@ -60,7 +62,10 @@ class Individual(Chromosome):
         self.fitness_evaluated = True
         return self.fitness
 
-#
+    def set_parents(self, parents)
+        if self._parents:
+            print("Warning, {parents=} should be iniated")
+
     def set_fitness(self, fitness_value) -> float:
 
 
