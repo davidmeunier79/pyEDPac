@@ -86,7 +86,7 @@ class EvoZoo(Zoo):
                         assert animal_nature == parent1.get_animal_nature() and animal_nature == parent2.get_animal_nature(), \
                             f"Error with {animal_nature=} and {parent1.get_animal_nature()} , {parent2.get_animal_nature()}"
 
-                        self.population.individuals[new_index].set_animal_nature(animal_nature)
+                        #self.population.individuals[new_index].set_animal_nature(animal_nature)
                         return
 
             print("Could not find nearby empty position {x=} {y=} for new indiv {new_index}")
@@ -272,8 +272,11 @@ class EvoZoo(Zoo):
 
         parent2 = self.population.individuals[pacman_index]
 
+        animal_nature = 0
+
         if parent1.get_animal_nature() == "-1" and parent2.get_animal_nature() == "-1":
 
+            animal_nature = "-1"
             if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent1.get_life_points() and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent2.get_life_points():
                 print(f"Enough life points to reproduce preys: {parent1.get_life_points()} {parent2.get_life_points()}")
                 parent1.add_life_points(-int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
@@ -284,6 +287,8 @@ class EvoZoo(Zoo):
                 return False
 
         elif parent1.get_animal_nature() == "1" and parent2.get_animal_nature() == "1":
+
+            animal_nature = "1"
 
             if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent1.get_life_points() and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY <= parent2.get_life_points():
                 print(f"Enough life points to reproduce preys: {parent1.get_life_points()} {parent2.get_life_points()}")
@@ -307,6 +312,7 @@ class EvoZoo(Zoo):
 
         self.population.init_new_individual(new_index = new_index, genes = offspring.get_genes())
 
+        self.population.individuals[new_index].set_animal_nature(animal_nature)
         self.population.individuals[new_index].set_parents((parent1.id, parent2.id))
 
         return True
