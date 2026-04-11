@@ -46,9 +46,9 @@ def worker_loop(pipe, agent_id):
                 # RECEIVE: Chromosome from Zoo
                 chromosome = msg['data']
                 net_process.build_from_chromosome(chromosome)
-
-                #SEND: Acknowledgment back to Zoo
-                pipe.send({'type': 'READY', 'id': net_process.agent_id})
+                #
+                # #SEND: Acknowledgment back to Zoo
+                # pipe.send({'type': 'READY', 'id': net_process.agent_id})
 
             if cmd == 'DEAD_CHROMOSOME':
                 # RECEIVE: Chromosome from Zoo
