@@ -440,7 +440,6 @@ class Zoo:
                 self.test_prey_reproduction(contact_index, pacman_index)
             else:
                 pass
-                #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
         return 1
@@ -492,23 +491,22 @@ class Zoo:
 
                 animal = contact_index % 2
 
-                if self.animals[animal]["danger"] == "-1" and pac.animal_nature == "1":
+                if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
                     pac.predator_contact()
 
-                elif self.animals[animal]["danger"] == "-1" and pac.animal_nature == "-1":
+                elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
                     #print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                     pair_contacts.append((contact_index, pacman_index, "-1"))
 
                     #self.test_predator_reproduction(contact_index, pacman_index)
 
-                elif self.animals[animal]["danger"] == "1" and pac.animal_nature == "1":
+                elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
                     #print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
 
                     pair_contacts.append((contact_index, pacman_index, "1"))
                     #self.test_prey_reproduction(contact_index, pacman_index)
                 else:
                     pass
-                    #print(f"Nothing particular between  {self.animals[animal]["danger"]} and {pac.animal_nature}")
 
 
             # naturally losing life each time points
@@ -521,10 +519,10 @@ class Zoo:
                 pac.fitness = pac.get_life_points()
                 pac.fitness_evaluated = True
 
-                if pac.animal_nature == "-1":
+                if pac.get_animal_nature() == "-1":
                     self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_predators"][-1] +=1
-                elif pac.animal_nature == "1":
+                elif pac.get_animal_nature() == "1":
                     self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
                     self.stats["nb_preys"][-1] +=1
 
