@@ -34,11 +34,11 @@ class SynapseConfig(BaseConfig):
     ONLINE_LEARNING: bool = True
     #ONLINE_LEARNING: bool = False
 
-    EXCIT_ALPHA: float = 0.5    # Coefficient apprentissage excitateur
+    EXCIT_ALPHA: float = 0.1    # Coefficient apprentissage excitateur
 
     INHIB_TIME_WINDOW: int = 10
 
-    INHIB_ALPHA: float = 0.5    # Coefficient apprentissage inhibiteur
+    INHIB_ALPHA: float = 0.1    # Coefficient apprentissage inhibiteur
 
     #TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
 
