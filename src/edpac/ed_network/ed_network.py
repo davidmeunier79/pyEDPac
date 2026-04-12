@@ -17,7 +17,7 @@ from ..ed_network.event_manager import EventManager
 from ..config.network_config import NetworkConfig, AssemblyNature, ProjectionNature
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 
-from ..config.constants import *
+from ..config.constants import VISIO_SQRT_NB_NEURONS, NB_VISIO_INPUTS, MINIMAL_TIME
 
 synapse_config=SynapseConfig()
 
@@ -197,6 +197,7 @@ class EDNetwork(Network):
 
         self.init_output_patterns()
 
+
         while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
 
             time_before = self.event_manager.get_time()
@@ -215,3 +216,16 @@ class EDNetwork(Network):
 
 
         return self.get_output_patterns()
+
+        #
+        # time_before = self.event_manager.get_time()
+        # spike_neuron_ids = self.event_manager.run_one_step()
+        #
+        # nb_events = self.event_manager.get_nb_events()
+        #
+        # #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+        #
+        # if nb_events == 0:
+        #     return []
+        # else:
+        #     return self.get_output_patterns()

@@ -15,6 +15,7 @@ from edpac.config.ga_config import PopulationConfig
 from .pacman_population import PacmanPopulation
 
 from edpac.zoo.zoo import Zoo
+from edpac.zoo.pacman import Direction
 
 from edpac.zoo.chars import char_to_index, index_to_char
 
@@ -143,27 +144,63 @@ class EvoZoo(Zoo):
 
         return input_percepts
 
-    def compute_percept(self, pacman_index):
+    def _move_forward(self, pacman_index):
+        """Calculates movement based on dir_body and updates grid."""
+        # Map dir_body to coordinate changes
+        #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
+        move_map = {Direction.DOWN: (0, -1), Direction.UP: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
 
-        pacman=self.population.individuals[pacman_index]
+        pac = self.population.individuals[pacman_index]
 
-        if pacman == 0:
-            print(f"Pacman {pacman_index} is empty, skipping")
+        dx, dy = move_map[pac.dir_body]
 
-            return -1
+        new_x = pac.x + dx
+        new_y = pac.y + dy
 
-        #print(f"Position pacman {i}: ", pacman.get_position())
+        target_char = self._in_grid(new_x, new_y)
 
-        input_percept = self.integrate_visio_outputs(pac= pacman)
+        if not target_char:
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            return
 
-        if all([percept is None for percept in input_percept]):
+        if target_char == 'X': # Not a wall
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            return
 
-            #print(f"Pacman {i}: sending empty inputs")
+        # Update grid data: old position becomes a dot
+        # if this a pacgum, increase life
+        if target_char == ".":
+            print(f"Pacman {pacman_index} Eating pacgum")
+            pac.eat_pacgum()
 
-            input_percepts = 1
+        elif target_char != " ":
 
-        return input_percept
+            index = char_to_index(target_char)
+            animal = self.get_animal_from_index(index)
 
+            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
+
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
+                #
+                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                # self.population.individuals[index].is_bitten()
+
+                pac.eat_prey(self.population.individuals[index].get_life_points())
+                print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
+                self.process_death(index)
+
+
+
+            else:
+                print("Same nature animal , cannot be eaten , we are no cannibals!")
+                return
+
+        self._set_in_grid(pac.x, pac.y, ' ')
+
+        # New position becomes Pacman
+        self._set_in_grid(new_x, new_y, index_to_char(pacman_index))
+
+        pac.set_position(new_x, new_y)
 
     def print_pacman_positions(self):
 
@@ -181,21 +218,13 @@ class EvoZoo(Zoo):
                 self._move_forward(pacman_index)
             elif pos == -1:
                 self.process_death(pacman_index)
-#
 
-    # TODO
     def get_animal_from_index(self, index):
         return index % 2
 
-#         assert 0 <= index < population.pop_config.POPULATION_SIZE
-#
-#         if  index < population.pop_config.INIT_PREY_POPULATION_SIZE
-#             return 0
-#         elif se
-
     def _find_first_avail(self, avail, target_danger):
 
-        all_dangers = [self.animals[index % 2]["danger"] for index in avail]
+        all_dangers = [self.animals[self.get_animal_from_index(index)]["danger"] for index in avail]
 
         for i, danger in enumerate(all_dangers):
             if danger == target_danger:

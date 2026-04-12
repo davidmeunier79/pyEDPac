@@ -42,12 +42,8 @@ class MultiInputVisualizer(InputVisualizer):
     #             self.input_visualizers = InputVisualizer(title = f"EDPac inputs {int(i //2)}, {i % 2} " ,scale=scale)
 
     def _return_root_coords(self, pacman_index):
-        root_x = int(pacman_index %2)
+        root_x = int(pacman_index % 2)
         root_y = int(pacman_index // 2)
-
-        #root_x = int(pacman_index // 2)
-        #root_y = int(pacman_index % 2)
-
         return root_x, root_y
 
     def _draw_panel_background(self, pacman_index):

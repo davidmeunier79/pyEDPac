@@ -63,7 +63,7 @@ class ZooVisualizer(PixelVisualizer):
                 continue
 
             pacman_index = char_to_index(char)
-            animal = pacman_index % 2
+            animal = self.zoo.get_animal_from_index(pacman_index)
 
             assert animal in self.zoo.animals.keys(), f"Error with {animal} ands {self.zoo.animals.keys()}"
 
@@ -113,7 +113,7 @@ class ZooVisualizer(PixelVisualizer):
         by = y * self.cell_size
 
         # A. Draw Body Sprite
-        animal = pacman_index % 2
+        animal = self.zoo.get_animal_from_index(pacman_index)
 
         body_shape = self.zoo.animals[animal]["shape"]
 

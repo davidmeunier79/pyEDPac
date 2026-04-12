@@ -47,6 +47,7 @@ class Zoo:
         self.stats["generation"].append(0)
         self.stats["nb_deads"].append(0)
         self.stats["nb_added_pacgums"].append(0)
+
     def _get_data_dir(self):
 
         # 1. Get the absolute path of constants.py
@@ -186,65 +187,6 @@ class Zoo:
                 for c, char in enumerate(line.strip()):
                     self._set_in_grid(c, r, char)
 
-    def _move_forward(self, pacman_index):
-        """Calculates movement based on dir_body and updates grid."""
-        # Map dir_body to coordinate changes
-        #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
-        move_map = {Direction.DOWN: (0, -1), Direction.UP: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
-
-        pac = self.population.individuals[pacman_index]
-
-        dx, dy = move_map[pac.dir_body]
-
-        new_x = pac.x + dx
-        new_y = pac.y + dy
-
-        target_char = self._in_grid(new_x, new_y)
-
-        if not target_char:
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
-            return
-
-        if target_char == 'X': # Not a wall
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
-            return
-
-        # Update grid data: old position becomes a dot
-        # if this a pacgum, increase life
-        if target_char == ".":
-            print(f"Pacman {pacman_index} Eating pacgum, Life points: " , pac.get_life_points())
-            pac.eat_pacgum()
-
-        elif target_char != " ":
-
-            index = char_to_index(target_char)
-            animal = index % 2
-
-            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
-
-            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                #
-                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                # self.population.individuals[index].is_bitten()
-
-                print("Before Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.get_life_points())
-                pac.eat_prey(self.population.individuals[index].get_life_points())
-                print("Eating prey ", self.animals[animal]["name"], ", Life points: " , pac.get_life_points())
-                self.process_death(index)
-
-
-
-            else:
-                print("Same nature animal , cannot be eaten , we are no cannibals!")
-                return
-
-        self._set_in_grid(pac.x, pac.y, ' ')
-
-        # New position becomes Pacman
-        self._set_in_grid(new_x, new_y, index_to_char(pacman_index))
-
-        pac.set_position(new_x, new_y)
-
     def get_animal_from_index(self, index):
         print(*"Error, should be implemented in inherited class")
 
@@ -300,8 +242,7 @@ class Zoo:
                     animal = 'X'
                 else:
                     index = char_to_index(char)
-                    animal = index % 2
-                #print(self.animals.keys())
+                    animal = self.get_animal_from_index(index)
 
                 # 4. Check for Objects (Walls or Animals)
                 assert animal in self.animals.keys(), f"Error with {animal}, not in {self.animals.keys()}"
@@ -414,24 +355,24 @@ class Zoo:
             else:
                 contact_index = char_to_index(char_contact)
 
-            animal = contact_index % 2
+            animal = self.get_animal_from_index(contact_index)
 
             if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
-                print(f"Contact with predator {self.animals[animal]["name"]}")
+                print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
                 pac.predator_contact()
 
             if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                print(f"Bite prey {self.animals[animal]["name"]}")
+                print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
                 pac.bite_prey()
 
             elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
-                print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+                print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
                 #pair_contacts.append((contact_index, pacman_index, "-1"))
 
                 self.test_predator_reproduction(contact_index, pacman_index)
 
             elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
-                print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
+                print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
 
                 #pair_contacts.append((contact_index, pacman_index, "1"))
                 self.test_prey_reproduction(contact_index, pacman_index)
@@ -483,10 +424,8 @@ class Zoo:
                 if char_contact in (".", " ", 'X') :
                     continue
 
-                else:
-                    contact_index = char_to_index(char_contact)
-
-                animal = contact_index % 2
+                contact_index = char_to_index(char_contact)
+                animal = self.get_animal_from_index(contact_index)
 
                 if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
                     pac.predator_contact()
