@@ -202,12 +202,11 @@ class Zoo:
         target_char = self._in_grid(new_x, new_y)
 
         if not target_char:
-            print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
             return
 
         if target_char == 'X': # Not a wall
-
-            print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
             return
 
         # Update grid data: old position becomes a dot
@@ -219,8 +218,6 @@ class Zoo:
         elif target_char != " ":
 
             index = char_to_index(target_char)
-
-
             animal = index % 2
 
             print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
@@ -399,7 +396,7 @@ class Zoo:
 
         if pac==0:
             print(f"Warning, pac {pacman_index=} should be implemented")
-            return
+            return 0
 
         #print(pac)
 

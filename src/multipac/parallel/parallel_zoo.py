@@ -175,7 +175,8 @@ class ParallelZoo(EvoZoo):
             # poll(timeout) checks if data is waiting
             # timeout=0 makes it an instantaneous check
 
-            percept = 0
+            if self.population.individuals[i]==0:
+                continue
 
             if pipe.poll(timeout):
                 try:
@@ -185,46 +186,35 @@ class ParallelZoo(EvoZoo):
 
                     if len(res['data']):
 
-                        if self.population.individuals[i]==0:
-                            percept=-1
-                        else:
+                        pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
 
-                            pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
-
-                            if pos:
-                                print(f"**** Move forward for agent {i}")
-                                self._move_forward(i)
+                        if pos:
+                            print(f"**** Move forward for agent {i}")
+                            self._move_forward(i)
                     else:
                         self.process_death(i)
-                        percept = -1
-
-                    if percept != -1:
-
-                        # computing contacts
-                        res = self.test_contacts(i)
-
-                        if not res:
-                            continue
-
-                        percept = self.compute_percept(i)
-
-                        results[i] = percept
-
-                    if percept:
-                        try:
-                            pipe.send({'type': 'TASK', 'data': percept})
-
-                        except BrokenPipeError:
-
-                            print(f"{percept=}")
-
 
                 except EOFError:
                     print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
-            else:
-                # Optional: Handle the "Lagging Agent" case
-                # Maybe use the previous frame's command or stay still
-                results[i] = None
+
+
+            # computing contacts
+            res = self.test_contacts(i)
+
+            if not res:
+                continue
+
+            percept = self.compute_percept(i)
+
+            results[i] = percept
+
+            if percept:
+                try:
+                    pipe.send({'type': 'TASK', 'data': percept})
+
+                except BrokenPipeError:
+
+                    print(f"{percept=}")
 
             pac = self.population.individuals[i]
 
@@ -248,8 +238,8 @@ class ParallelZoo(EvoZoo):
                     #self.init_new_individual(pacman_index)
                     self.process_death(i)
 
-            nb_added_pacgums = self.add_random_pacgums()
-            self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
+        nb_added_pacgums = self.add_random_pacgums()
+        self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
 
         return results
 

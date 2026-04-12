@@ -156,7 +156,6 @@ class EvoZoo(Zoo):
 
         input_percept = self.integrate_visio_outputs(pac= pacman)
 
-
         if all([percept is None for percept in input_percept]):
 
             #print(f"Pacman {i}: sending empty inputs")
@@ -221,11 +220,10 @@ class EvoZoo(Zoo):
 
             print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
+
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-
             self.send_chromosome(new_index)
-            #self.population.send_init_input(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
@@ -250,9 +248,7 @@ class EvoZoo(Zoo):
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-
             self.send_chromosome(new_index)
-            #self.population.send_init_input(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")

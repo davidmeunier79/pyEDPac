@@ -236,7 +236,7 @@ class Pacman(Individual):
         elif b_left and b_right:
             # Both active: Move forward
 
-            print("**** Move Forward **** ")
+            #print("**** Move Forward **** ")
             self.stats["nb_move_forward"] += 1
             return 1
 
