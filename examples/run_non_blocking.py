@@ -111,15 +111,15 @@ def main(stats_path):
     print("Running population")
     zoo.initialize_all_inputs()
 
-
-    input_percepts = zoo.compute_zoo_interaction()
-
-    # display percepts in multi_input_viz
-    multi_input_viz.display_all_inputs(input_percepts)
-    multi_input_viz.update_display()
-    QtWidgets.QApplication.processEvents()
-
-    zoo.send_first_wave(input_percepts)
+    #
+    # input_percepts = zoo.compute_zoo_interaction()
+    #
+    # # display percepts in multi_input_viz
+    # multi_input_viz.display_all_inputs(input_percepts)
+    # multi_input_viz.update_display()
+    # QtWidgets.QApplication.processEvents()
+    #
+    # zoo.send_first_wave(input_percepts)
 
     # 2. Create a local event loop
     loop = QEventLoop()
