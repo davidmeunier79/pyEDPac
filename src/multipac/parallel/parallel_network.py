@@ -42,13 +42,24 @@ def worker_loop(pipe, agent_id, verbose = 0):
                 cmd = msg.get('type')
                 data = msg.get('data')
 
+            if verbose:
+                print(f"[Worker {net_process.agent_id}] {cmd=}")
+
 
             if cmd == 'SET_CHROMOSOME':
+
                 # RECEIVE: Chromosome from Zoo
+                print(f"[Worker {net_process.agent_id}] receives SET_CHROMOSOME")
                 chromosome = msg['data']
-                net_process.build_from_chromosome(chromosome)
+
+                if verbose:
+                    print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME EvoNetwork")
+                net_process.network = EvoNetwork(chromosome)
 
                 #SEND: Acknowledgment back to Zoo
+
+                if verbose:
+                    print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
                 pipe.send({'type': 'READY', 'id': net_process.agent_id})
 
             if cmd == 'DEAD_CHROMOSOME':
@@ -61,9 +72,9 @@ def worker_loop(pipe, agent_id, verbose = 0):
                 print(f"[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
 
                 net_process.network = 0
-
-                #SEND: Acknowledgment back to Zoo
-                pipe.send({'type': 'READY', 'id': agent_id})
+                #
+                # #SEND: Acknowledgment back to Zoo
+                # pipe.send({'type': 'READY', 'id': agent_id})
 
             elif cmd == 'INIT_INPUTS':
                 # RECEIVE: Chromosome from Zoo
@@ -75,17 +86,20 @@ def worker_loop(pipe, agent_id, verbose = 0):
                 result = net_process.network.compute_one_wave()
 
                 #print("Sending outputs")
-                pipe.send({'type': 'READY', 'id': agent_id})
+                pipe.send({'type': 'RESULT', 'data': result})
+
+                #print("Sending outputs")
+                #pipe.send({'type': 'READY', 'id': agent_id})
 
             elif cmd == 'TASK':
+                #
+                # if msg['data'] == -1:
+                #     #print("Receiving Dead visio inputs")
+                #     #print("Sending empty outputs")
+                #     pipe.send({'type': 'RESULT', 'data': []})
 
-                if msg['data'] == -1:
-                    #print("Receiving Dead visio inputs")
-                    #print("Sending empty outputs")
-                    pipe.send({'type': 'RESULT', 'data': []})
 
-
-                elif msg['data'] == 1:
+                if msg['data'] == 1:
 
                     #print("Receiving empty inputs")
                     result = net_process.network.compute_one_wave()
@@ -113,133 +127,133 @@ def worker_loop(pipe, agent_id, verbose = 0):
         except EOFError:
             print("EOFError: pipe is closed by master")
             break # Pipe was closed by the Master
-
-def worker_loop(pipe, agent_id, verbose = 0, timeout=0.01):
-    """The main loop for the worker process."""
-    net_process = ParallelNetwork(agent_id)
-
-    while True:
-
-        try:
-            while pipe.poll(timeout):
-
-                if verbose:
-                    print(f"[Worker {net_process.agent_id}] Receiving message")
-
-                msg = pipe.recv()
-
-                # 1. Check if the message is a string (simple signal)
-                # or a dictionary (command + data)
-                if isinstance(msg, str):
-                    cmd = msg
-                    data = None
-                else:
-                    cmd = msg.get('type')
-                    #data = msg.get('data')
-
-                if verbose:
-                    print(f"[Worker {net_process.agent_id}] {cmd=}")
-
-                if cmd == 'SET_CHROMOSOME':
-                    # RECEIVE: Chromosome from Zoo
-
-                    print(f"[Worker {net_process.agent_id}] receives SET_CHROMOSOME")
-
-                    chromosome = msg['data']
-                    #SEND: Acknowledgment back to Zoo
-
-                    if verbose:
-                        print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
-                    pipe.send({'type': 'READY', 'id': net_process.agent_id})
-
-                    if verbose:
-                        print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME build_from_chromosome")
-                    net_process.network = EvoNetwork(chromosome)
-
-
-                elif cmd == 'DEAD_CHROMOSOME':
-                    # RECEIVE: Chromosome from Zoo
-                    agent_id = msg['data']
-
-                    assert agent_id == net_process.agent_id, \
-                        f"***[Worker {net_process.agent_id}] Error, receives DEAD_CHROMOSOME for {agent_id=}"
-
-                    print(f"[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
-
-                    if net_process.network:
-                        net_process.network = 0
-
-                    # #SEND: Acknowledgment back to Zoo
-                    # pipe.send({'type': 'READY', 'id': agent_id})
-
-                elif cmd == 'INIT_INPUTS':
-                    if net_process.network:
-                        # RECEIVE: Chromosome from Zoo
-
-                        if verbose:
-                            print(f"[Worker {net_process.agent_id}] INIT_INPUTS initialize inputs")
-
-                        net_process.network.initialize_inputs()
-                        # SEND: Acknowledgment back to Zoo
-                        #pipe.send({'type': 'READY', 'id': agent_id})
-
-                        if verbose:
-                            print(f"[Worker {net_process.agent_id}] INIT_INPUTS processing initial wave")
-
-                        result = net_process.network.compute_one_wave()
-                        #
-                        # if len(result):
-                        #     print("f[Worker {net_process.agent_id}] No more events in event manager, breaking")
-                        #     net_process.network = 0
-
-                        if verbose:
-                            print(f"[Worker {net_process.agent_id}] INIT_INPUTS send result")
-
-                        pipe.send({'type': 'RESULT', 'data': result})
-                        #pipe.send({'type': 'READY', 'id': result})
-
-                    else:
-                        print(f"*[Worker {net_process.agent_id}] Error, receiving INIT_INPUTS on empty Network")
-
-                elif cmd == 'TASK':
-
-                    if net_process.network:
-
-                        if verbose:
-                            print(f"[Worker {net_process.agent_id}] TASK Receiving inputs")
-
-                        input_percept = msg['data']
-
-                        #print(f"[Worker {net_process.agent_id}] TASK {input_percept=}")
-
-                        if all([percept is None for percept in input_percept]):
-
-                            if verbose:
-                                print(f"[Worker {net_process.agent_id}] TASK processing empty wave")
-                            result = net_process.network.compute_one_wave()
-
-                        else :
-                            if verbose:
-                                print(f"[Worker {net_process.agent_id}] TASK processing wave with percepts")
-                            result = net_process.network.compute_one_wave(input_percept)
-                        #
-                        # if len(result):
-                        #     print(f"[Worker {net_process.agent_id}] TASK No more events in event manager, breaking")
-                        #     net_process.network = 0
-                        if verbose:
-                            print(f"[Worker {net_process.agent_id}] TASK send result")
-                        pipe.send({'type': 'RESULT', 'data': result})
-                    else:
-
-                        print(f"*[Worker {net_process.agent_id}] Error, receiving TASK on empty Network")
-
-                elif cmd == 'TERMINATE':
-
-                    print(f"[Worker {net_process.agent_id}] shutdown")
-                    net_process.network = 0
-                    del(net_process.network)
-                    break
-
-        except EOFError:
-            print("EOFError: pipe is closed by master")
-            break # Pipe was closed by the Master
+#
+# def worker_loop(pipe, agent_id, verbose = 0, timeout=0.01):
+#     """The main loop for the worker process."""
+#     net_process = ParallelNetwork(agent_id)
+#
+#     while True:
+#
+#         try:
+#             while pipe.poll(timeout):
+#
+#                 if verbose:
+#                     print(f"[Worker {net_process.agent_id}] Receiving message")
+#
+#                 msg = pipe.recv()
+#
+#                 # 1. Check if the message is a string (simple signal)
+#                 # or a dictionary (command + data)
+#                 if isinstance(msg, str):
+#                     cmd = msg
+#                     data = None
+#                 else:
+#                     cmd = msg.get('type')
+#                     #data = msg.get('data')
+#
+#                 if verbose:
+#                     print(f"[Worker {net_process.agent_id}] {cmd=}")
+#
+#                 if cmd == 'SET_CHROMOSOME':
+#                     # RECEIVE: Chromosome from Zoo
+#
+#                     print(f"[Worker {net_process.agent_id}] receives SET_CHROMOSOME")
+#
+#                     chromosome = msg['data']
+#                     #SEND: Acknowledgment back to Zoo
+#
+#                     if verbose:
+#                         print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
+#                     pipe.send({'type': 'READY', 'id': net_process.agent_id})
+#
+#                     if verbose:
+#                         print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME build_from_chromosome")
+#                     net_process.network = EvoNetwork(chromosome)
+#
+#
+#                 elif cmd == 'DEAD_CHROMOSOME':
+#                     # RECEIVE: Chromosome from Zoo
+#                     agent_id = msg['data']
+#
+#                     assert agent_id == net_process.agent_id, \
+#                         f"***[Worker {net_process.agent_id}] Error, receives DEAD_CHROMOSOME for {agent_id=}"
+#
+#                     print(f"[Worker {net_process.agent_id}] receives DEAD_CHROMOSOME")
+#
+#                     if net_process.network:
+#                         net_process.network = 0
+#
+#                     # #SEND: Acknowledgment back to Zoo
+#                     # pipe.send({'type': 'READY', 'id': agent_id})
+#
+#                 elif cmd == 'INIT_INPUTS':
+#                     if net_process.network:
+#                         # RECEIVE: Chromosome from Zoo
+#
+#                         if verbose:
+#                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS initialize inputs")
+#
+#                         net_process.network.initialize_inputs()
+#                         # SEND: Acknowledgment back to Zoo
+#                         #pipe.send({'type': 'READY', 'id': agent_id})
+#
+#                         if verbose:
+#                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS processing initial wave")
+#
+#                         result = net_process.network.compute_one_wave()
+#                         #
+#                         # if len(result):
+#                         #     print("f[Worker {net_process.agent_id}] No more events in event manager, breaking")
+#                         #     net_process.network = 0
+#
+#                         if verbose:
+#                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS send result")
+#
+#                         pipe.send({'type': 'RESULT', 'data': result})
+#                         #pipe.send({'type': 'READY', 'id': result})
+#
+#                     else:
+#                         print(f"*[Worker {net_process.agent_id}] Error, receiving INIT_INPUTS on empty Network")
+#
+#                 elif cmd == 'TASK':
+#
+#                     if net_process.network:
+#
+#                         if verbose:
+#                             print(f"[Worker {net_process.agent_id}] TASK Receiving inputs")
+#
+#                         input_percept = msg['data']
+#
+#                         #print(f"[Worker {net_process.agent_id}] TASK {input_percept=}")
+#
+#                         if all([percept is None for percept in input_percept]):
+#
+#                             if verbose:
+#                                 print(f"[Worker {net_process.agent_id}] TASK processing empty wave")
+#                             result = net_process.network.compute_one_wave()
+#
+#                         else :
+#                             if verbose:
+#                                 print(f"[Worker {net_process.agent_id}] TASK processing wave with percepts")
+#                             result = net_process.network.compute_one_wave(input_percept)
+#                         #
+#                         # if len(result):
+#                         #     print(f"[Worker {net_process.agent_id}] TASK No more events in event manager, breaking")
+#                         #     net_process.network = 0
+#                         if verbose:
+#                             print(f"[Worker {net_process.agent_id}] TASK send result")
+#                         pipe.send({'type': 'RESULT', 'data': result})
+#                     else:
+#
+#                         print(f"*[Worker {net_process.agent_id}] Error, receiving TASK on empty Network")
+#
+#                 elif cmd == 'TERMINATE':
+#
+#                     print(f"[Worker {net_process.agent_id}] shutdown")
+#                     net_process.network = 0
+#                     del(net_process.network)
+#                     break
+#
+#         except EOFError:
+#             print("EOFError: pipe is closed by master")
+#             break # Pipe was closed by the Master

@@ -164,7 +164,7 @@ class ParallelZoo(EvoZoo):
 #             print(f"[ParallelZoo] Confirmed: New Worker {response['id']} is initialized.")
 #
 
-    def run_one_non_blocking_step(self, timeout=0.001):
+    def run_one_non_blocking_step(self, timeout=0.001, verbose=0):
         """
         Collects outputs from all workers without
         locking the Master process.
@@ -175,81 +175,95 @@ class ParallelZoo(EvoZoo):
             # poll(timeout) checks if data is waiting
             # timeout=0 makes it an instantaneous check
 
-            percept = 0
-
-            if pipe.poll(timeout):
-                try:
-                    res = pipe.recv()
-                    if res['type'] != 'RESULT':
-                        continue
-
-                    if len(res['data']):
-
-                        if self.population.individuals[i]==0:
-                            percept=-1
-                        else:
-
-                            pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
-
-                            if pos:
-                                print(f"**** Move forward for agent {i}")
-                                self._move_forward(i)
-                    else:
-                        self.process_death(i)
-                        percept = -1
-
-                    if percept != -1:
-
-                        # computing contacts
-                        res = self.test_contacts(i)
-
-                        if not res:
-                            continue
-
-                        percept = self.compute_percept(i)
-
-                        results[i] = percept
-
-                    if percept:
-                        try:
-                            pipe.send({'type': 'TASK', 'data': percept})
-
-                        except BrokenPipeError:
-
-                            print(f"{percept=}")
-
-
-                except EOFError:
-                    print(f"[Zoo] Worker {i} pipe closed unexpectedly!")
-            else:
-                # Optional: Handle the "Lagging Agent" case
-                # Maybe use the previous frame's command or stay still
-                results[i] = None
-
             pac = self.population.individuals[i]
 
-            if pac:
+            if pac == 0:
 
-                pac.fitness = pac.get_life_points()
-                pac.fitness_evaluated = True
+                if verbose:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+                continue
 
-                if pac.get_animal_nature() == "-1":
-                    self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-                    self.stats["nb_predators"][-1] +=1
-                elif pac.get_animal_nature() == "1":
-                    self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-                    self.stats["nb_preys"][-1] +=1
+            if verbose:
+                print(f"[ParallelZoo] Worker {i} polling message")
+
+            if pipe.poll(timeout):
+
+                try:
+
+                    if verbose:
+                        print(f"[ParallelZoo] Worker {i} receiving message")
+
+                    msg = pipe.recv()
+
+                    if msg['type'] != 'RESULT':
+                        continue
+
+                    if len(msg['data']):
+
+                        if verbose:
+                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs")
+                        pos = pac.integrate_motor_outputs(msg['data'])
+
+                        if pos:
+                            if verbose:
+                                print(f"[ParallelZoo] Worker {i} Move forward")
+                            self._move_forward(i)
+                    else:
+                        if verbose:
+                            print(f"[ParallelZoo] Worker {i} process_death")
+                        self.process_death(i)
+                        break
+
+                except EOFError:
+                    print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
 
 
-                # naturally losing life each time points
-                pac.add_life_points(-1)
+            # computing contacts
+            if verbose:
+                print(f"[ParallelZoo] Worker {i} test_contacts")
 
-                if pac.get_life_points() < 0:
-                    #self.init_new_individual(pacman_index)
-                    self.process_death(i)
+            res = self.test_contacts(i)
 
-            nb_added_pacgums = self.add_random_pacgums()
-            self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
+            if not res:
+                continue
+
+            if verbose:
+                print(f"[ParallelZoo] Worker {i} integrate_visio_outputs")
+            input_percept = self.integrate_visio_outputs(pac)
+
+
+            #print(f"[ParallelZoo] Worker {i} {input_percept=}")
+
+            if input_percept:
+                results[i] = input_percept
+
+                try:
+                    pipe.send({'type': 'TASK', 'data': input_percept})
+                except BrokenPipeError:
+                    print(f"{input_percept=}")
+
+            if verbose:
+                print(f"[ParallelZoo] Worker {i} updating stats")
+
+            pac.fitness = pac.get_life_points()
+            pac.fitness_evaluated = True
+
+            if pac.get_animal_nature() == "-1":
+                self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_predators"][-1] +=1
+            elif pac.get_animal_nature() == "1":
+                self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_preys"][-1] +=1
+
+            # naturally losing life each time points
+            pac.add_life_points(-1)
+
+            if pac.get_life_points() < 0:
+                #self.init_new_individual(pacman_index)
+                self.process_death(i)
+
+        nb_added_pacgums = self.add_random_pacgums()
+        self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
 
         return results
 
