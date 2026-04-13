@@ -66,7 +66,14 @@ def main(stats_path):
 
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(pop_config = PopulationConfigMulti())
+    pop_config = PopulationConfigMultiTest()
+    pop_config.POPULATION_SIZE=1
+
+    pop_config.INIT_PREY_POPULATION_SIZE =1
+
+    pop_config.INIT_PREDATOR_POPULATION_SIZE = 0
+
+    zoo = ParallelZoo(pop_config)
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
@@ -110,7 +117,7 @@ def main(stats_path):
 
     print("Running population")
     zoo.initialize_all_inputs()
-
+    #
     #
     # input_percepts = zoo.compute_zoo_interaction()
     #
@@ -166,17 +173,19 @@ def main(stats_path):
         zoo.stats["generation"][-1] = zoo.population.generation
 
         nb_alive_indiv = len([pac for pac in zoo.population.individuals if pac])
+        #
+        # print(f"******************** {nb_alive_indiv=} ***********************")
+        #
+        # print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}, nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
 
-        print(f"******************** {nb_alive_indiv=} ***********************")
+        if nb_alive_indiv == 0 or TIME > 100:
 
-        print(f"nb_preys={zoo.stats["nb_preys"][-1]} nb_predators={zoo.stats["nb_predators"][-1]} mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} generation={zoo.stats["generation"][-1]}, nb_deads={zoo.stats["nb_deads"][-1]}, nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
-
-        if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
 
-
         TIME+=1
+
+        time.sleep(1)
 
 
     print("In run_population")
@@ -216,9 +225,6 @@ def main(stats_path):
 
     del timer
     del loop
-
-
-
 
     print("Evolution finished or aborted.")
 
