@@ -143,7 +143,7 @@ def worker_loop(pipe, agent_id, verbose = 0):
 
             if len(result)==0:
 
-                print(f"[Worker {net_process.agent_id}] Empty No more events in event manager,")
+                print(f"[Worker {net_process.agent_id}] Empty No more events in event manager, breaking")
 
             try:
                 #print("Sending outputs")

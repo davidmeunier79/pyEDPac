@@ -215,8 +215,6 @@ class ParallelZoo(EvoZoo):
 
     def _test_all_contacts(self, verbose=0):
 
-        results = [None] * self.num_agents
-
         for i, pipe in enumerate(self.pipes):
             # poll(timeout) checks if data is waiting
             # timeout=0 makes it an instantaneous check
