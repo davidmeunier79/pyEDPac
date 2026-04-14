@@ -120,35 +120,16 @@ def worker_loop(pipe, agent_id, verbose = 1):
 
         elif cmd == 'TASK':
 
-            if data == 1:
 
-                if verbose > 0:
-                    print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
-
+            if all(pattern is None for pattern in data):
+                #if verbose > 0:
+                print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
                 result = net_process.network.compute_one_wave()
-                #
-                # if len(result)==0:
-                #
-                #     print(f"[Worker {net_process.agent_id}] Empty No more events in event manager,")
-                #
-                # #print("Sending outputs")
-                # pipe.send({'type': 'RESULT', 'data': result})
 
             else:
-                #Simulate a sensory-motor cycle
-
-                #print("Receiving visio inputs")
-                #
-                # if verbose > 0:
-                #     print(f"[Worker {net_process.agent_id}] compute_one_wave data")
-
+                #if verbose > 0:
+                print(f"[Worker {net_process.agent_id}] compute_one_wave data")
                 result = net_process.network.compute_one_wave(data)
-
-                # if len(result)==0:
-                #     print(f"[Worker {net_process.agent_id}] Empty No more events in event manager,")
-                #
-                # #print("Sending outputs")
-                # pipe.send({'type': 'RESULT', 'data': result})
 
         elif cmd == 'TERMINATE':
 
