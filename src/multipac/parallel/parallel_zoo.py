@@ -142,29 +142,29 @@ class ParallelZoo(EvoZoo):
         if verbose > 0:
             print("[ParallelZoo] All receive_poll_inputs")
 
-        self.receive_poll_inputs(timeout=0.001, verbose=verbose-1)
+        self._receive_poll_inputs(timeout=0.001, verbose=verbose-1)
 
         if verbose > 0:
             print("[ParallelZoo] All test_all_contacts")
 
-        self.test_all_contacts(verbose=verbose-1)
+        self._test_all_contacts(verbose=verbose-1)
 
         if verbose > 0:
             print("[ParallelZoo] All send_all_outputs")
 
-        results = self.send_all_outputs(verbose=verbose-1)
+        results = self._send_all_outputs(verbose=verbose-1)
 
         if verbose > 0:
             print("[ParallelZoo] All compute_all_stats")
 
-        self.compute_all_stats(verbose=verbose-1)
+        self._compute_all_stats(verbose=verbose-1)
 
         nb_added_pacgums = self.add_random_pacgums()
         self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
 
         return results
 
-    def receive_poll_inputs(self, timeout = 0.001, verbose=0):
+    def _receive_poll_inputs(self, timeout = 0.001, verbose=0):
 
         for i, pipe in enumerate(self.pipes):
             # poll(timeout) checks if data is waiting
@@ -213,7 +213,7 @@ class ParallelZoo(EvoZoo):
                     print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
 
 
-    def test_all_contacts(self, verbose=0):
+    def _test_all_contacts(self, verbose=0):
 
         results = [None] * self.num_agents
 
@@ -236,7 +236,7 @@ class ParallelZoo(EvoZoo):
             res = self.test_contacts(i)
 
 
-    def send_all_outputs(self, verbose=0):
+    def _send_all_outputs(self, verbose=0):
 
         results = [None] * self.num_agents
 
@@ -273,7 +273,7 @@ class ParallelZoo(EvoZoo):
 
         return results
 
-    def compute_all_stats(self, verbose=0):
+    def _compute_all_stats(self, verbose=0):
 
         for i, pipe in enumerate(self.pipes):
             # poll(timeout) checks if data is waiting
