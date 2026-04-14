@@ -52,7 +52,7 @@ def test_all_receive(pipe,timeout = 0.001, verbose=0):
 
     return cmd, data
 
-def worker_loop(pipe, agent_id, verbose = 1):
+def worker_loop(pipe, agent_id, verbose = 0):
     """The main loop for the worker process."""
     net_process = ParallelNetwork(agent_id)
 
