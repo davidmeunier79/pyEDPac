@@ -270,7 +270,7 @@ class EvoZoo(Zoo):
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-            self.send_chromosome(new_index)
+            self._send_chromosome(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
@@ -295,11 +295,33 @@ class EvoZoo(Zoo):
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-            self.send_chromosome(new_index)
+            self._send_chromosome(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
-    def send_chromosome(self, new_index):
+
+    def process_death(self, pacman_index):
+
+        #print(f"process_death of indiv {pacman_index=}")
+        if self.population.individuals[pacman_index] == 0:
+            #print(f"Pacman {pacman_index=} is already removed")
+            return
+
+        # remove from zoo
+        x, y = self.population.individuals[pacman_index].get_position()
+        self._set_in_grid(x, y, " ")
+
+        #remove from list_indivuals
+        self.population.store_dead_individual(self.population.individuals[pacman_index])
+        self.population.individuals[pacman_index] = 0
+
+        self._send_death_signal(pacman_index)
+        # increment nb_deads
+        self.stats["nb_deads"][-1] += 1
+
+
+
+    def _send_chromosome(self, new_index):
         print("Warning, should be implemented in inherited class")
 

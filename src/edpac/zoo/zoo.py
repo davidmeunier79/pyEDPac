@@ -493,25 +493,10 @@ class Zoo:
 
 
     def process_death(self, pacman_index):
-        #print(f"process_death of indiv {pacman_index=}")
-        if self.population.individuals[pacman_index] == 0:
-            #print(f"Pacman {pacman_index=} is already removed")
-            return
-
-        # remove from zoo
-        x, y = self.population.individuals[pacman_index].get_position()
-        self._set_in_grid(x, y, " ")
-
-        #remove from list_indivuals
-        self.population.store_dead_individual(self.population.individuals[pacman_index])
-        self.population.individuals[pacman_index] = 0
-
-        self.send_death_signal(pacman_index)
-        # increment nb_deads
-        self.stats["nb_deads"][-1] += 1
+        print("Error, should be implemented in inherited class")
 
 
-    def send_death_signal(self, pacman_index):
+    def _send_death_signal(self, pacman_index):
         print("Error, should be implemented in inherited class")
 
     def save_stats(self, indiv_path=0):
