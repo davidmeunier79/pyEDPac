@@ -107,6 +107,12 @@ class PacmanPopulation(Population):
     ################################# online reproduction ###########################################
     def create_new_individual(self, new_index, parent1, parent2):
 
+        assert parent1.get_animal_nature() == parent2.get_animal_nature(), \
+            f"Error , different animal natures for parents: {parent1.get_animal_nature()} {parent2.get_animal_nature() }"
+
+        # getting animal_nature
+        animal_nature = parent1.get_animal_nature()
+
         # compute mix chromosome between two parents
         offspring = self.crossover(parent1, parent2)
         #print("After crossover, offspring = ", offspring.genes)
