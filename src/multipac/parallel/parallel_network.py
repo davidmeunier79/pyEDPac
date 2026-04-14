@@ -80,6 +80,12 @@ def worker_loop(pipe, agent_id, verbose = 1):
             print(f"[Worker {net_process.agent_id}] receives SET_CHROMOSOME")
             chromosome = data
 
+
+            if verbose:
+                print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
+            pipe.send({'type': 'READY', 'id': net_process.agent_id})
+
+
             if verbose:
                 print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME EvoNetwork")
             net_process.network = EvoNetwork(chromosome)

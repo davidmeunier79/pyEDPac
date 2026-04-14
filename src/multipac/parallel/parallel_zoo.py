@@ -159,6 +159,9 @@ class ParallelZoo(EvoZoo):
 
         self.compute_all_stats(verbose=verbose-1)
 
+        nb_added_pacgums = self.add_random_pacgums()
+        self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
+
         return results
 
     def receive_poll_inputs(self, timeout = 0.001, verbose=0):
@@ -304,9 +307,6 @@ class ParallelZoo(EvoZoo):
             if pac.get_life_points() < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(i)
-
-        nb_added_pacgums = self.add_random_pacgums()
-        self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
 
 
     def run_one_step(self, visio_inputs):
