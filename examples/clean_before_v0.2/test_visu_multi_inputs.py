@@ -128,6 +128,10 @@ def main():
 
         print(MAX_TIME)
 
+        zoo.init_stats()
+
+        zoo.stats["time"][-1] = MAX_TIME
+
         zoo.test_pacman_contacts()  # Update the model()
 
         # Update both windows

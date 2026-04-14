@@ -45,13 +45,6 @@ def stop_everything():
 
 def main():
 
-    global SIMULATION_ACTIVE
-    if not SIMULATION_ACTIVE:
-        return 0
-
-
-def main():
-
 
 
     # Create objects
