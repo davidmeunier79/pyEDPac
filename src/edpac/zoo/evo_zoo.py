@@ -144,7 +144,7 @@ class EvoZoo(Zoo):
 
         return input_percepts
 
-    def _move_forward(self, pacman_index):
+    def _move_forward(self, pacman_index, verbose=0):
         """Calculates movement based on dir_body and updates grid."""
         # Map dir_body to coordinate changes
         #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
@@ -160,17 +160,20 @@ class EvoZoo(Zoo):
         target_char = self._in_grid(new_x, new_y)
 
         if not target_char:
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} could not move forward, {new_x=}, {new_y=} leads to error char={target_char}")
             return
 
         if target_char == 'X': # Not a wall
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} could not move forward, {new_x=}, {new_y=} is a wall")
             return
 
         # Update grid data: old position becomes a dot
         # if this a pacgum, increase life
         if target_char == ".":
-            print(f"Pacman {pacman_index} Eating pacgum")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} Eating pacgum")
             pac.eat_pacgum()
 
         elif target_char != " ":
@@ -178,23 +181,25 @@ class EvoZoo(Zoo):
             index = char_to_index(target_char)
             animal = self.get_animal_from_index(index)
 
-            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
+            if verbose > 0:
+                print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
 
             if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                #
-                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                # self.population.individuals[index].is_bitten()
 
                 pac.eat_prey(self.population.individuals[index].get_life_points())
-                print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
+
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
                 self.process_death(index)
 
 
 
             else:
-                print("Same nature animal , cannot be eaten , we are no cannibals!")
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Same nature animal , cannot be eaten , we are no cannibals!")
                 return
 
+        # Old position is empty
         self._set_in_grid(pac.x, pac.y, ' ')
 
         # New position becomes Pacman
