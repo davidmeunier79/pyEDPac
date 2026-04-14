@@ -96,11 +96,6 @@ class EvoZoo(Zoo):
 
 
     def generate_zoo_positions(self):
-        #
-        # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
-        # random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
-        #
-        # print(random_pos_x, random_pos_y)
 
         for i in range(len(self.population.individuals)):
 
@@ -115,34 +110,6 @@ class EvoZoo(Zoo):
         self.load_screen(screen_file= "screen.empty")
 
         self.generate_zoo_positions()
-
-    def compute_zoo_interaction(self):
-
-        input_percepts = []
-        for i,pacman in enumerate(self.population.individuals):
-            #print (i, pacman)
-            if pacman == 0:
-                #print(f"Pacman {i} is empty, skipping")
-                input_percepts.append(-1)
-                continue
-
-            #print(f"Position pacman {i}: ", pacman.get_position())
-
-            input_percept = self.integrate_visio_outputs(pac= pacman)
-
-            #print([percept is None for percept in input_percept])
-            #print("test all is None ", all([percept is None for percept in input_percept]))
-
-            if all([percept is None for percept in input_percept]):
-
-                #print(f"Pacman {i}: sending empty inputs")
-
-                input_percepts.append(1)
-            else:
-                #print(input_pecept)
-                input_percepts.append(input_percept)
-
-        return input_percepts
 
     def _move_forward(self, pacman_index, verbose=0):
         """Calculates movement based on dir_body and updates grid."""
@@ -212,20 +179,18 @@ class EvoZoo(Zoo):
         for i,pacman in enumerate(self.population.individuals):
             print(f" pacman  Position {i}: ", pacman.get_position())
 
-
-    def compute_move_pos(self, move_pos):
-
-        for pacman_index, pos in move_pos.items():
-            pac = self.population.individuals[pacman_index]
-
-            if pos == 1:
-                #print(f"Individual {pacman_index} moving forward")
-                self._move_forward(pacman_index)
-            elif pos == -1:
-                self.process_death(pacman_index)
-
     def get_animal_from_index(self, index):
         return index % 2
+
+    ########################################## online reproduction #######################################################
+    def _check_available_individual_slot(self):
+
+        avail = [i for i, pac in enumerate(self.population.individuals) if pac==0 ]
+
+        if len(avail):
+            return avail
+        else:
+            return -1
 
     def _find_first_avail(self, avail, target_danger):
 
@@ -235,57 +200,6 @@ class EvoZoo(Zoo):
             if danger == target_danger:
                 return avail[i]
         return -1
-
-    def test_prey_reproduction(self, contact_index, pacman_index):
-        # check if any slots are available
-        avail = self.check_available_individual_slot()
-
-        if avail == -1: # no available slot
-            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
-            return
-
-        new_index = self._find_first_avail(avail, target_danger = "1")
-
-        if new_index == -1:
-            #print("No available slots for prey_reproduction danger, breaking")
-            return
-
-        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
-
-            print(f"Prey {new_index=} available, building")
-            #self.stats["nb_preys"] += 1
-
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
-            self.send_chromosome(new_index)
-
-        else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
-
-    def test_predator_reproduction(self, contact_index, pacman_index):
-        # check if any slots are available
-        avail = self.check_available_individual_slot()
-
-        if avail == -1: # no available slot
-            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
-            return
-
-        new_index = self._find_first_avail(avail, target_danger = "-1")
-
-        if new_index == -1:
-            #print("No available slots for predator_reproduction danger, breaking")
-            return
-
-        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
-            print(f"Predator {new_index=} available, building")
-            #self.stats["nb_predators"] += 1
-
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
-            self.send_chromosome(new_index)
-
-        else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
@@ -311,7 +225,7 @@ class EvoZoo(Zoo):
                 print(f"Enough life points to reproduce predators: {parent1.get_life_points()} {parent2.get_life_points()}")
                 parent1.add_life_points(-int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
                 parent2.add_life_points(-int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
-                
+
             else:
                 print(f"Not enough life points to reproduce predators {parent1.get_life_points()} {parent2.get_life_points()}")
                 return False
@@ -331,31 +245,60 @@ class EvoZoo(Zoo):
             print(f"*Warning , animal_nature {parent1.get_animal_nature()} {parent1.get_animal_nature()} do not match")
             return False
 
-        # compute mix chromosome between two parents
-        offspring = self.population.crossover(parent1, parent2)
-        #print("After crossover, offspring = ", offspring.genes)
-
-        # Muter
-        self.population.mutate(offspring)
-        #print("After mutation, offspring = ", offspring.genes)
-        #print(f"{offspring.get_nb_genes()=}")
-
-        self.population.init_new_individual(new_index = new_index, genes = offspring.get_genes())
-
-        self.population.individuals[new_index].set_animal_nature(animal_nature)
-        self.population.individuals[new_index].set_parents((parent1.id, parent2.id))
+        self.population.create_new_individual(new_index, parent1, parent2)
 
         return True
 
+    def test_prey_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        avail = self._check_available_individual_slot()
 
-    def check_available_individual_slot(self):
+        if avail == -1: # no available slot
+            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
+            return
 
-        avail = [i for i, pac in enumerate(self.population.individuals) if pac==0 ]
+        new_index = self._find_first_avail(avail, target_danger = "1")
 
-        if len(avail):
-            return avail
+        if new_index == -1:
+            #print("No available slots for prey_reproduction danger, breaking")
+            return
+
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+
+            print(f"Prey {new_index=} available, building")
+            #self.stats["nb_preys"] += 1
+
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
+            self.send_chromosome(new_index)
+
         else:
-            return -1
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+
+    def test_predator_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        avail = self._check_available_individual_slot()
+
+        if avail == -1: # no available slot
+            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
+            return
+
+        new_index = self._find_first_avail(avail, target_danger = "-1")
+
+        if new_index == -1:
+            #print("No available slots for predator_reproduction danger, breaking")
+            return
+
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            print(f"Predator {new_index=} available, building")
+            #self.stats["nb_predators"] += 1
+
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
+            self.send_chromosome(new_index)
+
+        else:
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
     def send_chromosome(self, new_index):
         print("Warning, should be implemented in inherited class")

@@ -98,7 +98,7 @@ class ParallelZoo(EvoZoo):
             pipe.send({'type': 'INIT_INPUTS'})
 
 
-    def send_death_signal(self, pacman_index):
+    def _send_death_signal(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
 
         pipe = self.pipes[pacman_index]
@@ -107,7 +107,7 @@ class ParallelZoo(EvoZoo):
         print(f"[ParallelZoo] Sending Worker {pacman_index} DEAD_CHROMOSOME")
 
 
-    def send_chromosome(self, pacman_index):
+    def _send_chromosome(self, pacman_index):
         assert 0 <= pacman_index and pacman_index < len(self.pipes), f"Error with {pacman_index=} in pipes"
         assert  self.population.individuals[pacman_index], f"Error, sending empty chromosome {pacman_index}"
 
@@ -305,43 +305,6 @@ class ParallelZoo(EvoZoo):
             if pac.get_life_points() < 0:
                 #self.init_new_individual(pacman_index)
                 self.process_death(i)
-
-
-    def run_one_step(self, visio_inputs):
-
-        #print("\n[ParallelZoo] Running a test neural computation step...")
-
-        assert len(visio_inputs) == len(self.pipes), f"Error with visio_inputs {len(visio_inputs)=} == {len(self.pipes)=}"
-
-        for pipe, visio_input in zip(self.pipes, visio_inputs):
-            #print(visio_input)
-
-            try:
-                pipe.send({'type': 'TASK', 'data': visio_input})
-
-            except BrokenPipeError:
-
-                print(f"{visio_input=}")
-
-        move_pos = {}
-
-        for i, pipe in enumerate(self.pipes):
-            res = pipe.recv()
-            #print(f"[ParallelZoo] Agent {i} computed result: {res['data']}")
-
-            if len(res['data']):
-                pos = self.population.individuals[i].integrate_motor_outputs(res['data'])
-
-                if pos:
-                    print(f"**** Move forward for agent {i}")
-                    move_pos[i] = pos
-            else:
-                move_pos[i] = -1
-
-        return move_pos
-
-        #print(f"[ParallelZoo] Agent {i} moved")
-
 
     def shutdown(self):
         print("\n[ParallelZoo] Terminating simulation.")

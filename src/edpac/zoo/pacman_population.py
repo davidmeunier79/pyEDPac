@@ -104,6 +104,22 @@ class PacmanPopulation(Population):
         with open(output_file, 'w') as f:
             json.dump(self.dead_individuals, f, indent=4)
 
+    ################################# online reproduction ###########################################
+    def create_new_individual(self, new_index, parent1, parent2):
+
+        # compute mix chromosome between two parents
+        offspring = self.crossover(parent1, parent2)
+        #print("After crossover, offspring = ", offspring.genes)
+
+        # Muter
+        self.mutate(offspring)
+        #print("After mutation, offspring = ", offspring.genes)
+        #print(f"{offspring.get_nb_genes()=}")
+
+        self.init_new_individual(new_index = new_index, genes = offspring.get_genes())
+
+        self.individuals[new_index].set_animal_nature(animal_nature)
+        self.individuals[new_index].set_parents((parent1.id, parent2.id))
 
 
     def init_new_individual(self, new_index, genes):
