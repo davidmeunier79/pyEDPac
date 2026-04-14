@@ -329,7 +329,7 @@ class Zoo:
             #print(f"Error, {char=} could not be found in _grid")
             return ([-1], [-1])
 
-    def test_contacts(self, pacman_index):
+    def test_contacts(self, pacman_index, verbose = 0):
 
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 
@@ -358,24 +358,25 @@ class Zoo:
             animal = self.get_animal_from_index(contact_index)
 
             if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
-                print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
                 pac.predator_contact()
 
             if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
                 pac.bite_prey()
 
             elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
-                print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
-                #pair_contacts.append((contact_index, pacman_index, "-1"))
-
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
                 self.test_predator_reproduction(contact_index, pacman_index)
 
             elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
-                print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
-
-                #pair_contacts.append((contact_index, pacman_index, "1"))
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
                 self.test_prey_reproduction(contact_index, pacman_index)
+
             else:
                 pass
 
@@ -401,7 +402,7 @@ class Zoo:
             elif nature == "-1":
                 self.test_predator_reproduction(pac1, pac2)
 
-    def test_pacman_contacts(self):
+    def test_pacman_contacts(self, verbose = 0):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
 
         pair_contacts = []
@@ -431,19 +432,18 @@ class Zoo:
                     pac.predator_contact()
 
                 elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
-                    #print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
+
+                    if verbose > 0:
+                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
                     pair_contacts.append((contact_index, pacman_index, "-1"))
 
-                    #self.test_predator_reproduction(contact_index, pacman_index)
-
                 elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
-                    #print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
 
+                    if verbose > 0:
+                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
                     pair_contacts.append((contact_index, pacman_index, "1"))
-                    #self.test_prey_reproduction(contact_index, pacman_index)
                 else:
                     pass
-
 
             # naturally losing life each time points
             pac.add_life_points(-1)
