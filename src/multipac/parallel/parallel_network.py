@@ -70,7 +70,7 @@ def worker_loop(pipe, agent_id, verbose = 1):
         #     cmd = msg.get('type')
         #     data = msg.get('data')
         #
-        # if verbose:
+        # if verbose > 0:
         #     print(f"[Worker {net_process.agent_id}] {cmd=}")
         #
 
@@ -81,20 +81,13 @@ def worker_loop(pipe, agent_id, verbose = 1):
             chromosome = data
 
 
-            if verbose:
+            if verbose > 0:
                 print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
             pipe.send({'type': 'READY', 'id': net_process.agent_id})
 
-
-            if verbose:
+            if verbose > 0:
                 print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME EvoNetwork")
             net_process.network = EvoNetwork(chromosome)
-
-            #SEND: Acknowledgment back to Zoo
-
-            if verbose:
-                print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
-            pipe.send({'type': 'READY', 'id': net_process.agent_id})
 
             result = 0
 
@@ -115,29 +108,21 @@ def worker_loop(pipe, agent_id, verbose = 1):
             result = 0
 
         elif cmd == 'INIT_INPUTS':
-            # RECEIVE: Chromosome from Zoo
-
-            if verbose:
+            if verbose > 0:
                 print(f"[Worker {net_process.agent_id}] initialize_inputs")
 
             net_process.network.initialize_inputs()
-            # SEND: Acknowledgment back to Zoo
-            #pipe.send({'type': 'READY', 'id': agent_id})
 
-            #print("Receiving empty inputs")
-            if verbose:
-                print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
+            if verbose > 0:
+                print(f"[Worker {net_process.agent_id}] compute_one_wave init")
 
             result = net_process.network.compute_one_wave()
-
-            #print("Sending outputs")
-            #pipe.send({'type': 'READY', 'id': agent_id})
 
         elif cmd == 'TASK':
 
             if data == 1:
 
-                if verbose:
+                if verbose > 0:
                     print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
 
                 result = net_process.network.compute_one_wave()
@@ -153,9 +138,9 @@ def worker_loop(pipe, agent_id, verbose = 1):
                 #Simulate a sensory-motor cycle
 
                 #print("Receiving visio inputs")
-
-                if verbose:
-                    print(f"[Worker {net_process.agent_id}] compute_one_wave data")
+                #
+                # if verbose > 0:
+                #     print(f"[Worker {net_process.agent_id}] compute_one_wave data")
 
                 result = net_process.network.compute_one_wave(data)
 
@@ -198,7 +183,7 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #         try:
 #             while pipe.poll(timeout):
 #
-#                 if verbose:
+#                 if verbose > 0:
 #                     print(f"[Worker {net_process.agent_id}] Receiving message")
 #
 #                 msg = pipe.recv()
@@ -212,7 +197,7 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #                     cmd = msg.get('type')
 #                     #data = msg.get('data')
 #
-#                 if verbose:
+#                 if verbose > 0:
 #                     print(f"[Worker {net_process.agent_id}] {cmd=}")
 #
 #                 if cmd == 'SET_CHROMOSOME':
@@ -223,11 +208,11 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #                     chromosome = msg['data']
 #                     #SEND: Acknowledgment back to Zoo
 #
-#                     if verbose:
+#                     if verbose > 0:
 #                         print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME send READY")
 #                     pipe.send({'type': 'READY', 'id': net_process.agent_id})
 #
-#                     if verbose:
+#                     if verbose > 0:
 #                         print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME build_from_chromosome")
 #                     net_process.network = EvoNetwork(chromosome)
 #
@@ -251,14 +236,14 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #                     if net_process.network:
 #                         # RECEIVE: Chromosome from Zoo
 #
-#                         if verbose:
+#                         if verbose > 0:
 #                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS initialize inputs")
 #
 #                         net_process.network.initialize_inputs()
 #                         # SEND: Acknowledgment back to Zoo
 #                         #pipe.send({'type': 'READY', 'id': agent_id})
 #
-#                         if verbose:
+#                         if verbose > 0:
 #                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS processing initial wave")
 #
 #                         result = net_process.network.compute_one_wave()
@@ -267,7 +252,7 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #                         #     print("f[Worker {net_process.agent_id}] No more events in event manager, breaking")
 #                         #     net_process.network = 0
 #
-#                         if verbose:
+#                         if verbose > 0:
 #                             print(f"[Worker {net_process.agent_id}] INIT_INPUTS send result")
 #
 #                         pipe.send({'type': 'RESULT', 'data': result})
@@ -280,7 +265,7 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #
 #                     if net_process.network:
 #
-#                         if verbose:
+#                         if verbose > 0:
 #                             print(f"[Worker {net_process.agent_id}] TASK Receiving inputs")
 #
 #                         input_percept = msg['data']
@@ -289,19 +274,19 @@ def worker_loop(pipe, agent_id, verbose = 1):
 #
 #                         if all([percept is None for percept in input_percept]):
 #
-#                             if verbose:
+#                             if verbose > 0:
 #                                 print(f"[Worker {net_process.agent_id}] TASK processing empty wave")
 #                             result = net_process.network.compute_one_wave()
 #
 #                         else :
-#                             if verbose:
+#                             if verbose > 0:
 #                                 print(f"[Worker {net_process.agent_id}] TASK processing wave with percepts")
 #                             result = net_process.network.compute_one_wave(input_percept)
 #                         #
 #                         # if len(result):
 #                         #     print(f"[Worker {net_process.agent_id}] TASK No more events in event manager, breaking")
 #                         #     net_process.network = 0
-#                         if verbose:
+#                         if verbose > 0:
 #                             print(f"[Worker {net_process.agent_id}] TASK send result")
 #                         pipe.send({'type': 'RESULT', 'data': result})
 #                     else:
