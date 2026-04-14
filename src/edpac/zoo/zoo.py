@@ -331,7 +331,9 @@ class Zoo:
 
     def test_contacts(self, pacman_index, verbose = 0):
 
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+        #directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
         pac = self.population.individuals[pacman_index]
 
@@ -377,11 +379,6 @@ class Zoo:
                     print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
                 self.test_prey_reproduction(contact_index, pacman_index)
 
-            else:
-                pass
-
-
-        return 1
 
     ## all pacmal are tested at once
     def _compute_test_contacts(self, pair_contacts):
