@@ -153,14 +153,14 @@ class Pacman(Individual):
     def eat_pacgum(self):
         if self.get_animal_nature() == "1":
             self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREY)
+            self.stats["nb_eaten_pacgums"] += 1
 
         elif self.get_animal_nature() == "-1":
             self.add_life_points(self.pacman_config.NB_LIFE_POINTS_PER_PACGUM_PREDATOR)
-
+            self.stats["nb_eaten_pacgums"] += 1
         else:
             print(f"Warning, {self.get_animal_nature()=} is not defined for Pacman.eat_pacgum")
 
-        self.stats["nb_eaten_pacgums"] += 1
 
     def eat_prey(self, extra_life):
         if self.get_animal_nature() == "-1":
@@ -236,7 +236,7 @@ class Pacman(Individual):
         elif b_left and b_right:
             # Both active: Move forward
 
-            print("**** Move Forward **** ")
+            #print("**** Move Forward **** ")
             self.stats["nb_move_forward"] += 1
             return 1
 

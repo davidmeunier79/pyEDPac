@@ -15,6 +15,7 @@ from edpac.config.ga_config import PopulationConfig
 from .pacman_population import PacmanPopulation
 
 from edpac.zoo.zoo import Zoo
+from edpac.zoo.pacman import Direction
 
 from edpac.zoo.chars import char_to_index, index_to_char
 
@@ -143,28 +144,63 @@ class EvoZoo(Zoo):
 
         return input_percepts
 
-    def compute_percept(self, pacman_index):
+    def _move_forward(self, pacman_index):
+        """Calculates movement based on dir_body and updates grid."""
+        # Map dir_body to coordinate changes
+        #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
+        move_map = {Direction.DOWN: (0, -1), Direction.UP: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
 
-        pacman=self.population.individuals[pacman_index]
+        pac = self.population.individuals[pacman_index]
 
-        if pacman == 0:
-            print(f"Pacman {pacman_index} is empty, skipping")
+        dx, dy = move_map[pac.dir_body]
 
-            return -1
+        new_x = pac.x + dx
+        new_y = pac.y + dy
 
-        #print(f"Position pacman {i}: ", pacman.get_position())
+        target_char = self._in_grid(new_x, new_y)
 
-        input_percept = self.integrate_visio_outputs(pac= pacman)
+        if not target_char:
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            return
+
+        if target_char == 'X': # Not a wall
+            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            return
+
+        # Update grid data: old position becomes a dot
+        # if this a pacgum, increase life
+        if target_char == ".":
+            print(f"Pacman {pacman_index} Eating pacgum")
+            pac.eat_pacgum()
+
+        elif target_char != " ":
+
+            index = char_to_index(target_char)
+            animal = self.get_animal_from_index(index)
+
+            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
+
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
+                #
+                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
+                # self.population.individuals[index].is_bitten()
+
+                pac.eat_prey(self.population.individuals[index].get_life_points())
+                print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
+                self.process_death(index)
 
 
-        if all([percept is None for percept in input_percept]):
 
-            #print(f"Pacman {i}: sending empty inputs")
+            else:
+                print("Same nature animal , cannot be eaten , we are no cannibals!")
+                return
 
-            input_percepts = 1
+        self._set_in_grid(pac.x, pac.y, ' ')
 
-        return input_percept
+        # New position becomes Pacman
+        self._set_in_grid(new_x, new_y, index_to_char(pacman_index))
 
+        pac.set_position(new_x, new_y)
 
     def print_pacman_positions(self):
 
@@ -182,21 +218,13 @@ class EvoZoo(Zoo):
                 self._move_forward(pacman_index)
             elif pos == -1:
                 self.process_death(pacman_index)
-#
 
-    # TODO
     def get_animal_from_index(self, index):
         return index % 2
 
-#         assert 0 <= index < population.pop_config.POPULATION_SIZE
-#
-#         if  index < population.pop_config.INIT_PREY_POPULATION_SIZE
-#             return 0
-#         elif se
-
     def _find_first_avail(self, avail, target_danger):
 
-        all_dangers = [self.animals[index % 2]["danger"] for index in avail]
+        all_dangers = [self.animals[self.get_animal_from_index(index)]["danger"] for index in avail]
 
         for i, danger in enumerate(all_dangers):
             if danger == target_danger:
@@ -221,11 +249,10 @@ class EvoZoo(Zoo):
 
             print(f"Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
+
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-
             self.send_chromosome(new_index)
-            #self.population.send_init_input(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
@@ -250,9 +277,7 @@ class EvoZoo(Zoo):
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position(new_index)
-
             self.send_chromosome(new_index)
-            #self.population.send_init_input(new_index)
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
@@ -278,12 +303,12 @@ class EvoZoo(Zoo):
 
             animal_nature = "-1"
             if parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent1.get_life_points() and parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR <= parent2.get_life_points():
-                print(f"Enough life points to reproduce preys: {parent1.get_life_points()} {parent2.get_life_points()}")
+                print(f"Enough life points to reproduce predators: {parent1.get_life_points()} {parent2.get_life_points()}")
                 parent1.add_life_points(-int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
                 parent2.add_life_points(-int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
                 
             else:
-                print(f"Not enough life points to reproduce predators{parent1.get_life_points()} {parent2.get_life_points()}")
+                print(f"Not enough life points to reproduce predators {parent1.get_life_points()} {parent2.get_life_points()}")
                 return False
 
         elif parent1.get_animal_nature() == "1" and parent2.get_animal_nature() == "1":
@@ -295,7 +320,7 @@ class EvoZoo(Zoo):
                 parent1.add_life_points(-int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2))
                 parent2.add_life_points(-int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREY // 2))
             else:
-                print(f"Not enough life points to reproduce preys{parent1.get_life_points()} {parent2.get_life_points()}")
+                print(f"Not enough life points to reproduce preys {parent1.get_life_points()} {parent2.get_life_points()}")
                 return False
         else:
             print(f"*Warning , animal_nature {parent1.get_animal_nature()} {parent1.get_animal_nature()} do not match")
