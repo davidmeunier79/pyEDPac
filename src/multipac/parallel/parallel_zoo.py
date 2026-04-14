@@ -142,7 +142,7 @@ class ParallelZoo(EvoZoo):
         if verbose > 0:
             print("[ParallelZoo] All receive_poll_inputs")
 
-        self.receive_poll_inputs(timeout=0.001, verbose=0)
+        self.receive_poll_inputs(timeout=0.001, verbose=verbose-1)
 
         if verbose > 0:
             print("[ParallelZoo] All test_all_contacts")
