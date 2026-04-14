@@ -181,7 +181,7 @@ class EDNetwork(Network):
         return output_activities
 
 
-    def compute_one_wave(self, data = 0):
+    def compute_one_wave(self, data = 0, verbose = 0):
         """"
         Run one step in event_manager
         """
@@ -193,7 +193,8 @@ class EDNetwork(Network):
 
         current_time = self.event_manager.get_time()
 
-        print("current_time: ", current_time)
+        if verbose > 0:
+            print("current_time: ", current_time)
 
         self.init_output_patterns()
         #
