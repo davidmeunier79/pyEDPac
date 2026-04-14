@@ -208,7 +208,7 @@ class EDNetwork(Network):
             #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
 
             if nb_events == 0:
-                print("No more events in event manager, breaking")
+                #print("No more events in event manager, breaking")
                 return []
             else:
                 pass
