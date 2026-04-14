@@ -187,9 +187,6 @@ class Zoo:
                 for c, char in enumerate(line.strip()):
                     self._set_in_grid(c, r, char)
 
-    def get_animal_from_index(self, index):
-        print(*"Error, should be implemented in inherited class")
-
     def integrate_visio_outputs(self, pac):
         """
         Scans the zoo grid in a fan shape based on dir_head.
@@ -267,47 +264,10 @@ class Zoo:
 
         return new_pattern
 
-
-    def all_move_forward(self, turn_dir = 1):
-
-        for pacman_index, pac in enumerate(self.population.individuals):
-            #print(pac)
-            if pac==0:
-                continue
-
-            self._move_forward(pacman_index)
-
-    def turn_all_body(self, turn_dir = 1):
-
-        for pacman_index, pac in enumerate(self.population.individuals):
-            #print(pac)
-            if pac == 0:
-                continue
-
-            pac.dir_body = pac._get_turn(pac.dir_body, turn_dir)
-
-
-    def turn_all_heads(self, turn_dir = 1):
-
-        for pacman_index, pac in enumerate(self.population.individuals):
-            #print(pac)
-            if pac==0:
-                continue
-
-            pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
-
-
     def _in_grid(self, pos_x, pos_y):
         if 0 <= pos_x < self.cols and 0 <= pos_y < self.rows:
             char = self._grid[pos_y][pos_x].decode("utf-8")
             return char
-        #
-        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
-        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
-        #     char = self._grid[pos_x][pos_y].decode("utf-8")
-        #     return char
-
-        #print(f"Error, could not find position {pos_x} {pos_y}")
         return 0
 
 
@@ -316,10 +276,6 @@ class Zoo:
             self._grid[pos_y][pos_x] = char
         else:
             print(f"Error, could not add {char} at position {pos_x} {pos_y}")
-        #
-        # elif 0 <= pos_y < self.cols and 0 <= pos_x < self.rows:
-        #     print(f"**** Warning, accessing {pos_x=},{pos_y=} in reverse order in grid ****")
-        #     self._grid[pos_x][pos_y] = char
 
     def _where_in_grid(self, char):
         if char in np.unique(self._grid):
@@ -328,146 +284,6 @@ class Zoo:
         else:
             #print(f"Error, {char=} could not be found in _grid")
             return ([-1], [-1])
-
-    def test_contacts(self, pacman_index, verbose = 0):
-
-        #directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
-
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-
-        pac = self.population.individuals[pacman_index]
-
-        if pac==0:
-            print(f"Warning, pac {pacman_index=} should be implemented")
-            return 0
-
-        #print(pac)
-
-        x, y = pac.get_position()
-
-        for dir_x, dir_y in directions:
-
-            char_contact = self._in_grid(x + dir_x,  y + dir_y)
-            if not char_contact:
-                continue
-
-            if char_contact in (".", " ", 'X') :
-                continue
-
-            else:
-                contact_index = char_to_index(char_contact)
-
-            animal = self.get_animal_from_index(contact_index)
-
-            if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
-                if verbose > 0:
-                    print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
-                pac.predator_contact()
-
-            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                if verbose > 0:
-                    print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
-                pac.bite_prey()
-
-            elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
-                if verbose > 0:
-                    print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
-                self.test_predator_reproduction(contact_index, pacman_index)
-
-            elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
-                if verbose > 0:
-                    print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
-                self.test_prey_reproduction(contact_index, pacman_index)
-
-
-    ## all pacmal are tested at once
-    def _compute_test_contacts(self, pair_contacts):
-
-        print(pair_contacts)
-
-        # remove if one_indiv is dead in the pair
-        checked_pair_contacts = [pair for pair in pair_contacts if (self.population.individuals[pair[0]]!= 0 and self.population.individuals[pair[1]]!=0)]
-
-        checked_pair_contacts.sort(key=lambda pair: self.population.individuals[pair[0]].get_fitness() + self.population.individuals[pair[0]].get_fitness(), reverse=True)
-
-        print(checked_pair_contacts)
-
-        for pac1, pac2, nature in pair_contacts:
-            if nature == "1":
-                self.test_prey_reproduction(pac1, pac2)
-
-            elif nature == "-1":
-                self.test_predator_reproduction(pac1, pac2)
-
-    def test_pacman_contacts(self, verbose = 0):
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
-
-        pair_contacts = []
-
-        for pacman_index, pac in enumerate(self.population.individuals):
-
-            if pac==0:
-                continue
-
-            #print(pac)
-
-            x, y = pac.get_position()
-
-            for dir_x, dir_y in directions:
-
-                char_contact = self._in_grid(x + dir_x,  y + dir_y)
-                if not char_contact:
-                    continue
-
-                if char_contact in (".", " ", 'X') :
-                    continue
-
-                contact_index = char_to_index(char_contact)
-                animal = self.get_animal_from_index(contact_index)
-
-                if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
-                    pac.predator_contact()
-
-                elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
-
-                    if verbose > 0:
-                        print(f"Testing reproduction between predators {contact_index} and {pacman_index}")
-                    pair_contacts.append((contact_index, pacman_index, "-1"))
-
-                elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
-
-                    if verbose > 0:
-                        print(f"Testing reproduction between preys {contact_index} and {pacman_index}")
-                    pair_contacts.append((contact_index, pacman_index, "1"))
-                else:
-                    pass
-
-            # naturally losing life each time points
-            pac.add_life_points(-1)
-
-            if pac.get_life_points() < 0:
-                #self.init_new_individual(pacman_index)
-                self.process_death(pacman_index)
-            else:
-                pac.fitness = pac.get_life_points()
-                pac.fitness_evaluated = True
-
-                if pac.get_animal_nature() == "-1":
-                    self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-                    self.stats["nb_predators"][-1] +=1
-                elif pac.get_animal_nature() == "1":
-                    self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-                    self.stats["nb_preys"][-1] +=1
-
-        self.stats["mean_predator_fitness"][-1] /= self.stats["nb_predators"][-1]
-        self.stats["mean_prey_fitness"][-1] /= self.stats["nb_preys"][-1]
-        self.stats["generation"][-1] = self.population.generation
-
-        self._compute_test_contacts(pair_contacts)
-
-
-
-        return len([pac for pac in self.population.individuals if pac])
 
     def add_random_pacgums(self):
         """
@@ -491,13 +307,8 @@ class Zoo:
 
         return nb_added_pacgums
 
-
-    def process_death(self, pacman_index):
-        print("Error, should be implemented in inherited class")
-
-
-    def _send_death_signal(self, pacman_index):
-        print("Error, should be implemented in inherited class")
+    def get_animal_from_index(self, index):
+        return index % 2
 
     def save_stats(self, indiv_path=0):
 

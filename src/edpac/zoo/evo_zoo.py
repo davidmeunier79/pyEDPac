@@ -179,9 +179,6 @@ class EvoZoo(Zoo):
         for i,pacman in enumerate(self.population.individuals):
             print(f" pacman  Position {i}: ", pacman.get_position())
 
-    def get_animal_from_index(self, index):
-        return index % 2
-
     ########################################## online reproduction #######################################################
     def _check_available_individual_slot(self):
 
@@ -301,6 +298,34 @@ class EvoZoo(Zoo):
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
 
+    ############################################ general population moves (test)
+    def all_move_forward(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            self._move_forward(pacman_index)
+
+    def turn_all_body(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac == 0:
+                continue
+
+            pac.dir_body = pac._get_turn(pac.dir_body, turn_dir)
+
+
+    def turn_all_heads(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
+
+
+    ############################################ interaction between GA and grid
     def process_death(self, pacman_index):
 
         #print(f"process_death of indiv {pacman_index=}")
@@ -320,7 +345,109 @@ class EvoZoo(Zoo):
         # increment nb_deads
         self.stats["nb_deads"][-1] += 1
 
+    # testing contats individually
+    def test_contacts(self, pacman_index, verbose = 0):
 
+        #directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+
+        pac = self.population.individuals[pacman_index]
+
+        if pac==0:
+            print(f"Warning, pac {pacman_index=} should be implemented")
+            return 0
+
+        #print(pac)
+
+        x, y = pac.get_position()
+
+        for dir_x, dir_y in directions:
+
+            char_contact = self._in_grid(x + dir_x,  y + dir_y)
+            if not char_contact:
+                continue
+
+            if char_contact in (".", " ", 'X') :
+                continue
+
+            else:
+                contact_index = char_to_index(char_contact)
+
+            animal = self.get_animal_from_index(contact_index)
+
+            if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
+                pac.predator_contact()
+
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
+                pac.bite_prey()
+
+            elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
+                self.test_predator_reproduction(contact_index, pacman_index)
+
+            elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
+                self.test_prey_reproduction(contact_index, pacman_index)
+
+    def _test_all_contacts(self, verbose=0):
+
+        for i, pac in enumerate(self.population.individuals):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+
+            if pac == 0:
+                if verbose > 0:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+                continue
+
+            # computing contacts
+            if verbose > 0:
+                print(f"[ParallelZoo] Worker {i} test_contacts")
+
+            res = self.test_contacts(i)
+
+    def _compute_all_stats(self, verbose=0):
+
+        for i, pac in enumerate(self.population.individuals):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+
+            if pac == 0:
+
+                if verbose > 0:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+                continue
+
+
+            if verbose > 0:
+                print(f"[ParallelZoo] Worker {i} updating stats")
+
+            pac.fitness = pac.get_life_points()
+            pac.fitness_evaluated = True
+
+            if pac.get_animal_nature() == "-1":
+                self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_predators"][-1] +=1
+            elif pac.get_animal_nature() == "1":
+                self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_preys"][-1] +=1
+
+            # naturally losing life each time points
+            pac.add_life_points(-1)
+
+            if pac.get_life_points() < 0:
+                #self.init_new_individual(pacman_index)
+                self.process_death(i)
+
+    ################################# called here but implemented in ParallelZoo ############################
+    def _send_death_signal(self, pacman_index):
+        print("Error, should be implemented in inherited class")
 
     def _send_chromosome(self, new_index):
         print("Warning, should be implemented in inherited class")

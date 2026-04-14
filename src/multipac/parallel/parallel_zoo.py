@@ -213,27 +213,6 @@ class ParallelZoo(EvoZoo):
                     print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
 
 
-    def _test_all_contacts(self, verbose=0):
-
-        for i, pipe in enumerate(self.pipes):
-            # poll(timeout) checks if data is waiting
-            # timeout=0 makes it an instantaneous check
-
-            pac = self.population.individuals[i]
-
-            if pac == 0:
-
-                if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} is empty, continue")
-                continue
-
-            # computing contacts
-            if verbose > 0:
-                print(f"[ParallelZoo] Worker {i} test_contacts")
-
-            res = self.test_contacts(i)
-
-
     def _send_all_outputs(self, verbose=0):
 
         results = [None] * self.num_agents
@@ -270,41 +249,6 @@ class ParallelZoo(EvoZoo):
 
 
         return results
-
-    def _compute_all_stats(self, verbose=0):
-
-        for i, pipe in enumerate(self.pipes):
-            # poll(timeout) checks if data is waiting
-            # timeout=0 makes it an instantaneous check
-
-            pac = self.population.individuals[i]
-
-            if pac == 0:
-
-                if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} is empty, continue")
-                continue
-
-
-            if verbose > 0:
-                print(f"[ParallelZoo] Worker {i} updating stats")
-
-            pac.fitness = pac.get_life_points()
-            pac.fitness_evaluated = True
-
-            if pac.get_animal_nature() == "-1":
-                self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
-                self.stats["nb_predators"][-1] +=1
-            elif pac.get_animal_nature() == "1":
-                self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
-                self.stats["nb_preys"][-1] +=1
-
-            # naturally losing life each time points
-            pac.add_life_points(-1)
-
-            if pac.get_life_points() < 0:
-                #self.init_new_individual(pacman_index)
-                self.process_death(i)
 
     def shutdown(self):
         print("\n[ParallelZoo] Terminating simulation.")
