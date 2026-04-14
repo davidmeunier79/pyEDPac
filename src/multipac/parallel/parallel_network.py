@@ -122,13 +122,13 @@ def worker_loop(pipe, agent_id, verbose = 0):
 
 
             if all(pattern is None for pattern in data):
-                #if verbose > 0:
-                print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
+                if verbose > 0:
+                    print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
                 result = net_process.network.compute_one_wave()
 
             else:
-                #if verbose > 0:
-                print(f"[Worker {net_process.agent_id}] compute_one_wave data")
+                if verbose > 0:
+                    print(f"[Worker {net_process.agent_id}] compute_one_wave data")
                 result = net_process.network.compute_one_wave(data)
 
         elif cmd == 'TERMINATE':
