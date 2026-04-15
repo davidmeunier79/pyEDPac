@@ -108,7 +108,6 @@ def main(stats_path):
             print("All individuals are dead , Breaking")
             SIMULATION_ACTIVE = False
 
-
         TIME+=1
 
     print("shutdown")
