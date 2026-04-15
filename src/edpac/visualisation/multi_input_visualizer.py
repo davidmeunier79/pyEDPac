@@ -54,6 +54,14 @@ class MultiInputVisualizer(InputVisualizer):
 
         self.draw_background(root_x*self.panel_width, root_y*self.panel_height)
 
+    def _display_empty_inputs(self, pacman_index):
+
+        root_x, root_y = self._return_root_coords(pacman_index)
+
+        #print(f"Background {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+
+        self.draw_empty_inputs(root_x*self.panel_width, root_y*self.panel_height)
+
     def _display_panel_inputs(self, sensor_values, pacman_index):
 
         root_x, root_y = self._return_root_coords(pacman_index)
@@ -79,6 +87,6 @@ class MultiInputVisualizer(InputVisualizer):
         for i, sensor_values in enumerate(all_sensor_values):
             if sensor_values == -1 or sensor_values == 1 or sensor_values is None:
                 ## empty sensor_values
-                self._draw_panel_background(pacman_index = i)
+                self._display_empty_inputs(pacman_index = i)
             else:
                 self._display_panel_inputs(sensor_values, pacman_index = i)

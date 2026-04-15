@@ -12,12 +12,13 @@ import numpy as np
 
 from ..config.physiology_config import EventManagerConfig
 from ..physiology.dynamic_synapse import DynamicSynapse
+from ..physiology.spiking_neuron import SpikingNeuron
 
 
 class PSPEvent:
     """Événement PSP (Post-Synaptic Potential)"""
 
-    def __init__(self, time: int, synapse: 'DynamicSynapse', weight: float):
+    def __init__(self, time: int, synapse: DynamicSynapse, weight: float):
         """
         Créer un événement PSP
 
@@ -97,7 +98,7 @@ class EventManager:
         self.psp_count = 0
         self.is_empty = True
 
-    def schedule_psp(self, synapse: 'DynamicSynapse', spike_time: int):
+    def schedule_psp(self, synapse: DynamicSynapse, spike_time: int):
         """
         Programmer un PSP (potentiel post-synaptique)
 
@@ -214,7 +215,7 @@ class EventManager:
 
         return event_count
 
-    def inject_input(self, neuron: 'SpikingNeuron', time: int, weight: float = 0.1):
+    def inject_input(self, neuron: SpikingNeuron, time: int, weight: float = 0.1):
         """
         Injecter un input (PSP externe) dans un neurone
 

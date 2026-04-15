@@ -181,7 +181,7 @@ class EDNetwork(Network):
         return output_activities
 
 
-    def compute_one_wave(self, data = 0):
+    def compute_one_wave(self, data = 0, verbose = 0):
         """"
         Run one step in event_manager
         """
@@ -193,39 +193,39 @@ class EDNetwork(Network):
 
         current_time = self.event_manager.get_time()
 
-        #print("current_time: ", current_time)
+        if verbose > 0:
+            print("current_time: ", current_time)
 
         self.init_output_patterns()
-
-
-        while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
-
-            time_before = self.event_manager.get_time()
-            spike_neuron_ids = self.event_manager.run_one_step()
-
-            nb_events = self.event_manager.get_nb_events()
-
-            #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
-
-            if nb_events == 0:
-                print("No more events in event manager, breaking")
-                return []
-            else:
-                pass
-                #print(nb_events)
-
-
-        return self.get_output_patterns()
-
         #
-        # time_before = self.event_manager.get_time()
-        # spike_neuron_ids = self.event_manager.run_one_step()
         #
-        # nb_events = self.event_manager.get_nb_events()
+        # while (self.event_manager.get_time() - current_time) < MINIMAL_TIME:
         #
-        # #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+        #     time_before = self.event_manager.get_time()
+        #     spike_neuron_ids = self.event_manager.run_one_step()
         #
-        # if nb_events == 0:
-        #     return []
-        # else:
-        #     return self.get_output_patterns()
+        #     nb_events = self.event_manager.get_nb_events()
+        #
+        #     #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+        #
+        #     if nb_events == 0:
+        #         #print("No more events in event manager, breaking")
+        #         return []
+        #     else:
+        #         pass
+        #         #print(nb_events)
+        #
+        # return self.get_output_patterns()
+
+
+        time_before = self.event_manager.get_time()
+        spike_neuron_ids = self.event_manager.run_one_step()
+
+        nb_events = self.event_manager.get_nb_events()
+
+        #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+
+        if nb_events == 0:
+            return []
+        else:
+            return self.get_output_patterns()

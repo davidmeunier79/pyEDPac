@@ -96,11 +96,6 @@ class EvoZoo(Zoo):
 
 
     def generate_zoo_positions(self):
-        #
-        # random_pos_x = np.random.randint(low = 1, high = self.rows-1, size = len(self.population.individuals))
-        # random_pos_y = np.random.randint(low = 1, high = self.cols-1, size = len(self.population.individuals))
-        #
-        # print(random_pos_x, random_pos_y)
 
         for i in range(len(self.population.individuals)):
 
@@ -116,35 +111,7 @@ class EvoZoo(Zoo):
 
         self.generate_zoo_positions()
 
-    def compute_zoo_interaction(self):
-
-        input_percepts = []
-        for i,pacman in enumerate(self.population.individuals):
-            #print (i, pacman)
-            if pacman == 0:
-                #print(f"Pacman {i} is empty, skipping")
-                input_percepts.append(-1)
-                continue
-
-            #print(f"Position pacman {i}: ", pacman.get_position())
-
-            input_percept = self.integrate_visio_outputs(pac= pacman)
-
-            #print([percept is None for percept in input_percept])
-            #print("test all is None ", all([percept is None for percept in input_percept]))
-
-            if all([percept is None for percept in input_percept]):
-
-                #print(f"Pacman {i}: sending empty inputs")
-
-                input_percepts.append(1)
-            else:
-                #print(input_pecept)
-                input_percepts.append(input_percept)
-
-        return input_percepts
-
-    def _move_forward(self, pacman_index):
+    def _move_forward(self, pacman_index, verbose=0):
         """Calculates movement based on dir_body and updates grid."""
         # Map dir_body to coordinate changes
         #move_map = {Direction.UP: (0, -1), Direction.DOWN: (0, 1), Direction.LEFT: (-1, 0), Direction.RIGHT: (1, 0)}
@@ -160,17 +127,20 @@ class EvoZoo(Zoo):
         target_char = self._in_grid(new_x, new_y)
 
         if not target_char:
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} leads to error")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} could not move forward, {new_x=}, {new_y=} leads to error char={target_char}")
             return
 
         if target_char == 'X': # Not a wall
-            #print(f"Warning could not move {pacman_index=} forward, {new_x=}, {new_y=} is a wall")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} could not move forward, {new_x=}, {new_y=} is a wall")
             return
 
         # Update grid data: old position becomes a dot
         # if this a pacgum, increase life
         if target_char == ".":
-            print(f"Pacman {pacman_index} Eating pacgum")
+            if verbose > 0:
+                print(f"Pacman {pacman_index} Eating pacgum")
             pac.eat_pacgum()
 
         elif target_char != " ":
@@ -178,23 +148,25 @@ class EvoZoo(Zoo):
             index = char_to_index(target_char)
             animal = self.get_animal_from_index(index)
 
-            print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
+            if verbose > 0:
+                print(f"Pacman {pacman_index } in contact with {target_char} ({index=})")
 
             if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
-                #
-                # print("Biting prey ", self.animals[animal]["name"], ", Life points: " , pac.life_points)
-                # self.population.individuals[index].is_bitten()
 
                 pac.eat_prey(self.population.individuals[index].get_life_points())
-                print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
+
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Eating prey ", self.animals[animal]["name"])
                 self.process_death(index)
 
 
 
             else:
-                print("Same nature animal , cannot be eaten , we are no cannibals!")
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Same nature animal , cannot be eaten , we are no cannibals!")
                 return
 
+        # Old position is empty
         self._set_in_grid(pac.x, pac.y, ' ')
 
         # New position becomes Pacman
@@ -207,20 +179,15 @@ class EvoZoo(Zoo):
         for i,pacman in enumerate(self.population.individuals):
             print(f" pacman  Position {i}: ", pacman.get_position())
 
+    ########################################## online reproduction #######################################################
+    def _check_available_individual_slot(self):
 
-    def compute_move_pos(self, move_pos):
+        avail = [i for i, pac in enumerate(self.population.individuals) if pac==0 ]
 
-        for pacman_index, pos in move_pos.items():
-            pac = self.population.individuals[pacman_index]
-
-            if pos == 1:
-                #print(f"Individual {pacman_index} moving forward")
-                self._move_forward(pacman_index)
-            elif pos == -1:
-                self.process_death(pacman_index)
-
-    def get_animal_from_index(self, index):
-        return index % 2
+        if len(avail):
+            return avail
+        else:
+            return -1
 
     def _find_first_avail(self, avail, target_danger):
 
@@ -230,57 +197,6 @@ class EvoZoo(Zoo):
             if danger == target_danger:
                 return avail[i]
         return -1
-
-    def test_prey_reproduction(self, contact_index, pacman_index):
-        # check if any slots are available
-        avail = self.check_available_individual_slot()
-
-        if avail == -1: # no available slot
-            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
-            return
-
-        new_index = self._find_first_avail(avail, target_danger = "1")
-
-        if new_index == -1:
-            #print("No available slots for prey_reproduction danger, breaking")
-            return
-
-        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
-
-            print(f"Prey {new_index=} available, building")
-            #self.stats["nb_preys"] += 1
-
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
-            self.send_chromosome(new_index)
-
-        else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
-
-    def test_predator_reproduction(self, contact_index, pacman_index):
-        # check if any slots are available
-        avail = self.check_available_individual_slot()
-
-        if avail == -1: # no available slot
-            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
-            return
-
-        new_index = self._find_first_avail(avail, target_danger = "-1")
-
-        if new_index == -1:
-            #print("No available slots for predator_reproduction danger, breaking")
-            return
-
-        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
-            print(f"Predator {new_index=} available, building")
-            #self.stats["nb_predators"] += 1
-
-            #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
-            self.send_chromosome(new_index)
-
-        else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
     def _compute_online_reproduction(self, new_index, contact_index, pacman_index):
 
@@ -306,7 +222,7 @@ class EvoZoo(Zoo):
                 print(f"Enough life points to reproduce predators: {parent1.get_life_points()} {parent2.get_life_points()}")
                 parent1.add_life_points(-int(parent1.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
                 parent2.add_life_points(-int(parent2.pacman_config.MIN_LIFE_FOR_REPROD_PREDATOR // 2))
-                
+
             else:
                 print(f"Not enough life points to reproduce predators {parent1.get_life_points()} {parent2.get_life_points()}")
                 return False
@@ -326,32 +242,213 @@ class EvoZoo(Zoo):
             print(f"*Warning , animal_nature {parent1.get_animal_nature()} {parent1.get_animal_nature()} do not match")
             return False
 
-        # compute mix chromosome between two parents
-        offspring = self.population.crossover(parent1, parent2)
-        #print("After crossover, offspring = ", offspring.genes)
-
-        # Muter
-        self.population.mutate(offspring)
-        #print("After mutation, offspring = ", offspring.genes)
-        #print(f"{offspring.get_nb_genes()=}")
-
-        self.population.init_new_individual(new_index = new_index, genes = offspring.get_genes())
-
-        self.population.individuals[new_index].set_animal_nature(animal_nature)
-        self.population.individuals[new_index].set_parents((parent1.id, parent2.id))
+        self.population.create_new_individual(new_index, parent1, parent2)
 
         return True
 
+    def test_prey_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        avail = self._check_available_individual_slot()
 
-    def check_available_individual_slot(self):
+        if avail == -1: # no available slot
+            #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
+            return
 
-        avail = [i for i, pac in enumerate(self.population.individuals) if pac==0 ]
+        new_index = self._find_first_avail(avail, target_danger = "1")
 
-        if len(avail):
-            return avail
+        if new_index == -1:
+            #print("No available slots for prey_reproduction danger, breaking")
+            return
+
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+
+            print(f"Prey {new_index=} available, building")
+            #self.stats["nb_preys"] += 1
+
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
+            self._send_chromosome(new_index)
+
         else:
-            return -1
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
 
-    def send_chromosome(self, new_index):
+    def test_predator_reproduction(self, contact_index, pacman_index):
+        # check if any slots are available
+        avail = self._check_available_individual_slot()
+
+        if avail == -1: # no available slot
+            #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
+            return
+
+        new_index = self._find_first_avail(avail, target_danger = "-1")
+
+        if new_index == -1:
+            #print("No available slots for predator_reproduction danger, breaking")
+            return
+
+        if self._compute_online_reproduction(new_index, contact_index, pacman_index):
+            print(f"Predator {new_index=} available, building")
+            #self.stats["nb_predators"] += 1
+
+            #self.init_nearby_position(new_index, contact_index, pacman_index)
+            self.init_random_position(new_index)
+            self._send_chromosome(new_index)
+
+        else:
+            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+
+
+    ############################################ general population moves (test)
+    def all_move_forward(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            self._move_forward(pacman_index)
+
+    def turn_all_body(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac == 0:
+                continue
+
+            pac.dir_body = pac._get_turn(pac.dir_body, turn_dir)
+
+
+    def turn_all_heads(self, turn_dir = 1):
+        for pacman_index, pac in enumerate(self.population.individuals):
+            #print(pac)
+            if pac==0:
+                continue
+
+            pac.dir_head = pac._get_turn(pac.dir_head, turn_dir)
+
+
+    ############################################ interaction between GA and grid
+    def process_death(self, pacman_index):
+
+        #print(f"process_death of indiv {pacman_index=}")
+        if self.population.individuals[pacman_index] == 0:
+            #print(f"Pacman {pacman_index=} is already removed")
+            return
+
+        # remove from zoo
+        x, y = self.population.individuals[pacman_index].get_position()
+        self._set_in_grid(x, y, " ")
+
+        #remove from list_indivuals
+        self.population.store_dead_individual(self.population.individuals[pacman_index])
+        self.population.individuals[pacman_index] = 0
+
+        self._send_death_signal(pacman_index)
+        # increment nb_deads
+        self.stats["nb_deads"][-1] += 1
+
+    # testing contats individually
+    def test_contacts(self, pacman_index, verbose = 0):
+
+        #directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (1, 1), (-1, 1), (-1, -1)]
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+
+        pac = self.population.individuals[pacman_index]
+
+        if pac==0:
+            print(f"Warning, pac {pacman_index=} should be implemented")
+            return 0
+
+        #print(pac)
+
+        x, y = pac.get_position()
+
+        for dir_x, dir_y in directions:
+
+            char_contact = self._in_grid(x + dir_x,  y + dir_y)
+            if not char_contact:
+                continue
+
+            if char_contact in (".", " ", 'X') :
+                continue
+
+            else:
+                contact_index = char_to_index(char_contact)
+
+            animal = self.get_animal_from_index(contact_index)
+
+            if self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Contact with predator {self.animals[animal]["name"]}")
+                pac.predator_contact()
+
+            if self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "-1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Bite prey {self.animals[animal]["name"]}")
+                pac.bite_prey()
+
+            elif self.animals[animal]["danger"] == "-1" and pac.get_animal_nature() == "-1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between predators {contact_index} and {pacman_index}")
+                self.test_predator_reproduction(contact_index, pacman_index)
+
+            elif self.animals[animal]["danger"] == "1" and pac.get_animal_nature() == "1":
+                if verbose > 0:
+                    print(f"Pacman {pacman_index} Testing reproduction between preys {contact_index} and {pacman_index}")
+                self.test_prey_reproduction(contact_index, pacman_index)
+
+    def _test_all_contacts(self, verbose=0):
+
+        for i, pac in enumerate(self.population.individuals):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+
+            if pac == 0:
+                if verbose > 0:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+                continue
+
+            # computing contacts
+            if verbose > 0:
+                print(f"[ParallelZoo] Worker {i} test_contacts")
+
+            res = self.test_contacts(i)
+
+    def _compute_all_stats(self, verbose=0):
+
+        for i, pac in enumerate(self.population.individuals):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+
+            if pac == 0:
+
+                if verbose > 0:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+                continue
+
+
+            if verbose > 0:
+                print(f"[ParallelZoo] Worker {i} updating stats")
+
+            pac.fitness = pac.get_life_points()
+            pac.fitness_evaluated = True
+
+            if pac.get_animal_nature() == "-1":
+                self.stats["mean_predator_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_predators"][-1] +=1
+            elif pac.get_animal_nature() == "1":
+                self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
+                self.stats["nb_preys"][-1] +=1
+
+            # naturally losing life each time points
+            pac.add_life_points(-1)
+
+            if pac.get_life_points() < 0:
+                #self.init_new_individual(pacman_index)
+                self.process_death(i)
+
+    ################################# called here but implemented in ParallelZoo ############################
+    def _send_death_signal(self, pacman_index):
+        print("Error, should be implemented in inherited class")
+
+    def _send_chromosome(self, new_index):
         print("Warning, should be implemented in inherited class")
 

@@ -23,6 +23,17 @@ class InputVisualizer(PixelVisualizer):
         self.set_background_color((10, 10, 20))
 
 
+    def draw_empty_inputs(self, root_x = 0 , root_y = 0):
+        """Draw all neurons as DIM dots in the background."""
+
+        for i in range(self.nb_input_patterns):
+
+            base_x = self.padding + i*(self.square_size + self.padding)
+            base_y = self.padding
+
+            self.set_pattern(root_y + base_y,root_x + base_x, np.ones(shape = (self.square_size, self.square_size)),
+                             (0, 0, 0))
+
     def draw_background(self, root_x = 0 , root_y = 0):
         """Draw all neurons as DIM dots in the background."""
 

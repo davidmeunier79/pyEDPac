@@ -37,6 +37,11 @@ from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 
 from multipac.parallel.parallel_zoo import ParallelZoo
 
+from edpac.config.config_manager import save_configs
+
+
+
+
 
 # 1. Global flag to track if we should keep evolving
 SIMULATION_ACTIVE = True
@@ -53,17 +58,15 @@ def stop_everything():
     # This ensures any active QEventLoop also exits
     app.quit()
 
-def main():
+def main(stats_path):
 
     global SIMULATION_ACTIVE
     if not SIMULATION_ACTIVE:
         return 0
 
-
-
     # Create objects
     #################################### Population ######################################
-    zoo = ParallelZoo(pop_config = PopulationConfigMultiTest())
+    zoo = ParallelZoo(pop_config = PopulationConfigMulti())
     #zoo.load_screen(screen_file="screen.empty")
 
     # 3. Initial Draw
@@ -80,10 +83,10 @@ def main():
     zoo_viz.setAttribute(Qt.WA_DeleteOnClose)
     zoo_viz.destroyed.connect(stop_everything)
 
-    #zoo_viz.init_zoo(zoo)
     zoo_viz.draw_static_grid()
     zoo_viz.draw_zoo()
     zoo_viz.show()
+
 
 
     ####################################### MultiInputVisualizer ########################
@@ -101,20 +104,29 @@ def main():
 
     multi_input_viz.display_all_backgrounds()
     multi_input_viz.show()
-
     #multi_input_viz.update_display()
-    QtWidgets.QApplication.processEvents()
 
+    QtWidgets.QApplication.processEvents()
 
     print("Running population")
     zoo.initialize_all_inputs()
 
+    #
+    # input_percepts = zoo.compute_zoo_interaction()
+    #
+    # # display percepts in multi_input_viz
+    # multi_input_viz.display_all_inputs(input_percepts)
+    # multi_input_viz.update_display()
+    # QtWidgets.QApplication.processEvents()
+    #
+    # zoo.send_first_wave(input_percepts)
 
     # 2. Create a local event loop
     loop = QEventLoop()
 
     # 3. Simulation Loop (simplified)
     def update():
+
 
         global SIMULATION_ACTIVE
 
@@ -123,56 +135,55 @@ def main():
             timer.stop()
             loop.quit()
             return
+        #
+        global TIME
+        #
 
-        global MAX_TIME
+        print(f"******************** {TIME=} ***********************")
 
-        print(MAX_TIME)
-
-        zoo.test_pacman_contacts()  # Update the model()
-
-        # Update both windows
-        #zoo_viz.draw_zoo()
-        #zoo_viz.update_display()
-        #QtWidgets.QApplication.processEvents()
-
-        input_percepts = zoo.compute_zoo_interaction()
-        #print(f"{input_percepts=}")
-
-        # display percepts in multi_input_viz
-        multi_input_viz.display_all_inputs(input_percepts)
-        multi_input_viz.update_display()
-        QtWidgets.QApplication.processEvents()
-
-        move_pos = zoo.run_one_step(input_percepts)
-        print(f"{move_pos=}")
-
-        zoo.compute_move_pos(move_pos)
+        zoo.init_stats()
+        zoo.stats["time"][-1] = TIME
 
         # Update both windows
         zoo_viz.draw_zoo()
         zoo_viz.update_display()
         QtWidgets.QApplication.processEvents()
 
-        time.sleep(2.5)
+        input_percepts = zoo.run_one_non_blocking_step()
 
-        if all([indiv == 0 for indiv in zoo.population.individuals]) == True:
+        # display percepts in multi_input_viz
+        multi_input_viz.display_all_inputs(input_percepts)
+        multi_input_viz.update_display()
+        QtWidgets.QApplication.processEvents()
+
+        #nb_alive_indiv = zoo.test_pacman_contacts()  # Update the model()
+
+        if zoo.stats["nb_predators"][-1]:
+            zoo.stats["mean_predator_fitness"][-1] /= zoo.stats["nb_predators"][-1]
+
+        if zoo.stats["nb_preys"][-1]:
+            zoo.stats["mean_prey_fitness"][-1] /= zoo.stats["nb_preys"][-1]
+
+        zoo.stats["generation"][-1] = zoo.population.generation
+
+        nb_alive_indiv = len([pac for pac in zoo.population.individuals if pac])
+
+        print(f"{nb_alive_indiv=} ")
+
+        print(f"nb_preys={zoo.stats["nb_preys"][-1]} \n nb_predators={zoo.stats["nb_predators"][-1]} \n mean_prey_fitness={zoo.stats["mean_prey_fitness"][-1]} \n mean_predator_fitness={zoo.stats["mean_predator_fitness"][-1]} \n generation={zoo.stats["generation"][-1]} \n nb_deads={zoo.stats["nb_deads"][-1]} \n nb_added_pacgums={zoo.stats["nb_added_pacgums"][-1]}")
+
+        if nb_alive_indiv == 0:
             print("All individuals are dead , Breaking")
-
             SIMULATION_ACTIVE = False
 
-        MAX_TIME -= 1
 
-        if MAX_TIME < 0 or SIMULATION_ACTIVE==False:
-            print(f"In shutting_down at {MAX_TIME=}")
-            loop.quit()
-
-            zoo.shutdown()
+        TIME+=1
 
 
     print("In run_population")
 
-    global MAX_TIME
-    MAX_TIME = 1000
+    global TIME
+    TIME = 0
 
     # timer = QtCore.QTimer()
     # timer.timeout.connect(update)
@@ -189,6 +200,17 @@ def main():
     # 4. BLOCK here until loop.quit() is called
     loop.exec()
 
+    print("shutdown")
+    zoo.shutdown()
+
+    print("save stats")
+    zoo.save_stats(stats_path)
+
+    zoo.population.save_individuals(stats_path)
+
+    print("save config")
+    save_configs(stats_path)
+
     # --- CRITICAL CLEANUP STEP ---
     # 2. Disconnect signals to allow the GC to see these objects as 'dead'
     timer.timeout.disconnect(update)
@@ -203,6 +225,21 @@ def main():
 
 if __name__ == "__main__":
     import time
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process a specific individual genome/path.")
+
+    # Define the parameter
+    parser.add_argument(
+        "--stats_path",
+        type=str,
+        required=True,
+        help="Path to the individual .npy or chromosome file"
+    )
+
+    # Parse and execute
+    args = parser.parse_args()
+
     start_time = time.time()
-    main()
+    main(args.stats_path)
     print("--- %s seconds ---" % (time.time() - start_time))

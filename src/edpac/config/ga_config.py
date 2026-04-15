@@ -84,8 +84,8 @@ class PopulationConfigMulti(BaseConfig):
     # # # # Taille population
     POPULATION_SIZE: int = 63
 
-    INIT_PREY_POPULATION_SIZE : int = 20
-    INIT_PREDATOR_POPULATION_SIZE : int = 20
+    INIT_PREY_POPULATION_SIZE : int = 32
+    INIT_PREDATOR_POPULATION_SIZE : int = 31
 
 
 @dataclass
