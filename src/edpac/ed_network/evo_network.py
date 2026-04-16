@@ -56,11 +56,13 @@ class EvoNetwork(EDNetwork):
 
         # Construire le réseau
         # Décoder le chromosome et créer les projections
-        self._create_projections_from_chromosome()
+        print('_create_projections_from_chromosome')
+        self._create_projections_from_chromosome(1)
 
+        print('_reorganise_synapses')
         self._reorganise_synapses()
 
-    def _create_projections_from_chromosome(self):
+    def _create_projections_from_chromosome(self, verbose = 0):
         """Créer les projections en décodant le chromosome"""
         
         if self.chromosome.chromo_config.VARIABLE_LENGTH_CHROMOSOME:
@@ -177,19 +179,28 @@ class EvoNetwork(EDNetwork):
                         self.projections.append(projection)
 
             else:
-                #TODO
-                #print("RELATIVE_ENCODING and VARIABLE_LENGTH_CHROMOSOME not yet coded")
-
                 assert self.chromosome.get_nb_genes() % self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION == 0, \
                     "Error, {self.chromosome.nb_genes=} should be a multiple of {self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION}"
 
+                if verbose > 0:
+                    print("VARIABLE_LENGTH_CHROMOSOME and not RELATIVE_ENCODING")
+
                 nb_projections = self.chromosome.get_nb_genes() // self.chromosome.chromo_config.NB_GENES_EACH_PROJECTION
+
+                if verbose > 0:
+                    print(f"{nb_projections=}")
 
                 # Pour chaque projection codée
                 for proj_id in range(nb_projections):
+
+                    if verbose > 0:
+                        print(f"Projection {proj_id}")
+
                     #print("Projection: ", proj_idx)
                     pre_id, proj_nature, post_id  = self.chromosome.get_projection(proj_id)
-                    #print("Gene values: ", pre_id, " ", proj_nature," ", post_id)
+
+                    if verbose > 0:
+                        print(f"Gene values: {pre_id} {proj_nature} {post_id}")
 
                     # building projection
                     direct = 0

@@ -16,7 +16,7 @@ from ..ed_network.assembly import Assembly
 from ..ed_network.ed_synapse import EDSynapse
 from ..config.physiology_config import NeuronConfig, SynapseConfig
 from ..config.network_config import NetworkConfig, ProjectionNature, AssemblyNature
-#from ..config.constants import *
+from ..config.constants import VISIO_SQRT_NB_NEURONS, MOTOR_SQRT_NB_NEURONS
 
 class Network:
     """
@@ -54,7 +54,7 @@ class Network:
         # Input assemblies
         for i in range(self.config.NB_INPUT_ASSEMBLIES):
             assembly = Assembly(
-                nb_neurons=self.config.VISIO_SQRT_NB_NEURONS*self.config.VISIO_SQRT_NB_NEURONS,
+                nb_neurons=VISIO_SQRT_NB_NEURONS*VISIO_SQRT_NB_NEURONS,
                 nature=AssemblyNature.INPUT,
                 position=(0, i),
                 neuron_config=self.neuron_config
@@ -75,7 +75,7 @@ class Network:
         # Output assemblies (4 pour actions Pacman)
         for i in range(self.config.NB_OUTPUT_ASSEMBLIES):
             assembly = Assembly(
-                nb_neurons=self.config.MOTOR_SQRT_NB_NEURONS*self.config.MOTOR_SQRT_NB_NEURONS,
+                nb_neurons=MOTOR_SQRT_NB_NEURONS*MOTOR_SQRT_NB_NEURONS,
                 nature=AssemblyNature.OUTPUT,
                 position=(self.config.SQRT_NB_ASSEMBLIES+2, i),
                 neuron_config=self.neuron_config

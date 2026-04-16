@@ -164,6 +164,63 @@ class ParallelZoo(EvoZoo):
 
         return results
 
+
+    def _receive_motor_outputs(self, timeout = 0.001, verbose=0):
+
+        motor_outputs = []
+
+        for i, pipe in enumerate(self.pipes):
+            # poll(timeout) checks if data is waiting
+            # timeout=0 makes it an instantaneous check
+
+            pos = None
+
+
+            pac = self.population.individuals[i]
+
+            if pac == 0:
+
+                if verbose > 0:
+                    print(f"[ParallelZoo] Worker {i} is empty, continue")
+
+                motor_outputs.append(pos)
+                continue
+            #
+            # if verbose > 0:
+            #     print(f"[ParallelZoo] Worker {i} polling message")
+
+            if pipe.poll(timeout):
+
+                try:
+
+                    if verbose > 0:
+                        print(f"[ParallelZoo] Worker {i} receiving message")
+
+                    msg = pipe.recv()
+
+                    if msg['type'] != 'RESULT':
+                        motor_outputs.append(pos)
+                        continue
+
+                    if len(msg['data']):
+
+                        if verbose > 0:
+                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
+                        pos = msg['data']
+
+                    else:
+                        if verbose > 0:
+                            print(f"[ParallelZoo] Worker {i} process_death")
+                        self.process_death(i)
+
+
+                except EOFError:
+                    print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
+
+            motor_outputs.append(pos)
+
+        return motor_outputs
+
     def _receive_poll_inputs(self, timeout = 0.001, verbose=0):
 
         for i, pipe in enumerate(self.pipes):
@@ -177,9 +234,9 @@ class ParallelZoo(EvoZoo):
                 if verbose > 0:
                     print(f"[ParallelZoo] Worker {i} is empty, continue")
                 continue
-
-            if verbose > 0:
-                print(f"[ParallelZoo] Worker {i} polling message")
+            #
+            # if verbose > 0:
+            #     print(f"[ParallelZoo] Worker {i} polling message")
 
             if pipe.poll(timeout):
 
@@ -190,13 +247,16 @@ class ParallelZoo(EvoZoo):
 
                     msg = pipe.recv()
 
+                    if verbose > 0:
+                        print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
+
                     if msg['type'] != 'RESULT':
                         continue
 
                     if len(msg['data']):
 
                         if verbose > 0:
-                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs")
+                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg['data']=}")
                         pos = pac.integrate_motor_outputs(msg['data'])
 
                         if pos:
@@ -234,9 +294,9 @@ class ParallelZoo(EvoZoo):
 
 
             input_percept = self.integrate_visio_outputs(pac)
-
-            if verbose > 0:
-                print(f"[ParallelZoo] Worker {i} {input_percept=}")
+            #
+            # if verbose > 0:
+            #     print(f"[ParallelZoo] Worker {i} {input_percept=}")
 
             if input_percept:
                 results[i] = input_percept

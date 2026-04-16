@@ -52,11 +52,15 @@ def test_all_receive(pipe,timeout = 0.001, verbose=0):
 
     return cmd, data
 
-def worker_loop(pipe, agent_id, verbose = 0):
+def worker_loop(pipe, agent_id, verbose = 1):
     """The main loop for the worker process."""
     net_process = ParallelNetwork(agent_id)
 
     while True:
+#
+#         if verbose > 0
+#             print(f"[Worker {net_process.agent_id}] Looping")
+
         result = 0
 
         cmd, data = test_all_receive(pipe, verbose = verbose-1)
@@ -89,9 +93,10 @@ def worker_loop(pipe, agent_id, verbose = 0):
                 print(f"[Worker {net_process.agent_id}] SET_CHROMOSOME EvoNetwork")
             net_process.network = EvoNetwork(chromosome)
 
+            print("Finished building EvoNetwork")
             result = 0
 
-        if cmd == 'DEAD_CHROMOSOME':
+        elif cmd == 'DEAD_CHROMOSOME':
             # RECEIVE: Chromosome from Zoo
             agent_id = data
 
@@ -113,23 +118,37 @@ def worker_loop(pipe, agent_id, verbose = 0):
 
             net_process.network.initialize_inputs()
 
-            if verbose > 0:
-                print(f"[Worker {net_process.agent_id}] compute_one_wave init")
+#             if verbose > 0:
+#                 print(f"[Worker {net_process.agent_id}] compute_one_wave init")
+#
+#             result = net_process.network.compute_one_wave()
 
-            result = net_process.network.compute_one_wave()
+            if verbose > 0:
+                print(f"[Worker {net_process.agent_id}] compute_one_rgb_wave init")
+
+            result = net_process.network.compute_one_rgb_wave()
 
         elif cmd == 'TASK':
 
-
             if all(pattern is None for pattern in data):
                 if verbose > 0:
-                    print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
-                result = net_process.network.compute_one_wave()
+                    print(f"[Worker {net_process.agent_id}] compute_one_rgb_wave empty")
+                result = net_process.network.compute_one_rgb_wave()
+            #
+            # if all(pattern is None for pattern in data):
+            #     if verbose > 0:
+            #         print(f"[Worker {net_process.agent_id}] compute_one_wave empty")
+            #     result = net_process.network.compute_one_wave()
 
             else:
+
                 if verbose > 0:
                     print(f"[Worker {net_process.agent_id}] compute_one_wave data")
-                result = net_process.network.compute_one_wave(data)
+                result = net_process.network.compute_one_rgb_wave(data)
+                #
+                # if verbose > 0:
+                #     print(f"[Worker {net_process.agent_id}] compute_one_wave data")
+                # result = net_process.network.compute_one_wave(data)
 
         elif cmd == 'TERMINATE':
 
@@ -139,14 +158,14 @@ def worker_loop(pipe, agent_id, verbose = 0):
 
             break
 
+
         if result != 0:
 
             if len(result)==0:
-
                 print(f"[Worker {net_process.agent_id}] Empty No more events in event manager, breaking")
 
             try:
-                #print("Sending outputs")
+                print(f"[Worker {net_process.agent_id}] Sending outputs {result=}")
                 pipe.send({'type': 'RESULT', 'data': result})
 
             except EOFError:

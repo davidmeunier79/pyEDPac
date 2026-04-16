@@ -92,6 +92,40 @@ class EDNetwork(Network):
 
         return spike_neuron_ids
 
+
+    def integrate_rgb_inputs(self, sensory_patterns, verbose = 0):
+        """
+        Injecter tous les inputs dans input_assemblies
+
+        Args:
+            sensory_patterns: NB_VISIO_INPUTS
+        """
+        if verbose > 0:
+            print(sensory_patterns.shape)
+
+        rgb_patterns = np.moveaxis(sensory_patterns, -1, 0)
+        if verbose > 0:
+            print(len(rgb_patterns))
+            print(rgb_patterns[0].shape)
+
+
+        assert len(rgb_patterns) == len(self.input_assemblies), f"Error with dimensions {len(rgb_patterns)=} != {len(self.input_assemblies)=}"
+
+
+        current_time = self.event_manager.get_time()
+
+        spike_neuron_ids = []
+        for i, pattern in enumerate(rgb_patterns):
+
+            assert pattern.shape == (VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS), f"Error with {pattern.shape=} and {VISIO_SQRT_NB_NEURONS} {VISIO_SQRT_NB_NEURONS}"
+
+            spike_ids = self.inject_rgb_input(assembly_idx = i,  time = current_time , pattern = pattern.reshape(-1,1), verbose = verbose-1)
+
+            spike_neuron_ids.extend(spike_ids)
+
+        return spike_neuron_ids
+
+
     def inject_input(self, assembly_idx: int, time: int, pattern: np.ndarray):
         """
         Injecter un input dans une assemblée input
@@ -120,30 +154,42 @@ class EDNetwork(Network):
                 spike_neuron_ids.append(neuron.id)
 
         return spike_neuron_ids
-    #
-    # def inject_input_float(self, assembly_idx: int, time: int, pattern_float: np.ndarray):
-    #     """
-    #     Injecter un input dans une assemblée input
-    #
-    #     Args:
-    #         assembly_idx: Index de l'assemblée input
-    #         time: Temps d'injection
-    #         pattern_float: Pattern d'activation (valeurs entre 0 et 1)
-    #     """
-    #     if assembly_idx >= len(self.input_assemblies):
-    #         raise IndexError(f"Input assembly {assembly_idx} not found")
-    #
-    #     assembly = self.input_assemblies[assembly_idx]
-    #
-    #     if len(pattern_float) != assembly.get_nb_neurons():
-    #         raise ValueError(f"Pattern size {len(pattern_float)} != assembly size {assembly.get_nb_neurons()}")
-    #
-    #     # Injecter stochastiquement selon le pattern
-    #     for neuron_idx, activation in enumerate(pattern_float):
-    #         neuron = assembly.get_neuron(neuron_idx)
-    #         neuron.emit_spike(time + (1.0 - activation)*synapse_config.TEMPORAL_WAVE_LENGTH)
-    #
-    #             #self.event_manager.inject_input(neuron, time, weight=activation)
+
+
+
+    def inject_rgb_input(self, assembly_idx: int, time: int, pattern: np.ndarray, verbose = 0):
+        """
+        Injecter un input dans une assemblée input
+
+        Args:
+            assembly_idx: Index de l'assemblée input
+            time: Temps d'injection
+            pattern: Pattern d'activation (valeurs entre 0 et 1)
+        """
+        if assembly_idx >= len(self.input_assemblies):
+            raise IndexError(f"Input assembly {assembly_idx} not found")
+
+        assembly = self.input_assemblies[assembly_idx]
+
+        if len(pattern) != assembly.get_nb_neurons():
+            raise ValueError(f"Pattern size {len(pattern)} != assembly size {assembly.get_nb_neurons()}")
+
+        spike_neuron_ids = []
+
+        if verbose > 0:
+            print(f"{pattern=}")
+
+        # Injecter stochastiquement selon le pattern
+        for i, (activation, neuron) in enumerate(zip(pattern, assembly.neurons)):
+
+            if verbose > 0:
+                print(f"{i} {activation=}")
+
+            spike_time = time + (1.0 - activation[0]/256) * synapse_config.TEMPORAL_WAVE_LENGTH
+            neuron.emit_spike(spike_time)
+            spike_neuron_ids.append(neuron.id)
+
+        return spike_neuron_ids
 
     def init_output_patterns(self):
 
@@ -181,11 +227,11 @@ class EDNetwork(Network):
         return output_activities
 
 
-    def compute_one_wave(self, data = 0, verbose = 0):
+    def compute_one_wave(self, data = None, verbose = 0):
         """"
         Run one step in event_manager
         """
-        if data:
+        if data is not None:
             spike_neuron_ids = self.integrate_inputs(data)
 
         #print(spike_neuron_ids)
@@ -229,3 +275,57 @@ class EDNetwork(Network):
             return []
         else:
             return self.get_output_patterns()
+
+
+    def compute_one_rgb_wave(self, data = None, verbose = 0):
+        """"
+        Run one step in event_manager
+        """
+        if data is not None:
+            spike_neuron_ids = self.integrate_rgb_inputs(data)
+
+        if verbose > 0:
+            print(f"{spike_neuron_ids=}")
+
+
+        current_time = self.event_manager.get_time()
+
+        if verbose > 0:
+            print("current_time: ", current_time)
+
+        self.init_output_patterns()
+
+        if verbose > 0:
+            print("starting loop")
+
+        while (self.event_manager.get_time() - current_time) < synapse_config.TEMPORAL_WAVE_LENGTH:
+
+            time_before = self.event_manager.get_time()
+            spike_neuron_ids = self.event_manager.run_one_step()
+
+            nb_events = self.event_manager.get_nb_events()
+
+            if verbose > 0:
+                print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+
+            if nb_events == 0:
+                #print("No more events in event manager, breaking")
+                return []
+            else:
+                pass
+                #print(nb_events)
+
+        return self.get_output_patterns()
+
+        #
+        # time_before = self.event_manager.get_time()
+        # spike_neuron_ids = self.event_manager.run_one_step()
+        #
+        # nb_events = self.event_manager.get_nb_events()
+        #
+        # #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+        #
+        # if nb_events == 0:
+        #     return []
+        # else:
+        #     return self.get_output_patterns()
