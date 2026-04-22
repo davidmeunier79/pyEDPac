@@ -9,3 +9,7 @@ self.grid[y, x]
 
 TODO 30/03/2026:
 multi visu inputs
+
+
+#TODO 17/04/2026
+integration of color rgb in QT MultiInputVisualizer

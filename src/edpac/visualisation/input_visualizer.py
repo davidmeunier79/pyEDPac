@@ -67,3 +67,24 @@ class InputVisualizer(PixelVisualizer):
             self.set_pattern(root_y + base_y, root_x + base_x, pattern, (255, 255, 255))
 
         #self.update_display()
+    #
+    # def display_color_inputs(self, sensor_values, root_x = 0 , root_y = 0):
+    #     """
+    #     Takes a list/array of 5 values (0.0 to 1.0 or category IDs).
+    #     Displays them as a horizontal bar of colored squares.
+    #     """
+    #     #self.clear_canvas((255, 255, 255))  # Dark gray background
+    #
+    #     #self.refresh_from_background()
+    #
+    #     for i, pattern in enumerate(sensor_values):
+    #
+    #         if pattern is None:
+    #             continue
+    #
+    #         base_x = self.padding +( i * (self.square_size + self.padding))
+    #         base_y = self.padding
+    #
+    #         self.set_color_pattern(root_y + base_y, root_x + base_x, pattern)
+
+        #self.update_display()

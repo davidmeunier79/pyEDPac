@@ -39,6 +39,7 @@ class Agent(Entity):
             color=ac_color,
             position=start_pos,
             scale=(1, 2, 1),
+            collider='box',          # CRITICAL: Add this for .intersects() to work
             add_to_scene_entities=True
         )
 
@@ -46,15 +47,15 @@ class Agent(Entity):
 
         # Setup the "Neural Eye" (Offscreen)
         self.vision_tex = self.setup_offscreen_vision()
-
-    def get_proximity_data(self):
-        # Cast a ray forward to see if anything is in the way
-        # distance=5 is the range of the "smell" or "sonar"
-        hit_info = raycast(self.world_position + self.forward*0.6, self.forward, distance=5, ignore=(self,))
-
-        if hit_info.hit:
-            return hit_info.distance / 5  # Normalized 0.0 to 1.0
-        return 1.0  # Clear path
+    #
+    # def get_proximity_data(self):
+    #     # Cast a ray forward to see if anything is in the way
+    #     # distance=5 is the range of the "smell" or "sonar"
+    #     hit_info = raycast(self.world_position + self.forward*0.6, self.forward, distance=5, ignore=(self,))
+    #
+    #     if hit_info.hit:
+    #         return hit_info.distance / 5  # Normalized 0.0 to 1.0
+    #     return 1.0  # Clear path
 
     def setup_offscreen_vision(self, width=VISIO_SQRT_NB_NEURONS, height=VISIO_SQRT_NB_NEURONS):
         win_props = WindowProperties.size(width, height)
@@ -143,8 +144,9 @@ class EvoSimulation(Entity):
     def update(self):
         verbose = 0
         # This mirrors your "while SIMULATION_ACTIVE" loop
-        print(f"Step: {self.time_step}")
 
+        if verbose > 0:
+            print(f"[EvoSimulation] Step: {self.time_step}")
 
         if verbose > 0:
             print("[EvoSimulation] init_stats")
@@ -172,21 +174,23 @@ class EvoSimulation(Entity):
             print("[EvoSimulation] compute_perceptions")
 
         results = self.compute_perceptions(verbose=verbose-1)
+        #
+        # if self.time_step % 5 == 0:
 
-        if self.time_step % 5 == 0:
+        if verbose > 0:
+            print("[EvoSimulation] display_all_color_inputs")
 
-            if verbose > 0:
-                print("[EvoSimulation] display_all_color_inputs")
+        self.multi_input_viz.display_all_color_inputs(results)
+        self.multi_input_viz.update_display()
 
-            self.multi_input_viz.display_all_color_inputs(results)
-            self.multi_input_viz.update_display()
+        qt_app.processEvents()
 
-            qt_app.processEvents()
 
         self.time_step += 1
 
         if self.time_step > 1000:
             sim.on_destroy()
+            quit()
             return
 
     def compute_movements(self, motor_outputs, verbose=0):
@@ -204,29 +208,32 @@ class EvoSimulation(Entity):
 
             if out is None or agent == 0:
                 if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} motor_output is None, skipping")
+                    print(f"[compute_movements] Worker {i} motor_output is None, skipping")
                 continue
 
             if out[0] > zoo_config.MOTOR_THRESHOLD and out[1] > zoo_config.MOTOR_THRESHOLD: # Forward
 
                 if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} received move forward order")
-                # LOOK AHEAD: check if moving forward hits a wall
-                origin = agent.world_position + (0, 0.5, 0)
-                hit_info = raycast(origin, agent.forward, distance=1, ignore=(agent,))
+                    print(f"[compute_movements] Worker {i} received move forward order")
 
+                origin = agent.world_position + Vec3(0, 1, 0) + (agent.forward * 0.6)
+                hit_info = raycast(origin, agent.forward, distance=5, ignore=(agent,), debug=True)
+
+                # LOOK AHEAD: check if moving forward hits a wall
+                # origin = agent.world_position + (0, 0.5, 0)
+                # hit_info = raycast(origin, agent.forward, distance=1, ignore=(agent,))
+
+                print(f"[compute_movements] Worker {i}:  {hit_info=}")
                 if not hit_info.hit:
 
-                    if verbose > 0:
-                        print(f"[ParallelZoo] Worker {i} move forward ")
+                    print(f"[compute_movements] Worker {i} move forward ")
                     move_vec = agent.forward * move_speed * time.dt
                     agent.x += move_vec.x
                     agent.y = 1  # Force it to stay above the plane
                     agent.z += move_vec.z
                 else:
 
-                    if verbose > 0:
-                        print(f"[ParallelZoo] Worker {i} hitting a wall, no move")
+                    print(f"[ParallelZoo] Worker {i} hitting a wall, no move")
 
 
 
@@ -239,20 +246,26 @@ class EvoSimulation(Entity):
                 agent.rotation_y += rot_speed * time.dt
 
     def _test_all_contacts(self, verbose = 0):
-        for agent in self.agents:
+        for agent_id, agent in enumerate(self.agents):
             if agent == 0: continue
 
             # Check for overlaps with other agents
             hit_info = agent.intersects()
+#
+#             if verbose >0:
+#                 print(f"[Test all contacts] Agent {agent_id} {hit_info=}")
+
             if hit_info.hit:
                 other = hit_info.entity
                 if isinstance(other, Agent):
+
+                    print(f"Agent {agent.agent_id} caught Agent {other.agent_id}!")
                     # Logic: Predator (-1) hits Prey (1)
                     if agent.animal_nature == "-1" and other.animal_nature == "1":
-                        if verbose > 0:
-                            print(f"Predator {agent.agent_id} caught Prey {other.agent_id}!")
-                            # TODO
-                            #Execute zoo logic: increase fitness, reset prey position, etc.
+                        #if verbose > 0:
+                        print(f"Predator {agent.agent_id} caught Prey {other.agent_id}!")
+                        # TODO
+                        #Execute zoo logic: increase fitness, reset prey position, etc.
 
     def compute_perceptions(self, verbose=0):
 
@@ -292,7 +305,7 @@ class EvoSimulation(Entity):
                 pipe.send({'type': 'TASK', 'data': input_percept})
             except BrokenPipeError:
 
-                print(f"BrokenPipeError, {rgb_patterns=}")
+                print(f"BrokenPipeError, {input_percept=}")
 
         return results
 
@@ -302,6 +315,10 @@ class EvoSimulation(Entity):
         self.zoo.save_stats(self.stats_path)
         self.zoo.population.save_individuals(self.stats_path)
         save_configs(self.stats_path)
+
+        if hasattr(self, 'multi_input_viz'):
+            self.multi_input_viz.close()
+
         print("Simulation Saved and Shutdown.")
 
 # --- 3. Run Script ---
@@ -320,7 +337,7 @@ if __name__ == "__main__":
     Sky()
 
 
-    Entity(model='plane', scale=100, texture='white_cube', texture_scale=(100,100), color=color.light_gray)
+    Entity(model='plane', scale=AREA_SIZE, texture='white_cube', texture_scale=(AREA_SIZE,AREA_SIZE), color=color.light_gray)
     # Simple wall setup in your EvoSimulation or __main__
     wall_thickness = 2
 
@@ -337,11 +354,6 @@ if __name__ == "__main__":
     # Start Simulation
     sim = EvoSimulation(args.stats_path)
 
-    def input(key):
-        if key == 'escape':
-            sim.on_destroy()
-            app.quit()
-
     # Use the Ursina wrapper 'camera', NOT a NodePath
     camera.orthographic = True
     camera.position = (0, 100, 0)
@@ -351,6 +363,12 @@ if __name__ == "__main__":
     # Increase the range of what the camera can see
     camera.clip_plane_far = 500  # Default is often 100
     camera.clip_plane_near = 0.1
+
+
+    def input(key):
+        if key == 'escape':
+            sim.on_destroy()
+            quit()
 
     app.run()
 

@@ -54,6 +54,33 @@ class PixelVisualizer(QtWidgets.QMainWindow):
 
         dest[target_rows[valid], target_cols[valid]] = color
 
+
+    def set_color_pattern(self, base_y, base_x, pattern_arr, target_buffer=None):
+        """
+        Draws a color numpy pattern (H, W, 3) directly onto the buffer.
+        """
+        dest = self.buffer if target_buffer is None else target_buffer
+
+        # Get dimensions of the incoming pattern
+        ph, pw = pattern_arr.shape[0], pattern_arr.shape[1]
+
+        # Calculate valid slice boundaries to prevent out-of-bounds crashes
+        # This handles patterns that might bleed off the edge of the visualizer
+        y_start = max(0, base_y)
+        y_end = min(self.height, base_y + ph)
+        x_start = max(0, base_x)
+        x_end = min(self.width, base_x + pw)
+
+        # Calculate corresponding slices for the source pattern_arr
+        src_y_start = y_start - base_y
+        src_y_end = src_y_start + (y_end - y_start)
+        src_x_start = x_start - base_x
+        src_x_end = src_x_start + (x_end - x_start)
+
+        # Perform the assignment (Slicing is much faster than np.where for full blocks)
+        if y_end > y_start and x_end > x_start:
+            dest[y_start:y_end, x_start:x_end] = pattern_arr[src_y_start:src_y_end, src_x_start:src_x_end]
+
     def draw_line(self, start_pos, end_pos, color, target_buffer=None, neuron_mask=np.ones(shape=(1,1))):
 
         dest = self.buffer if target_buffer is None else target_buffer

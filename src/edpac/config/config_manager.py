@@ -16,22 +16,17 @@ def save_configs(stats_path, config_dir="edpac/config"):
     stats_dir = Path(stats_path)
     stats_dir.mkdir(parents=True, exist_ok=True)
 
-
     # 1. Get the absolute path of constants.py
     current_file = Path(__file__).resolve()
-    print(current_file)
 
     # 2. Go up the folder tree to find the project root
     # (In your case: constants.py -> config/ -> edpac/ -> src/ -> ROOT)
     # Adjust the number of .parent calls to match your actual structure
     PROJECT_ROOT = current_file.parent
-    print(PROJECT_ROOT)
 
     config_dir = os.path.join(PROJECT_ROOT)
 
     config_path = Path(config_dir)
-    print(config_path)
-    print(os.getcwd())
 
     print(list(config_path.glob("*_config.py")))
 

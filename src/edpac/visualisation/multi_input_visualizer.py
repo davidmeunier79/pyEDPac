@@ -18,13 +18,13 @@ class MultiInputVisualizer(InputVisualizer):
 
         print(self.nb_panels)
 
-        self.nb_input_patterns = NB_VISIO_INPUTS
+        self.nb_input_patterns = 1
         self.square_size = VISIO_SQRT_NB_NEURONS
         self.padding = 5
 
         # for each visualizer
         self.panel_height = (VISIO_SQRT_NB_NEURONS + 2*self.padding)
-        self.panel_width = (NB_VISIO_INPUTS * (VISIO_SQRT_NB_NEURONS + self.padding) + self.padding)
+        self.panel_width = (1 * (VISIO_SQRT_NB_NEURONS + self.padding) + self.padding)
 
         print(self.panel_height, self.panel_width)
 
@@ -70,6 +70,16 @@ class MultiInputVisualizer(InputVisualizer):
 
         self.display_inputs(sensor_values, root_x*self.panel_width, root_y*self.panel_height)
 
+    def _display_color_panel_inputs(self, sensor_values, pacman_index, verbose=0):
+
+        root_x, root_y = self._return_root_coords(pacman_index)
+
+        if verbose>0:
+            print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+            print(f"{sensor_values=}")
+
+        self.set_color_pattern(root_x*self.panel_width, root_y*self.panel_height, sensor_values)
+
     def display_all_backgrounds(self):
 
         for i in range(self.nb_panels):
@@ -85,8 +95,30 @@ class MultiInputVisualizer(InputVisualizer):
         assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
 
         for i, sensor_values in enumerate(all_sensor_values):
-            if sensor_values == -1 or sensor_values == 1 or sensor_values is None:
+
+            if sensor_values is not None:
                 ## empty sensor_values
                 self._display_empty_inputs(pacman_index = i)
             else:
                 self._display_panel_inputs(sensor_values, pacman_index = i)
+
+    def display_all_color_inputs(self, all_sensor_values, verbose=0):
+
+        self.refresh_from_background()
+
+        assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
+
+        for i, sensor_values in enumerate(all_sensor_values):
+
+            if sensor_values is None:
+                if verbose > 0:
+                    print("empty sensor_values")
+
+                # empty sensor_values
+                self._display_empty_inputs(pacman_index = i)
+            else:
+                if verbose > 0:
+                    print("color_panel_inputs")
+
+                # display_color_panel_inputs
+                self._display_color_panel_inputs(sensor_values, pacman_index = i)

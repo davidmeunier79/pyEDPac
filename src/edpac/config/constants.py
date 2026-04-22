@@ -24,3 +24,6 @@ VISIO_SQRT_NB_NEURONS=32
 
 # rate of renewal of pacgums in zoo
 REGROWTH_PACGUM_RATE = 0.001
+
+
+AREA_SIZE = 50

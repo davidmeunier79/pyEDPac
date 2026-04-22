@@ -184,6 +184,43 @@ class EDNetwork(Network):
 
             if verbose > 0:
                 print(f"{i} {activation=}")
+                print(f"{i} {activation[0]/256}")
+
+            if np.random.rand() < activation[0]/256:
+                spike_time = time
+                neuron.emit_spike(spike_time)
+                spike_neuron_ids.append(neuron.id)
+
+        return spike_neuron_ids
+
+
+    def inject_wave_rgb_input(self, assembly_idx: int, time: int, pattern: np.ndarray, verbose = 0):
+        """
+        Injecter un input dans une assemblée input
+
+        Args:
+            assembly_idx: Index de l'assemblée input
+            time: Temps d'injection
+            pattern: Pattern d'activation (valeurs entre 0 et 1)
+        """
+        if assembly_idx >= len(self.input_assemblies):
+            raise IndexError(f"Input assembly {assembly_idx} not found")
+
+        assembly = self.input_assemblies[assembly_idx]
+
+        if len(pattern) != assembly.get_nb_neurons():
+            raise ValueError(f"Pattern size {len(pattern)} != assembly size {assembly.get_nb_neurons()}")
+
+        spike_neuron_ids = []
+
+        if verbose > 0:
+            print(f"{pattern=}")
+
+        # Injecter stochastiquement selon le pattern
+        for i, (activation, neuron) in enumerate(zip(pattern, assembly.neurons)):
+
+            if verbose > 0:
+                print(f"{i} {activation=}")
 
             spike_time = time + (1.0 - activation[0]/256) * synapse_config.TEMPORAL_WAVE_LENGTH
             neuron.emit_spike(spike_time)
@@ -298,34 +335,34 @@ class EDNetwork(Network):
         if verbose > 0:
             print("starting loop")
 
-        while (self.event_manager.get_time() - current_time) < synapse_config.TEMPORAL_WAVE_LENGTH:
-
-            time_before = self.event_manager.get_time()
-            spike_neuron_ids = self.event_manager.run_one_step()
-
-            nb_events = self.event_manager.get_nb_events()
-
-            if verbose > 0:
-                print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
-
-            if nb_events == 0:
-                #print("No more events in event manager, breaking")
-                return []
-            else:
-                pass
-                #print(nb_events)
-
-        return self.get_output_patterns()
-
+        # while (self.event_manager.get_time() - current_time) < synapse_config.TEMPORAL_WAVE_LENGTH:
         #
-        # time_before = self.event_manager.get_time()
-        # spike_neuron_ids = self.event_manager.run_one_step()
+        #     time_before = self.event_manager.get_time()
+        #     spike_neuron_ids = self.event_manager.run_one_step()
         #
-        # nb_events = self.event_manager.get_nb_events()
+        #     nb_events = self.event_manager.get_nb_events()
         #
-        # #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+        #     if verbose > 0:
+        #         print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
         #
-        # if nb_events == 0:
-        #     return []
-        # else:
-        #     return self.get_output_patterns()
+        #     if nb_events == 0:
+        #         #print("No more events in event manager, breaking")
+        #         return []
+        #     else:
+        #         pass
+        #         #print(nb_events)
+        #
+        # return self.get_output_patterns()
+
+
+        time_before = self.event_manager.get_time()
+        spike_neuron_ids = self.event_manager.run_one_step()
+
+        nb_events = self.event_manager.get_nb_events()
+
+        #print(f"{time_before=} :  {len(spike_neuron_ids)=}, {nb_events=}")
+
+        if nb_events == 0:
+            return []
+        else:
+            return self.get_output_patterns()

@@ -56,10 +56,10 @@ class EvoNetwork(EDNetwork):
 
         # Construire le réseau
         # Décoder le chromosome et créer les projections
-        print('_create_projections_from_chromosome')
-        self._create_projections_from_chromosome(1)
+        #print('_create_projections_from_chromosome')
+        self._create_projections_from_chromosome()
 
-        print('_reorganise_synapses')
+        #print('_reorganise_synapses')
         self._reorganise_synapses()
 
     def _create_projections_from_chromosome(self, verbose = 0):
