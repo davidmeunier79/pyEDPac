@@ -7,7 +7,6 @@ import sys
 sys.path.insert(0, '../src')
 
 from edpac.config.ga_config import PopulationConfigMultiTest
-from multipac.parallel.parallel_zoo3d import ParallelZoo3D
 from edpac.config.config_manager import save_configs
 from edpac.config.constants import VISIO_SQRT_NB_NEURONS, AREA_SIZE
 
@@ -17,6 +16,12 @@ zoo_config = MultiPacmanConfig()
 
 # QT components
 from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
+
+
+from multipac.parallel.parallel_zoo3d import ParallelZoo3D
+from multipac.zoo3d.agent import Agent
+
+
 from PySide6 import QtWidgets
 import sys
 
@@ -25,75 +30,6 @@ qt_app = QtWidgets.QApplication.instance()
 if not qt_app:
     qt_app = QtWidgets.QApplication(sys.argv)
 
-
-# --- 1. The Agent Logic ---
-class Agent(Entity):
-    def __init__(self, agent_id, start_pos=(0, 1, 0)):
-        self.animal_nature = "-1" if agent_id % 2 == 0 else "1"
-
-        # Assign color based on role (Predator=Red, Prey=Green/Blue)
-        ac_color = color.red if self.animal_nature == "-1" else color.blue
-
-        super().__init__(
-            model='cube',
-            color=ac_color,
-            position=start_pos,
-            scale=(1, 2, 1),
-            collider='box',          # CRITICAL: Add this for .intersects() to work
-            add_to_scene_entities=True
-        )
-
-        self.agent_id = agent_id
-
-        # Setup the "Neural Eye" (Offscreen)
-        self.vision_tex = self.setup_offscreen_vision()
-    #
-    # def get_proximity_data(self):
-    #     # Cast a ray forward to see if anything is in the way
-    #     # distance=5 is the range of the "smell" or "sonar"
-    #     hit_info = raycast(self.world_position + self.forward*0.6, self.forward, distance=5, ignore=(self,))
-    #
-    #     if hit_info.hit:
-    #         return hit_info.distance / 5  # Normalized 0.0 to 1.0
-    #     return 1.0  # Clear path
-
-    def setup_offscreen_vision(self, width=VISIO_SQRT_NB_NEURONS, height=VISIO_SQRT_NB_NEURONS):
-        win_props = WindowProperties.size(width, height)
-        fb_props = FrameBufferProperties()
-        fb_props.set_rgb_color(True)
-        fb_props.set_rgba_bits(8, 8, 8, 0)
-        fb_props.set_depth_bits(24)
-
-        buffer = base.graphics_engine.make_output(
-            base.pipe, f"agent_buffer_{self.agent_id}", -100,
-            fb_props, win_props, GraphicsPipe.BF_refuse_window,
-            base.win.get_gsg(), base.win
-        )
-
-        tex = Texture()
-        buffer.add_render_texture(tex, GraphicsOutput.RTM_copy_ram)
-
-        cam_node = PandaCamera(f'cam_{self.agent_id}')
-        cam_node.get_lens().set_fov(90)
-        cam_np = self.attach_new_node(cam_node)
-
-        # OFFSET: Position camera slightly forward (0.6) so it doesn't see inside the cube
-        cam_np.setPos(0, 0.4, 0.6)
-        #
-        # # In the __main__ block, after creating 'app'
-        # cam_np.setPos(0, 50, -50)  # High up and pulled back
-        # cam_np.setP(-45)          # Tilt down to look at the plane
-        # cam_np.orthographic = False      # Use True if you want a technical 2D-style top-down view
-
-        dr = buffer.make_display_region()
-        dr.set_camera(cam_np)
-        return tex
-
-    def get_vision_matrix(self):
-        if self.vision_tex.has_ram_image():
-            data = self.vision_tex.get_ram_image_as("RGB")
-            return np.frombuffer(data, dtype=np.uint8).reshape((VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS, 3))
-        return np.zeros((VISIO_SQRT_NB_NEURONS, VISIO_SQRT_NB_NEURONS, 3), dtype=np.uint8)
 
 # --- 2. Simulation Manager ---
 class EvoSimulation(Entity):
@@ -205,10 +141,16 @@ class EvoSimulation(Entity):
         assert len(motor_outputs)==len(self.agents), f"Error with {len(motor_outputs)=} and {len(self.agents)=} "
 
         for i, (agent, out) in enumerate(zip(self.agents, motor_outputs)):
-
+        #
             if out is None or agent == 0:
                 if verbose > 0:
                     print(f"[compute_movements] Worker {i} motor_output is None, skipping")
+                continue
+
+            if len(out) == 0:
+                #if verbose > 0:
+                print(f"[compute_movements] Worker {i} _process_death")
+                self._process_death(i)
                 continue
 
             if out[0] > zoo_config.MOTOR_THRESHOLD and out[1] > zoo_config.MOTOR_THRESHOLD: # Forward
@@ -244,6 +186,25 @@ class EvoSimulation(Entity):
             elif out[1] > zoo_config.MOTOR_THRESHOLD: # Rotate Right
                 print(f"[ParallelZoo] Worker {i} rotate right")
                 agent.rotation_y += rot_speed * time.dt
+
+
+            #### Moving head direction as well
+
+            if out[2] > zoo_config.MOTOR_THRESHOLD and out[3] > zoo_config.MOTOR_THRESHOLD: # Realign dir head to dir body
+
+                #if verbose > 0:
+                print(f"[compute_movements] Worker {i} received align head order")
+                agent.head.rotation_y = 0
+
+
+            elif out[2] > zoo_config.MOTOR_THRESHOLD: # Rotate Head Left
+                print(f"[ParallelZoo] Worker {i} rotate left")
+                agent.head.rotation_y -= rot_speed * time.dt
+
+            elif out[3] > zoo_config.MOTOR_THRESHOLD: # Rotate Head Right
+                print(f"[ParallelZoo] Worker {i} rotate right")
+                agent.head.rotation_y += rot_speed * time.dt
+
 
     def _test_all_contacts(self, verbose = 0):
         for agent_id, agent in enumerate(self.agents):
@@ -308,6 +269,26 @@ class EvoSimulation(Entity):
                 print(f"BrokenPipeError, {input_percept=}")
 
         return results
+
+    def _process_death(self, pacman_index, verbose=0):
+
+        assert 0 < pacman_index and pacman_index < len(self.agents), f"Error, wrong {pacman_index=} {len(self.agents)=}"
+
+        agent = self.agents[pacman_index]
+        if agent == 0:
+            print(f"*Agent {pacman_index} is already set to 0")
+
+        else:
+            destroy(agent)
+
+        # 3. Reference cleanup
+        # We set it to 0 to maintain the list indices (matching worker IDs)
+        self.agents[pacman_index] = 0
+
+        if verbose > 0:
+            print(f"Agent {pacman_index} has been removed from the simulation.")
+
+        self.zoo._remove_individual(pacman_index, verbose=verbose-1)
 
     def on_destroy(self):
         # Shutdown logic when window closes

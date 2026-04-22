@@ -10,7 +10,7 @@ Toutes les constantes globales du projet
 
 
 # Pacman parameters , also used in EvoNetwork
-NB_MOTOR_PATTERNS = 2
+NB_MOTOR_PATTERNS = 4
 NB_VISIO_INPUTS = 3
 #NB_AUDIO_INPUTS = 2
 
