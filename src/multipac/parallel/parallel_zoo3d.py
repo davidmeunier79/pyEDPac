@@ -31,7 +31,7 @@ class ParallelZoo3D(EvoZoo3D):
         print(f"[ParallelZoo] Deploying {self.num_agents} individuals...")
         for i in range(self.num_agents):
             parent_conn, child_conn = mp.Pipe()
-            p = mp.Process(target=worker_loop, args=(child_conn, i))
+            p = mp.Process(target=worker_loop, args=(child_conn, i, 0))
             p.start()
             self.pipes.append(parent_conn)
             self.processes.append(p)
@@ -116,8 +116,8 @@ class ParallelZoo3D(EvoZoo3D):
         self.population.store_dead_individual(self.population.individuals[pacman_index])
         self.population.individuals[pacman_index] = 0
 
-        if verbose > 0:
-            print(f"Agent {pacman_index} has been removed from the population.")
+        #if verbose > 0:
+        print(f"Agent {pacman_index} has been removed from the population.")
 
         ## send signal to process
         self._send_death_signal(pacman_index)
@@ -177,93 +177,6 @@ class ParallelZoo3D(EvoZoo3D):
             motor_outputs.append(pos)
 
         return motor_outputs
-
-    # def _receive_poll_inputs(self, timeout = 0.001, verbose=0):
-    #
-    #     for i, pipe in enumerate(self.pipes):
-    #         # poll(timeout) checks if data is waiting
-    #         # timeout=0 makes it an instantaneous check
-    #
-    #         pac = self.population.individuals[i]
-    #
-    #         if pac == 0:
-    #
-    #             if verbose > 0:
-    #                 print(f"[ParallelZoo] Worker {i} is empty, continue")
-    #             continue
-    #         #
-    #         # if verbose > 0:
-    #         #     print(f"[ParallelZoo] Worker {i} polling message")
-    #
-    #         if pipe.poll(timeout):
-    #
-    #             try:
-    #
-    #                 if verbose > 0:
-    #                     print(f"[ParallelZoo] Worker {i} receiving message")
-    #
-    #                 msg = pipe.recv()
-    #
-    #                 if verbose > 0:
-    #                     print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
-    #
-    #                 if msg['type'] != 'RESULT':
-    #                     continue
-    #
-    #                 if len(msg['data']):
-    #
-    #                     if verbose > 0:
-    #                         print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg['data']=}")
-    #                     pos = pac.integrate_motor_outputs(msg['data'])
-    #
-    #                     if pos:
-    #                         if verbose > 0:
-    #                             print(f"[ParallelZoo] Worker {i} Move forward")
-    #                         self._move_forward(i)
-    #                 else:
-    #                     if verbose > 0:
-    #                         print(f"[ParallelZoo] Worker {i} process_death")
-    #                     self.process_death(i)
-    #                     continue
-    #
-    #             except EOFError:
-    #                 print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
-    #
-    #
-    # def _send_all_outputs(self, verbose=0):
-    #
-    #     results = [None] * self.num_agents
-    #
-    #     for i, pipe in enumerate(self.pipes):
-    #         # poll(timeout) checks if data is waiting
-    #         # timeout=0 makes it an instantaneous check
-    #
-    #         pac = self.population.individuals[i]
-    #
-    #         if pac == 0:
-    #
-    #             if verbose > 0:
-    #                 print(f"[ParallelZoo] Worker {i} is empty, continue")
-    #             continue
-    #
-    #         if verbose > 0:
-    #             print(f"[ParallelZoo] Worker {i} integrate_visio_outputs")
-    #
-    #
-    #         input_percept = self.integrate_visio_outputs(pac)
-    #         #
-    #         # if verbose > 0:
-    #         #     print(f"[ParallelZoo] Worker {i} {input_percept=}")
-    #
-    #         if input_percept:
-    #             results[i] = input_percept
-    #
-    #             try:
-    #                 pipe.send({'type': 'TASK', 'data': input_percept})
-    #             except BrokenPipeError:
-    #                 print(f"{input_percept=}")
-    #
-    #     return results
 
     def shutdown(self):
         print("\n[ParallelZoo] Terminating simulation.")

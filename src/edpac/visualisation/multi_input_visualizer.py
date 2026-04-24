@@ -62,11 +62,12 @@ class MultiInputVisualizer(InputVisualizer):
 
         self.draw_empty_inputs(root_x*self.panel_width, root_y*self.panel_height)
 
-    def _display_panel_inputs(self, sensor_values, pacman_index):
+    def _display_panel_inputs(self, sensor_values, pacman_index, verbose=0):
 
         root_x, root_y = self._return_root_coords(pacman_index)
 
-        #print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+        if verbose>0:
+            print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
 
         self.display_inputs(sensor_values, root_x*self.panel_width, root_y*self.panel_height)
 
@@ -76,9 +77,12 @@ class MultiInputVisualizer(InputVisualizer):
 
         if verbose>0:
             print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
-            print(f"{sensor_values=}")
+        #print(f"{sensor_values=}")
 
-        self.set_color_pattern(root_x*self.panel_width, root_y*self.panel_height, sensor_values)
+
+        self.display_color_inputs(sensor_values, root_x*self.panel_width, root_y*self.panel_height)
+
+        #self.set_color_pattern(root_x*self.panel_width, root_y*self.panel_height, sensor_values)
 
     def display_all_backgrounds(self):
 
@@ -109,16 +113,14 @@ class MultiInputVisualizer(InputVisualizer):
         assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
 
         for i, sensor_values in enumerate(all_sensor_values):
-
             if sensor_values is None:
-                if verbose > 0:
-                    print("empty sensor_values")
-
                 # empty sensor_values
-                self._display_empty_inputs(pacman_index = i)
-            else:
                 if verbose > 0:
-                    print("color_panel_inputs")
+                    print(f"[display_all_color_inputs] Agent {i} _display_empty_inputs")
+                self._display_empty_inputs(pacman_index = i)
 
+            else:
                 # display_color_panel_inputs
+                if verbose > 0:
+                    print(f"[display_all_color_inputs] Agent {i}  _display_color_panel_inputs")
                 self._display_color_panel_inputs(sensor_values, pacman_index = i)

@@ -18,8 +18,17 @@ from dataclasses import dataclass
 from edpac.config.constants import VISIO_SQRT_NB_NEURONS
 
 
+from edpac.config.base_config import BaseConfig
+
 @dataclass
-class MultiPacmanConfig:
+class UrsinaConfig(BaseConfig):
+
+    URSINA_MOVE_SPEED: int = 25
+    URSINA_ROT_SPEED: int = 150
+    MAX_REF_FRAME_REFRESH: float = 1/30
+
+@dataclass
+class MultiPacmanConfig(BaseConfig):
 
     VISIO_COLUMN_DEPTH: int = 6
     BLURRED_FACTOR = 0.2
@@ -28,24 +37,24 @@ class MultiPacmanConfig:
     MOTOR_THRESHOLD = 0.01 # if any spike in output_assembly , trigger output)
 
     ## Pacman Life
-    INITIAL_LIFE_POINTS: int = 1000
+    INITIAL_LIFE_POINTS: int = 10000
 
     #NB_LIFE_POINTS_PER_PREY: int = 100
     NB_LIFE_POINTS_PER_PREDATOR_CONTACT: int = 1
     NB_LIFE_POINTS_PER_PREY_BITE: int = 1
 
     # Special 2 populations prey and predators
-    NB_LIFE_POINTS_PER_PACGUM_PREY: int = 50
+    NB_LIFE_POINTS_PER_PACGUM_PREY: int = 500
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR: int = 0
 
-    MIN_LIFE_FOR_REPROD_PREY: int = 100
-    MIN_LIFE_FOR_REPROD_PREDATOR: int = 500
+    MIN_LIFE_FOR_REPROD_PREY: int = 1000
+    MIN_LIFE_FOR_REPROD_PREDATOR: int = 5000
 
     # random otherwise all bodies and heads are facing RIGHT
     RANDOM_INIT_DIRECTION: bool = True
 
 @dataclass
-class PacmanConfig:
+class PacmanConfig(BaseConfig):
 
     VISIO_COLUMN_DEPTH: int = 6
     BLURRED_FACTOR: int = 0.2
@@ -69,10 +78,3 @@ class PacmanConfig:
 #     NB_LIFE_POINTS_PER_PREDATOR: int = 10
 #
 #     #REGROWTH_PACGUM_RATE = 0.001 # rate of renewal of pacgums # now in constants
-@dataclass
-class ZooVisualizerConfig:
-    ZOO_NB_ROWS: int = 22
-    ZOO_NB_COLS: int = 40
-
-    ZOO_CELL_SIZE: int = VISIO_SQRT_NB_NEURONS
-

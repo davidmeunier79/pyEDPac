@@ -87,7 +87,7 @@ class EvoSimulation(Entity):
         if verbose > 0:
             print("[EvoSimulation] init_stats")
 
-        zoo.init_stats()
+        self.zoo.init_stats()
         zoo.stats["time"][-1] = self.time_step
 
         if verbose > 0:
@@ -126,7 +126,7 @@ class EvoSimulation(Entity):
 
         self.time_step += 1
 
-        if self.time_step > 1000 or nb_alive_indiv==0:
+        if nb_alive_indiv==0:
             sim.on_destroy()
             quit()
             return

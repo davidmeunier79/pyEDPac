@@ -55,40 +55,6 @@ class EvoZoo3D():
             if self.population.individuals[i]:
                 self.init_random_position3d(i)
 
-    def init_stats(self):
-
-        self.stats["time"].append(0)
-        self.stats["nb_predators"].append(0)
-        self.stats["nb_preys"].append(0)
-        self.stats["mean_predator_fitness"].append(0)
-        self.stats["mean_prey_fitness"].append(0)
-
-        self.stats["generation"].append(0)
-        self.stats["nb_deads"].append(0)
-        self.stats["nb_added_pacgums"].append(0)
-
-    def save_stats(self, indiv_path=0):
-
-        import json
-        import os
-        import pandas as pd
-
-        if indiv_path == 0:
-            indiv_path = os.path.abspath("")
-        else:
-            try:
-                os.makedirs(os.path.abspath(indiv_path))
-            except OSError:
-                print(f"{os.path.abspath(indiv_path)} already exists")
-
-        file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
-
-        df = pd.DataFrame(self.stats)
-        df = df.set_index("time")
-
-        df.to_csv(file_stats , header = True)
-
-
     ########################################## online reproduction #######################################################
     def _check_available_individual_slot(self):
 
@@ -101,7 +67,7 @@ class EvoZoo3D():
 
     def _find_first_avail(self, avail, target_danger):
 
-        all_dangers = [self.animals[self.get_animal_from_index(index)]["danger"] for index in avail]
+        all_dangers = ["1" if index %2 == 0 else "-1" for index in avail]
 
         for i, danger in enumerate(all_dangers):
             if danger == target_danger:
@@ -172,7 +138,7 @@ class EvoZoo3D():
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
 
-            print(f"Prey {new_index=} available, building")
+            print(f"*** Prey {new_index=} available, building")
             #self.stats["nb_preys"] += 1
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
@@ -197,7 +163,7 @@ class EvoZoo3D():
             return
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
-            print(f"Predator {new_index=} available, building")
+            print(f"*** Predator {new_index=} available, building")
             #self.stats["nb_predators"] += 1
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
@@ -237,7 +203,19 @@ class EvoZoo3D():
 
     ############################################ stats
 
-    def _compute_all_stats(self, verbose=0):
+    def init_stats(self):
+
+        self.stats["time"].append(0)
+        self.stats["nb_predators"].append(0)
+        self.stats["nb_preys"].append(0)
+        self.stats["mean_predator_fitness"].append(0)
+        self.stats["mean_prey_fitness"].append(0)
+
+        self.stats["generation"].append(0)
+        self.stats["nb_deads"].append(0)
+        self.stats["nb_added_pacgums"].append(0)
+
+    def compute_all_stats(self, verbose=0):
 
         for i, pac in enumerate(self.population.individuals):
             # poll(timeout) checks if data is waiting
@@ -263,12 +241,44 @@ class EvoZoo3D():
                 self.stats["mean_prey_fitness"][-1] += pac.get_fitness()
                 self.stats["nb_preys"][-1] +=1
 
-            # naturally losing life each time points
-            pac.add_life_points(-1)
+        if self.stats["nb_predators"][-1]:
+            self.stats["mean_predator_fitness"][-1] /= self.stats["nb_predators"][-1]
 
-            if pac.get_life_points() < 0:
-                #self.init_new_individual(pacman_index)
-                self.process_death(i)
+        if self.stats["nb_preys"][-1]:
+            self.stats["mean_prey_fitness"][-1] /= self.stats["nb_preys"][-1]
+
+        self.stats["generation"][-1] = self.population.generation
+
+        nb_alive_indiv = len([pac for pac in self.population.individuals if pac])
+        #
+        # print(f" {nb_alive_indiv=} ")
+        #
+        # print(f" nb_preys={self.stats["nb_preys"][-1]} \n nb_predators={self.stats["nb_predators"][-1]} \n mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} \n mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} \n generation={self.stats["generation"][-1]} \n nb_deads={self.stats["nb_deads"][-1]} \n nb_added_pacgums={self.stats["nb_added_pacgums"][-1]}")
+         print(f"{nb_alive_indiv=}  mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} generation={self.stats["generation"][-1]} nb_deads={self.stats["nb_deads"][-1]} }")
+
+        return nb_alive_indiv
+
+    def save_stats(self, indiv_path=0):
+
+        import json
+        import os
+        import pandas as pd
+
+        if indiv_path == 0:
+            indiv_path = os.path.abspath("")
+        else:
+            try:
+                os.makedirs(os.path.abspath(indiv_path))
+            except OSError:
+                print(f"{os.path.abspath(indiv_path)} already exists")
+
+        file_stats = os.path.join(indiv_path, f"Stats_evo.csv")
+
+        df = pd.DataFrame(self.stats)
+        df = df.set_index("time")
+
+        df.to_csv(file_stats , header = True)
+
 
     ################################# called here but implemented in ParallelZoo ############################
     def _send_death_signal(self, pacman_index):

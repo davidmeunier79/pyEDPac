@@ -7,6 +7,10 @@ zoo.grid.shape = rows, cols
 x, y = get_position
 self.grid[y, x]
 
+-1 (odd) -> PREDATOR
+1 (even) -> PREY
+
+
 TODO 30/03/2026:
 multi visu inputs
 

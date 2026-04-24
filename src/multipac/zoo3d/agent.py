@@ -111,7 +111,7 @@ from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBu
 
 class Agent(Entity):
     def __init__(self, agent_id, start_pos=(0, 1, 0)):
-        self.animal_nature = "-1" if agent_id % 2 == 0 else "1"
+        self.animal_nature = "1" if agent_id % 2 == 0 else "-1"
         ac_color = color.red if self.animal_nature == "-1" else color.blue
 
         super().__init__(
@@ -140,7 +140,7 @@ class Agent(Entity):
         self.nose = Entity(
             parent=self.head,
             model='cube',
-            color=color.black,
+            color=color.green,
             scale=(0.2, 0.1, 0.5),
             position=(0, 0, 0.4) # Pointing forward from head
         )
