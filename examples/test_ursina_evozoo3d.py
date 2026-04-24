@@ -33,7 +33,7 @@ if not qt_app:
 
 # --- 2. Simulation Manager ---
 class EvoSimulation(Entity):
-    def __init__(self, stats_path, ursina_config : UrsinaConfig):
+    def __init__(self, stats_path, ursina_config : UrsinaConfig = None):
         super().__init__()
 
 

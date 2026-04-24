@@ -33,11 +33,11 @@ if not qt_app:
 
 # --- 2. Simulation Manager ---
 class EvoSimulation(Entity):
-    def __init__(self, stats_path, ursina_config : UrsinaConfig):
+    def __init__(self, stats_path, ursina_config : UrsinaConfig = None):
         super().__init__()
 
 
-        self.config = config or UrsinaConfig()
+        self.ursina_config = ursina_config or UrsinaConfig()
 
         self.stats_path = stats_path
         self.time_step = 0
@@ -45,11 +45,11 @@ class EvoSimulation(Entity):
         # Initialize Zoo (Parallel Logic)
         pop_config=PopulationConfigMultiTest()
 
-        pop_config.POPULATION_SIZE=20
+        pop_config.POPULATION_SIZE=14
 
-        pop_config.INIT_PREY_POPULATION_SIZE=10
+        pop_config.INIT_PREY_POPULATION_SIZE=7
 
-        pop_config.INIT_PREDATOR_POPULATION_SIZE=10
+        pop_config.INIT_PREDATOR_POPULATION_SIZE=7
 
         self.zoo = ParallelZoo3D(pop_config)
         self.zoo.init_3D_zoo()
@@ -82,13 +82,13 @@ class EvoSimulation(Entity):
         verbose = 0
         # This mirrors your "while SIMULATION_ACTIVE" loop
 
-        print(f"******************** {self.time_step=} ***********************")
+        #print(f"******************** {self.time_step=} ***********************")
 
         if verbose > 0:
             print("[EvoSimulation] init_stats")
 
         self.zoo.init_stats()
-        zoo.stats["time"][-1] = self.time_step
+        self.zoo.stats["time"][-1] = self.time_step
 
         if verbose > 0:
             print("[EvoSimulation] _receive_motor_outputs")
@@ -135,7 +135,7 @@ class EvoSimulation(Entity):
 
         # 3. Apply Neural Outputs to 3D Movement
 
-        dt = min(time.dt, self.config.MAX_REF_FRAME_REFRESH)
+        dt = min(time.dt, self.ursina_config.MAX_REF_FRAME_REFRESH)
         #dt = time.dt
         #print(f"{time.dt=}, {dt=}")
 
@@ -177,7 +177,7 @@ class EvoSimulation(Entity):
 
                     if verbose > 0:
                         print(f"[compute_movements] Worker {i} move forward ")
-                    move_vec = agent.forward * self.config.URSINA_MOVE_SPEED * dt
+                    move_vec = agent.forward * self.ursina_config.URSINA_MOVE_SPEED * dt
                     agent.x += move_vec.x
                     agent.y = 1  # Force it to stay above the plane
                     agent.z += move_vec.z
@@ -190,15 +190,15 @@ class EvoSimulation(Entity):
 
                 if verbose > 0:
                     print(f"[compute_movements] Worker {i} rotate left")
-                agent.rotation_y -= self.config.URSINA_ROT_SPEED * dt
-                agent.head.rotation_y -= self.config.URSINA_ROT_SPEED * dt
+                agent.rotation_y -= self.ursina_config.URSINA_ROT_SPEED * dt
+                agent.head.rotation_y -= self.ursina_config.URSINA_ROT_SPEED * dt
 
             elif out[1] > zoo_config.MOTOR_THRESHOLD: # Rotate Right
 
                 if verbose > 0:
                     print(f"[compute_movements] Worker {i} rotate right")
-                agent.rotation_y += self.config.URSINA_ROT_SPEED * dt
-                agent.head.rotation_y += self.config.URSINA_ROT_SPEED * dt
+                agent.rotation_y += self.ursina_config.URSINA_ROT_SPEED * dt
+                agent.head.rotation_y += self.ursina_config.URSINA_ROT_SPEED * dt
 
             #### Moving head direction as well
             if out[2] > zoo_config.MOTOR_THRESHOLD and out[3] > zoo_config.MOTOR_THRESHOLD: # Realign dir head to dir body
@@ -210,13 +210,13 @@ class EvoSimulation(Entity):
 
                 if verbose > 0:
                     print(f"[compute_movements] Worker {i} head rotate left")
-                agent.head.rotation_y -= self.config.URSINA_ROT_SPEED * dt
+                agent.head.rotation_y -= self.ursina_config.URSINA_ROT_SPEED * dt
 
             elif out[3] > zoo_config.MOTOR_THRESHOLD: # Rotate Head Right
 
                 if verbose > 0:
                     print(f"[compute_movements] Worker {i} head rotate right")
-                agent.head.rotation_y += self.config.URSINA_ROT_SPEED * dt
+                agent.head.rotation_y += self.ursina_config.URSINA_ROT_SPEED * dt
 
 
     def _test_all_contacts(self, verbose = 0):
