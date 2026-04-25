@@ -142,7 +142,7 @@ class EvoZoo3D():
             #self.stats["nb_preys"] += 1
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
+            self.init_random_position3d(new_index)
             self._send_chromosome(new_index)
 
         else:
@@ -167,7 +167,7 @@ class EvoZoo3D():
             #self.stats["nb_predators"] += 1
 
             #self.init_nearby_position(new_index, contact_index, pacman_index)
-            self.init_random_position(new_index)
+            self.init_random_position3d(new_index)
             self._send_chromosome(new_index)
 
         else:
