@@ -254,7 +254,7 @@ class EvoZoo3D():
         # print(f" {nb_alive_indiv=} ")
         #
         # print(f" nb_preys={self.stats["nb_preys"][-1]} \n nb_predators={self.stats["nb_predators"][-1]} \n mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} \n mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} \n generation={self.stats["generation"][-1]} \n nb_deads={self.stats["nb_deads"][-1]} \n nb_added_pacgums={self.stats["nb_added_pacgums"][-1]}")
-        print(f"{self.stats["time"][-1]} {nb_alive_indiv=} mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} generation={self.stats["generation"][-1]}")
+        #print(f"{self.stats["time"][-1]} {nb_alive_indiv=} mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} generation={self.stats["generation"][-1]}")
 
         return nb_alive_indiv
 

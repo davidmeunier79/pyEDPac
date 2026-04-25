@@ -88,6 +88,6 @@ class InputVisualizer(PixelVisualizer):
             base_x = self.padding +( i * (self.square_size + self.padding))
             base_y = self.padding
 
-            self.set_color_pattern(root_y + base_y, root_x + base_x, pattern)
+            self.set_color_pattern(root_y + base_y, root_x + base_x, pattern, verbose=verbose-1)
 
         #self.update_display()

@@ -18,7 +18,7 @@ from ..config.ga_config import (
 
 from ..config.constants import *
 
-from ..config.ga_config import PopulationConfig
+from ..config.ga_config import PopulationConfigMulti
 
 from edpac.config.ga_config import ChromosomeConfig
 
@@ -30,7 +30,7 @@ class PacmanPopulation(Population):
     """Population d'individus"""
     
     def __init__(self,
-                 config: PopulationConfig = None,
+                 config: PopulationConfigMulti = None,
                  chromosome_config = None,
                  selection_config: SelectionConfig = None,
                  crossover_config: CrossoverConfig = None,
