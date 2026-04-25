@@ -47,7 +47,18 @@ class EvoSimulation(Entity):
         self.zoo.initialize_all_inputs()
 
         # Create 3D bodies for all individuals
+        self._init_all_agents()
+
+        ####################################### MultiInputVisualizer ########################
+        # multi_input_viz.setAttribute(Qt.WA_DeleteOnClose)
+        # multi_input_viz.destroyed.connect(stop_everything)
+
+        self.multi_input_viz = MultiInputVisualizer(self.zoo.population, title = "EDPac inputs", scale=2)
+        self.multi_input_viz.show()
+
+    def _init_all_agents(self):
         self.agents = []
+
         for i, indiv in enumerate(self.zoo.population.individuals):
             print(indiv)
 
@@ -58,13 +69,24 @@ class EvoSimulation(Entity):
             else:
                 self.agents.append(0)
 
+    def _init_new_agent(self, new_agent_index):
+        #TODO use with _init_all_agents
+        assert 0 <= new_agent_index and new_agent_index < len(self.zoo.population.individuals),\
+            f"***Error with 0 <= {new_agent_index} < {len(self.zoo.population.individuals)=} "
 
-        ####################################### MultiInputVisualizer ########################
-        # multi_input_viz.setAttribute(Qt.WA_DeleteOnClose)
-        # multi_input_viz.destroyed.connect(stop_everything)
+        assert 0 <= new_agent_index and new_agent_index < len( self.agents),\
+            f"***Error with 0 <= {new_agent_index} < {len(self.agents)=} "
 
-        self.multi_input_viz = MultiInputVisualizer(self.zoo.population, title = "EDPac inputs", scale=2)
-        self.multi_input_viz.show()
+        indiv = self.zoo.population.individuals[new_agent_index]
+
+        if indiv != 0:
+            start_x, start_z = indiv.get_position()
+            if self.agents[new_agent_index] == 0:
+                self.agents[new_agent_index](Agent(new_agent_index, start_pos=(start_x, 1, start_z)))
+            else:
+                print(f"Error, Agent {new_agent_index} should be 0 (not inited)")
+        else:
+            print(f"Error, {indiv=} should not be 0")
 
     def update(self):
         verbose = 0
@@ -129,7 +151,7 @@ class EvoSimulation(Entity):
         #dt = time.dt
         #print(f"{time.dt=}, {dt=}")
 
-        if verbose > 0:
+        if verbose > 1:
             print(f"{motor_outputs=}")
 
         assert len(motor_outputs)==len(self.agents), f"Error with {len(motor_outputs)=} and {len(self.agents)=} "
@@ -137,7 +159,7 @@ class EvoSimulation(Entity):
         for i, (agent, out, pac) in enumerate(zip(self.agents, motor_outputs, self.zoo.population.individuals)):
         #
             if out is None or agent == 0 or pac == 0:
-                if verbose > 0:
+                if verbose > 1:
                     print(f"[compute_movements] Worker {i} motor_output is None, skipping")
                 continue
 
@@ -250,12 +272,16 @@ class EvoSimulation(Entity):
                     elif agent.animal_nature == "1" and other.animal_nature == "1":
                         if verbose > 0:
                             print(f"[_test_all_contacts] Testing reproduction between preys: {agent.agent_id} and {other.agent_id}!")
-                        self.zoo.test_prey_reproduction(agent.agent_id, other.agent_id)
+                        new_agent_index = self.zoo.test_prey_reproduction(agent.agent_id, other.agent_id)
+                        if new_agent_index != -1:
+                            self._init_new_agent(new_agent_index)
 
                     elif agent.animal_nature == "-1" and other.animal_nature == "-1":
                         if verbose > 0:
                             print(f"[_test_all_contacts] Testing reproduction between predators: {agent.agent_id} and {other.agent_id}!")
-                        self.zoo.test_predator_reproduction(agent.agent_id, other.agent_id)
+                        new_agent_index = self.zoo.test_predator_reproduction(agent.agent_id, other.agent_id)
+                        if new_agent_index != -1:
+                            self._init_new_agent(new_agent_index)
 
             # naturally losing life each time points
             pac.add_life_points(-1)

@@ -128,13 +128,13 @@ class EvoZoo3D():
 
         if avail == -1: # no available slot
             #print(f"No available slots for prey_reproduction {contact_index}, {pacman_index}, breaking")
-            return
+            return -1
 
         new_index = self._find_first_avail(avail, target_danger = "1")
 
         if new_index == -1:
             #print("No available slots for prey_reproduction danger, breaking")
-            return
+            return -1
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
 
@@ -144,9 +144,10 @@ class EvoZoo3D():
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position3d(new_index)
             self._send_chromosome(new_index)
-
+            return new_index
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+            return -1
 
     def test_predator_reproduction(self, contact_index, pacman_index):
         # check if any slots are available
@@ -154,13 +155,13 @@ class EvoZoo3D():
 
         if avail == -1: # no available slot
             #print(f"No available slots for predator_reproduction {contact_index}, {pacman_index}, breaking")
-            return
+            return -1
 
         new_index = self._find_first_avail(avail, target_danger = "-1")
 
         if new_index == -1:
             #print("No available slots for predator_reproduction danger, breaking")
-            return
+            return -1
 
         if self._compute_online_reproduction(new_index, contact_index, pacman_index):
             print(f"*** Predator {new_index=} available, building")
@@ -169,9 +170,11 @@ class EvoZoo3D():
             #self.init_nearby_position(new_index, contact_index, pacman_index)
             self.init_random_position3d(new_index)
             self._send_chromosome(new_index)
+            return new_index
 
         else:
             print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+            return -1
 
 
     ############################################ general population moves (test)
@@ -285,5 +288,8 @@ class EvoZoo3D():
         print("Error, should be implemented in inherited class")
 
     def _send_chromosome(self, new_index):
-        print("Warning, should be implemented in inherited class")
+        print("Error, should be implemented in inherited class")
+
+    def init_new_agent(self, new_index):
+        print("Error, should be implemented in inherited class")
 
