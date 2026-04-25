@@ -82,11 +82,11 @@ class EvoSimulation(Entity):
         if indiv != 0:
             start_x, start_z = indiv.get_position()
             if self.agents[new_agent_index] == 0:
-                self.agents[new_agent_index](Agent(new_agent_index, start_pos=(start_x, 1, start_z)))
+                self.agents[new_agent_index] = Agent(new_agent_index, start_pos=(start_x, 1, start_z))
             else:
-                print(f"Error, Agent {new_agent_index} should be 0 (not inited)")
+                print(f"**Error, Agent {new_agent_index} should be 0 (not inited)")
         else:
-            print(f"Error, {indiv=} should not be 0")
+            print(f"**Error, {indiv=} should not be 0")
 
     def update(self):
         verbose = 0
