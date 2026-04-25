@@ -216,7 +216,7 @@ class EvoSimulation(Entity):
             if (agent == 0 or pac == 0):
 
                 if agent != pac :
-                    print(f"***Error [_test_all_contacts] Agent and Indiv {agent_id} are not dead together")
+                    print(f"***Error [_test_all_contacts] Agent and Indiv {agent_id} are not dead together {agent=} != {pac=}")
 
                 continue
 
