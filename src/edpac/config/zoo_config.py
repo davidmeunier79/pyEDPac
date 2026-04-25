@@ -40,8 +40,8 @@ class MultiPacmanConfig(BaseConfig):
     INITIAL_LIFE_POINTS: int = 10000
 
     #NB_LIFE_POINTS_PER_PREY: int = 100
-    NB_LIFE_POINTS_PER_PREDATOR_CONTACT: int = 1
-    NB_LIFE_POINTS_PER_PREY_BITE: int = 1
+    NB_LIFE_POINTS_PER_PREDATOR_CONTACT: int = 100
+    NB_LIFE_POINTS_PER_PREY_BITE: int = 100
 
     # Special 2 populations prey and predators
     NB_LIFE_POINTS_PER_PACGUM_PREY: int = 500
