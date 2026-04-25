@@ -275,7 +275,7 @@ class EvoSimulation(Entity):
 
             pac = self.zoo.population.individuals[i]
 
-            if pac == 0:
+            if pac == 0 or agent == 0:
 
                 if verbose > 0:
                     print(f"[ParallelZoo] Worker {i} is empty, continue")
