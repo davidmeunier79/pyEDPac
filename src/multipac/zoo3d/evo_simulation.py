@@ -1,6 +1,7 @@
 from ursina import *
 from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe
 import numpy as np
+import random
 import sys
 
 # Ensure your src is in path
@@ -64,8 +65,8 @@ class EvoSimulation(Entity):
 
             if indiv is not None and indiv != 0:
                 start_x, start_z = indiv.get_position()
-
-                self.agents.append(Agent(i, start_pos=(start_x, 1, start_z)))
+                rot_body = random.uniform(0, 360)
+                self.agents.append(Agent(i, start_pos=(start_x, 1, start_z), start_rot = rot_body))
             else:
                 self.agents.append(0)
 
@@ -175,7 +176,7 @@ class EvoSimulation(Entity):
                     print(f"[compute_movements] Worker {i} received move forward order")
 
                 origin = agent.world_position + Vec3(0, 1, 0) + (agent.forward * 0.6)
-                hit_info = raycast(origin, agent.forward, distance=5, ignore=(agent,), debug=True)
+                hit_info = raycast(origin, agent.forward, distance=1, ignore=(agent,), debug=True)
 
                 # LOOK AHEAD: check if moving forward hits a wall
                 # origin = agent.world_position + (0, 0.5, 0)
@@ -187,15 +188,30 @@ class EvoSimulation(Entity):
 
                 if not hit_info.hit:
 
-                    if verbose > 0:
-                        print(f"[compute_movements] Worker {i} move forward ")
+                    #if verbose > 0:
+                    print(f"[compute_movements] Worker {i} move forward (no obstacle)")
                     move_vec = agent.forward * self.ursina_config.URSINA_MOVE_SPEED * dt
                     agent.x += move_vec.x
                     agent.y = 1  # Force it to stay above the plane
                     agent.z += move_vec.z
                     pac.eat_pacgum()
+
                 else:
-                    if verbose > 0:
+
+                    other = hit_info.entity
+
+                    if isinstance(other, Agent):
+
+                        #if verbose > 0:
+                        print(f"[compute_movements] Worker {i} move forward to agent {other.agent_id}")
+                        move_vec = agent.forward * self.ursina_config.URSINA_MOVE_SPEED * dt
+                        agent.x += move_vec.x
+                        agent.y = 1  # Force it to stay above the plane
+                        agent.z += move_vec.z
+                        pac.eat_pacgum()
+
+                    else:
+                        #if verbose > 0:
                         print(f"*[compute_movements] Worker {i} hitting a wall, no move")
 
             elif out[0] > zoo_config.MOTOR_THRESHOLD: # Rotate Left

@@ -23,7 +23,7 @@ from ursina import *
 from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe
 
 class Agent(Entity):
-    def __init__(self, agent_id, start_pos=(0, 1, 0), proximity_range=3.0):
+    def __init__(self, agent_id, start_pos=(0, 1, 0), start_rot=0, proximity_range=3.0):
         self.animal_nature = "1" if agent_id % 2 == 0 else "-1"
         ac_color = color.red if self.animal_nature == "-1" else color.blue
 
@@ -31,6 +31,7 @@ class Agent(Entity):
             model='cube',  # The body
             color=ac_color,
             position=start_pos,
+            rotation_y=start_rot,  # Sets the initial facing direction
             scale=(1.2, 1, 1.2), # Slightly flatter body
             collider='box',
             add_to_scene_entities=True
