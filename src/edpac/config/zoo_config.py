@@ -24,7 +24,7 @@ from edpac.config.base_config import BaseConfig
 class UrsinaConfig(BaseConfig):
 
     URSINA_MOVE_SPEED: int = 25
-    URSINA_ROT_SPEED: int = 150
+    URSINA_ROT_SPEED: int = 300
     MAX_REF_FRAME_REFRESH: float = 1/30
 
 @dataclass

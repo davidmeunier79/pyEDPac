@@ -122,7 +122,7 @@ class EvoZoo3D():
 
         return True
 
-    def test_prey_reproduction(self, contact_index, pacman_index):
+    def test_prey_reproduction(self, contact_index, pacman_index, verbose=0):
         # check if any slots are available
         avail = self._check_available_individual_slot()
 
@@ -146,10 +146,11 @@ class EvoZoo3D():
             self._send_chromosome(new_index)
             return new_index
         else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+            if verbose > 0:
+                print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
             return -1
 
-    def test_predator_reproduction(self, contact_index, pacman_index):
+    def test_predator_reproduction(self, contact_index, pacman_index, verbose=0):
         # check if any slots are available
         avail = self._check_available_individual_slot()
 
@@ -173,7 +174,8 @@ class EvoZoo3D():
             return new_index
 
         else:
-            print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
+            if verbose>0:
+                print(f"Could not compute _compute_online_reproduction {new_index=}, {contact_index=}, {pacman_index=} ")
             return -1
 
 

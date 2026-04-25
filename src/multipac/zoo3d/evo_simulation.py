@@ -91,9 +91,8 @@ class EvoSimulation(Entity):
 
     def update(self):
         verbose = 0
-        # This mirrors your "while SIMULATION_ACTIVE" loop
 
-        #print(f"******************** {self.time_step=} ***********************")
+        print(f"******************** {self.time_step=} ***********************")
 
         if verbose > 0:
             print("[EvoSimulation] init_stats")
@@ -115,7 +114,7 @@ class EvoSimulation(Entity):
         if verbose > 0:
             print("[EvoSimulation] All test_all_contacts")
 
-        self._test_all_contacts(verbose= 0)
+        self._test_all_contacts(verbose= 1)
 
         #TODO
         if verbose > 0:
@@ -263,14 +262,14 @@ class EvoSimulation(Entity):
 
             if hit_info.hit:
 
-                if verbose >0:
+                if verbose > 1:
                     print(f"[_test_all_contacts] Agent {agent_id} {hit_info=}")
 
                 other = hit_info.entity
                 if isinstance(other, Agent):
 
 
-                    if verbose > 0:
+                    if verbose > 1:
                         print(f"[_test_all_contacts] Agent {agent.agent_id} intersect Agent {other.agent_id}!")
                     # Logic: Predator (-1) hits Prey (1)
 
@@ -286,14 +285,14 @@ class EvoSimulation(Entity):
 
 
                     elif agent.animal_nature == "1" and other.animal_nature == "1":
-                        if verbose > 0:
+                        if verbose > 1:
                             print(f"[_test_all_contacts] Testing reproduction between preys: {agent.agent_id} and {other.agent_id}!")
                         new_agent_index = self.zoo.test_prey_reproduction(agent.agent_id, other.agent_id)
                         if new_agent_index != -1:
                             self._init_new_agent(new_agent_index)
 
                     elif agent.animal_nature == "-1" and other.animal_nature == "-1":
-                        if verbose > 0:
+                        if verbose > 1:
                             print(f"[_test_all_contacts] Testing reproduction between predators: {agent.agent_id} and {other.agent_id}!")
                         new_agent_index = self.zoo.test_predator_reproduction(agent.agent_id, other.agent_id)
                         if new_agent_index != -1:
