@@ -87,7 +87,7 @@ class EvoSimulation(Entity):
         if verbose > 0:
             print("[EvoSimulation] compute_movements")
 
-        self.compute_movements(motor_outputs, verbose=verbose-1)
+        self.compute_movements(motor_outputs, verbose=1)
 
         if verbose > 0:
             print("[EvoSimulation] All test_all_contacts")
@@ -98,7 +98,7 @@ class EvoSimulation(Entity):
         if verbose > 0:
             print("[EvoSimulation] compute_perceptions")
 
-        results = self.compute_perceptions(verbose=1)
+        results = self.compute_perceptions(verbose=0)
         #
         # if self.time_step % 5 == 0:
 
