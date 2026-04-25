@@ -182,7 +182,7 @@ class EvoSimulation(Entity):
                 # hit_info = raycast(origin, agent.forward, distance=1, ignore=(agent,))
 
 
-                if verbose > 0:
+                if verbose > 1:
                     print(f"[compute_movements] Worker {i}:  {hit_info=}")
 
                 if not hit_info.hit:
