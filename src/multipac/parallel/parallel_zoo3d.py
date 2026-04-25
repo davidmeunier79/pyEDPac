@@ -104,7 +104,7 @@ class ParallelZoo3D(EvoZoo3D):
 
     def _remove_individual(self, pacman_index, verbose=0):
 
-        assert 0 < pacman_index and pacman_index < len(self.population.individuals), \
+        assert 0 <= pacman_index and pacman_index < len(self.population.individuals), \
             f"Error, wrong {pacman_index=} {len(self.population.individuals)=}"
 
         if self.population.individuals[pacman_index] == 0:

@@ -63,7 +63,7 @@ class EvoSimulation(Entity):
         # multi_input_viz.setAttribute(Qt.WA_DeleteOnClose)
         # multi_input_viz.destroyed.connect(stop_everything)
 
-        self.multi_input_viz = MultiInputVisualizer(self.zoo.population, title = "EDPac inputs", scale=4)
+        self.multi_input_viz = MultiInputVisualizer(self.zoo.population, title = "EDPac inputs", scale=2)
         self.multi_input_viz.show()
 
     def update(self):
