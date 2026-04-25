@@ -107,7 +107,7 @@ class EvoSimulation(Entity):
 
         qt_app = QtWidgets.QApplication.instance()
         if qt_app :
-            self.multi_input_viz.display_all_color_inputs(results, verbose=4)
+            self.multi_input_viz.display_all_color_inputs(results, verbose=verbose-1)
             self.multi_input_viz.update_display()
             qt_app.processEvents()
 
