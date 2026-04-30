@@ -63,9 +63,10 @@ if __name__ == "__main__":
 
 
     pop_config=PopulationConfigMulti()
-    #pop_config.POPULATION_SIZE=14
-    #pop_config.INIT_PREY_POPULATION_SIZE=7
-    #pop_config.INIT_PREDATOR_POPULATION_SIZE=7
+
+    pop_config.POPULATION_SIZE=32
+    pop_config.INIT_PREY_POPULATION_SIZE=16
+    pop_config.INIT_PREDATOR_POPULATION_SIZE=16
 
     # Start Simulation
     sim = EvoSimulation(args.stats_path, ursina_config = None, pop_config = pop_config)
