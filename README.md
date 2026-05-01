@@ -19,3 +19,24 @@ See or use requirements.txt
 ### Testing:
 
 python run_evo.py --stats_path test_stats
+
+
+
+
+### v0.1 (~Original EDPac)
+
+go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.1.zip
+download zip
+extract (unzip) pyEDPac-0.1.zip
+
+cd pyEDPac-0.1/examples
+python run_population.py
+
+### v0.2 (MultiPac 2D)
+
+go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.2.zip
+download zip
+extract (unzip) pyEDPac-0.2.zip
+
+cd pyEDPac-0.2/examples
+python run_evo.py --stats_path run_multipac
