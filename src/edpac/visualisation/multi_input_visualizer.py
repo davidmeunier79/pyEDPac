@@ -29,7 +29,7 @@ class MultiInputVisualizer(InputVisualizer):
         print(self.panel_height, self.panel_width)
 
 
-        height = self.panel_height * int(self.nb_panels // 8)
+        height = self.panel_height * int(self.nb_panels // 8 + 1)
         width = self.panel_width * 8
 
         print(height, width)

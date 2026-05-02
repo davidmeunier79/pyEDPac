@@ -66,7 +66,7 @@ class Agent(Entity):
         self.nose = Entity(
             parent=self.head,
             model='cube',
-            color=color.green,
+            color=color.black,
             scale=(0.2, 0.2, 0.5),
             position=(0, 0, 0.4) # Pointing forward from head
         )
