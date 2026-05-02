@@ -27,6 +27,7 @@ class UrsinaConfig(BaseConfig):
     URSINA_ROT_SPEED: int = 300
     MAX_REF_FRAME_REFRESH: float = 1/30
 
+    PROXIMITY_RANGE=5
 @dataclass
 class MultiPacmanConfig(BaseConfig):
 

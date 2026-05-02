@@ -66,7 +66,7 @@ class EvoSimulation(Entity):
             if indiv is not None and indiv != 0:
                 start_x, start_z = indiv.get_position()
                 rot_body = random.uniform(0, 360)
-                self.agents.append(Agent(i, start_pos=(start_x, 1, start_z), start_rot = rot_body))
+                self.agents.append(Agent(i, start_pos=(start_x, 1, start_z), start_rot = rot_body, proximity_range=self.ursina_config.PROXIMITY_RANGE))
             else:
                 self.agents.append(0)
 
