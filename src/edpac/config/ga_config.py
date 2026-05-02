@@ -92,10 +92,10 @@ class PopulationConfigMulti(BaseConfig):
 class PopulationConfigMultiTest(BaseConfig):
     """Configuration de la population"""
     # # # # Taille population
-    POPULATION_SIZE: int = 20
+    POPULATION_SIZE: int = 4
 
-    INIT_PREY_POPULATION_SIZE : int = 7
-    INIT_PREDATOR_POPULATION_SIZE : int = 5
+    INIT_PREY_POPULATION_SIZE : int = 2
+    INIT_PREDATOR_POPULATION_SIZE : int = 2
 
 
 

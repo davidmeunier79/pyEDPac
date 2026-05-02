@@ -1,8 +1,10 @@
 from ursina import *
-from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe
+from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe, get_model_path
 import numpy as np
 import random
 import sys
+import pathlib
+import os
 
 # Ensure your src is in path
 sys.path.insert(0, '../src')
@@ -26,7 +28,32 @@ from multipac.zoo3d.agent import Agent
 from PySide6 import QtWidgets
 import sys
 
+# Get the path to your package level 'data/texture' folder
+# Adjust the number of '.parent' calls depending on where main.py is relative to /data
+package_root = Path(__file__).resolve().parent.parent # Example: goes up to package level
+texture_dir = package_root / 'data' / 'textures'
 
+# Add this directory to the global search path
+get_model_path().prepend_directory(str(texture_dir))
+
+
+def add_wall_crosses(parent_wall, is_horizontal=True, x_density=0.5, wall_height=5.0):
+    # Create a thin plane slightly offset from the wall surface to avoid z-fighting
+
+    # 1. Get the absolute path of constants.py
+    current_file = pathlib.Path(__file__).resolve()
+
+    cross_overlay = Entity(
+        parent=parent_wall,
+        model='quad',
+        texture='close', # Ensure you have a cross.png or use 'close_button'
+        color=color.white,
+        # Scale the texture so it repeats based on the wall dimensions
+        texture_scale=(parent_wall.scale_x * x_density if is_horizontal else parent_wall.scale_z * x_density,
+                       wall_height * x_density),
+        double_sided=True
+    )
+    return cross_overlay
 
 
 # --- 2. Simulation Manager ---
@@ -175,7 +202,7 @@ class EvoSimulation(Entity):
                     print(f"[compute_movements] Worker {i} received move forward order")
 
                 origin = agent.world_position + Vec3(0, 1, 0) + (agent.forward * 0.6)
-                hit_info = raycast(origin, agent.forward, distance=1, ignore=(agent,), debug=True)
+                hit_info = raycast(origin, agent.forward, distance=self.ursina_config.RAY_CAST_DISTANCE, ignore=(agent,), debug=True)
 
                 # LOOK AHEAD: check if moving forward hits a wall
                 # origin = agent.world_position + (0, 0.5, 0)
@@ -303,6 +330,22 @@ class EvoSimulation(Entity):
 
             if pac.get_life_points() < 0:
                 self._process_death(agent_id)
+                continue
+
+            # test if position is outside the zoo3d
+            position = agent.get_position()
+
+            if position[1] == 1 and \
+                    (-AREA_SIZE//2 <= position[0] and position[0] <= AREA_SIZE//2) and \
+                    (-AREA_SIZE//2 <= position[2] and position[2] <= AREA_SIZE//2):
+
+                if verbose > 2:
+                    print(f"Position {position=} is acceptable")
+
+            else:
+                print(f"**Error, {position=}, killing individual {agent_id=}")
+                self._process_death(agent_id)
+
 
     def compute_perceptions(self, verbose=0):
 

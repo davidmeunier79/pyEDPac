@@ -67,7 +67,7 @@ class Agent(Entity):
             parent=self.head,
             model='cube',
             color=color.green,
-            scale=(0.2, 0.1, 0.5),
+            scale=(0.2, 0.2, 0.5),
             position=(0, 0, 0.4) # Pointing forward from head
         )
 

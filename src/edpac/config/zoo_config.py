@@ -28,6 +28,8 @@ class UrsinaConfig(BaseConfig):
     MAX_REF_FRAME_REFRESH: float = 1/30
 
     PROXIMITY_RANGE=5
+
+    RAY_CAST_DISTANCE=2 # check to walls
 @dataclass
 class MultiPacmanConfig(BaseConfig):
 

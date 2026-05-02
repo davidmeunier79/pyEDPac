@@ -22,7 +22,7 @@ from edpac.visualisation.multi_input_visualizer import MultiInputVisualizer
 from multipac.parallel.parallel_zoo3d import ParallelZoo3D
 #from multipac.zoo3d.agent import Agent
 
-from multipac.zoo3d.evo_simulation import EvoSimulation
+from multipac.zoo3d.evo_simulation import EvoSimulation, add_wall_crosses
 
 from PySide6 import QtWidgets
 import sys
@@ -31,6 +31,11 @@ import sys
 qt_app = QtWidgets.QApplication.instance()
 if not qt_app:
     qt_app = QtWidgets.QApplication(sys.argv)
+
+# --- Wall Decoration Setup ---
+wall_height = 5
+# Define how many crosses per unit (e.g., 1 cross every 2 units)
+x_density = 0.5
 
 # --- 3. Run Script ---
 if __name__ == "__main__":
@@ -53,19 +58,36 @@ if __name__ == "__main__":
     wall_thickness = 2
 
 
-    area_size = 50
+    # Create walls with textures
+    Wall_N = Entity(model='cube', scale=(AREA_SIZE, wall_height, wall_thickness), y=2, z=AREA_SIZE/2, color=color.gray, collider='box')
+    # Overlay on the inner side (facing -Z)
+    inner_N = add_wall_crosses(Wall_N, True, x_density, wall_height)
+    inner_N.z = -0.51 # Move slightly inward from the wall center
+    inner_N.scale_x = 1 # Matches parent width
 
-    # Create walls
-    Wall_N = Entity(model='cube', scale=(AREA_SIZE, 5, wall_thickness), y=2, z=AREA_SIZE/2, color=color.gray, collider='box')
-    Wall_S = Entity(model='cube', scale=(AREA_SIZE, 5, wall_thickness), y=2, z=-AREA_SIZE/2, color=color.gray, collider='box')
-    Wall_E = Entity(model='cube', scale=(wall_thickness, 5, area_size), y=2, x=AREA_SIZE/2, color=color.gray, collider='box')
-    Wall_W = Entity(model='cube', scale=(wall_thickness, 5, area_size), y=2, x=-AREA_SIZE/2, color=color.gray, collider='box')
+    Wall_S = Entity(model='cube', scale=(AREA_SIZE, wall_height, wall_thickness), y=2, z=-AREA_SIZE/2, color=color.gray, collider='box')
+    # Overlay on the inner side (facing +Z)
+    inner_S = add_wall_crosses(Wall_S, True, x_density, wall_height)
+    inner_S.z = 0.51
+    inner_S.rotation_y = 180
+
+    Wall_E = Entity(model='cube', scale=(wall_thickness, wall_height, AREA_SIZE), y=2, x=AREA_SIZE/2, color=color.gray, collider='box')
+    # Overlay on the inner side (facing -X)
+    inner_E = add_wall_crosses(Wall_E, False, x_density, wall_height)
+    inner_E.x = -0.51
+    inner_E.rotation_y = 90
+
+    Wall_W = Entity(model='cube', scale=(wall_thickness, wall_height, AREA_SIZE), y=2, x=-AREA_SIZE/2, color=color.gray, collider='box')
+    # Overlay on the inner side (facing +X)
+    inner_W = add_wall_crosses(Wall_W, False, x_density, wall_height)
+    inner_W.x = 0.51
+    inner_W.rotation_y = -90
 
 
     pop_config=PopulationConfigMultiTest()
-    pop_config.POPULATION_SIZE=16
-    pop_config.INIT_PREY_POPULATION_SIZE=8
-    pop_config.INIT_PREDATOR_POPULATION_SIZE=8
+    #pop_config.POPULATION_SIZE=16
+    #pop_config.INIT_PREY_POPULATION_SIZE=8
+    #pop_config.INIT_PREDATOR_POPULATION_SIZE=8
 
     # Start Simulation
     sim = EvoSimulation(args.stats_path, ursina_config = None, pop_config = pop_config)
