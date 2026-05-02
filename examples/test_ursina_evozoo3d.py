@@ -1,5 +1,5 @@
 from ursina import *
-from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe
+from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe, get_model_path
 import numpy as np
 import sys
 
@@ -37,6 +37,24 @@ wall_height = 5
 # Define how many crosses per unit (e.g., 1 cross every 2 units)
 x_density = 0.5
 
+wall_thickness = 2
+
+
+
+
+# Get the path to your package level 'data/texture' folder
+# Adjust the number of '.parent' calls depending on where main.py is relative to /data
+package_root = Path(__file__).resolve().parent.parent # Example: goes up to package level
+print(package_root)
+
+texture_dir = package_root / 'data' / 'textures'
+
+print(texture_dir)
+
+# Add this directory to the global search path
+#get_model_path().prepend_directory(str(texture_dir))
+
+
 # --- 3. Run Script ---
 if __name__ == "__main__":
     import argparse
@@ -48,14 +66,12 @@ if __name__ == "__main__":
 
     # --- Example Usage ---
     app = Ursina()
+    application.asset_folder = texture_dir
 
     # Environment Setup
     Sky()
 
-
     Entity(model='plane', scale=AREA_SIZE, texture='white_cube', texture_scale=(AREA_SIZE,AREA_SIZE), color=color.light_gray)
-    # Simple wall setup in your EvoSimulation or __main__
-    wall_thickness = 2
 
 
     # Create walls with textures

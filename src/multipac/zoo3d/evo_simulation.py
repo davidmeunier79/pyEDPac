@@ -1,5 +1,5 @@
 from ursina import *
-from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe, get_model_path
+from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBufferProperties, WindowProperties, GraphicsPipe
 import numpy as np
 import random
 import sys
@@ -28,25 +28,13 @@ from multipac.zoo3d.agent import Agent
 from PySide6 import QtWidgets
 import sys
 
-# Get the path to your package level 'data/texture' folder
-# Adjust the number of '.parent' calls depending on where main.py is relative to /data
-package_root = Path(__file__).resolve().parent.parent # Example: goes up to package level
-texture_dir = package_root / 'data' / 'textures'
-
-# Add this directory to the global search path
-get_model_path().prepend_directory(str(texture_dir))
-
-
 def add_wall_crosses(parent_wall, is_horizontal=True, x_density=0.5, wall_height=5.0):
     # Create a thin plane slightly offset from the wall surface to avoid z-fighting
-
-    # 1. Get the absolute path of constants.py
-    current_file = pathlib.Path(__file__).resolve()
 
     cross_overlay = Entity(
         parent=parent_wall,
         model='quad',
-        texture='close', # Ensure you have a cross.png or use 'close_button'
+        texture='close.png', # Ensure you have a cross.png or use 'close_button'
         color=color.white,
         # Scale the texture so it repeats based on the wall dimensions
         texture_scale=(parent_wall.scale_x * x_density if is_horizontal else parent_wall.scale_z * x_density,
