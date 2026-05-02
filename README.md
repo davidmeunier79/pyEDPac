@@ -1,8 +1,10 @@
 # pyEDPac
 
-## installation
+## installation of latest (github) version
 
-See or use requirements.txt
+### using requirements.txt
+
+pip install -r requirements
 
 ## All the required files for running a simulation are in examples/
 
@@ -18,25 +20,36 @@ See or use requirements.txt
 
 ### Testing:
 
+```bash
 python run_evo.py --stats_path test_stats
+```
 
 
 
+## Previous versions
+
+Versions exist as .zip releases
 
 ### v0.1 (~Original EDPac)
 
-go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.1.zip
-download zip
-extract (unzip) pyEDPac-0.1.zip
+- go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.1.zip
+- download zip
+- extract (unzip) pyEDPac-0.1.zip
 
+
+```bash
 cd pyEDPac-0.1/examples
 python run_population.py
+```
+
 
 ### v0.2 (MultiPac 2D)
 
-go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.2.zip
-download zip
-extract (unzip) pyEDPac-0.2.zip
+- go to /home/INT/meunier.d/Téléchargements/pyEDPac-0.2.zip
+- download zip
+- extract (unzip) pyEDPac-0.2.zip
 
+```bash
 cd pyEDPac-0.2/examples
 python run_evo.py --stats_path run_multipac
+```
