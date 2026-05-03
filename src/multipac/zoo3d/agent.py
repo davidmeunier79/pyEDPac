@@ -25,7 +25,7 @@ from panda3d.core import GraphicsOutput, Texture, Camera as PandaCamera, FrameBu
 class Agent(Entity):
     def __init__(self, agent_id, start_pos=(0, 1, 0), start_rot=0, proximity_range=3.0):
         self.animal_nature = "1" if agent_id % 2 == 0 else "-1"
-        ac_color = color.red if self.animal_nature == "-1" else color.cyan
+        ac_color = color.orange if self.animal_nature == "-1" else color.cyan
 
         super().__init__(
             model='cube',  # The body

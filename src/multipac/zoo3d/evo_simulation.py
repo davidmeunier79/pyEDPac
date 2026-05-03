@@ -190,7 +190,7 @@ class EvoSimulation(Entity):
                     print(f"[compute_movements] Worker {i} received move forward order")
 
                 origin = agent.world_position + Vec3(0, 1, 0) + (agent.forward * 0.6)
-                hit_info = raycast(origin, agent.forward, distance=self.ursina_config.RAY_CAST_DISTANCE, ignore=(agent,), debug=True)
+                hit_info = raycast(origin, agent.forward, distance=self.ursina_config.RAY_CAST_DISTANCE, debug=True)
 
                 # LOOK AHEAD: check if moving forward hits a wall
                 # origin = agent.world_position + (0, 0.5, 0)
@@ -222,7 +222,18 @@ class EvoSimulation(Entity):
                         agent.x += move_vec.x
                         agent.y = 1  # Force it to stay above the plane
                         agent.z += move_vec.z
-                        pac.eat_pacgum()
+
+                        ## other pac
+                        assert 0 <= other.agent_id and other.agent_id < len(self.zoo.population.individuals), f"*Error with {other.agent_id=}"
+                        other_pac = self.zoo.population.individuals[other.agent_id]
+
+                        assert other_pac != 0, f"*Error, find agent {other.agent_id=} but no {other_pac=}"
+
+                        if pac.get_nature == "-1" and other_pac.get_nature() == "1":
+
+                            print(f"[compute_movements] Worker {i} eating prey {other.agent_id}")
+                            pac.eat_prey(other_pac.get_life_points())
+                            self._process_death(other.agent_id)
 
                     else:
                         #if verbose > 0:
