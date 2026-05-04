@@ -209,7 +209,7 @@ class EvoSimulation(Entity):
                     agent.y = 1  # Force it to stay above the plane
                     agent.z += move_vec.z
                     pac.eat_pacgum()
-                    self.zoo.stats["nb_eaten_pacgums"]+=1
+                    self.zoo.stats["nb_eaten_pacgums"][-1] += 1
 
 
                 else:
@@ -236,7 +236,7 @@ class EvoSimulation(Entity):
                             print(f"[compute_movements] Worker {i} eating prey {other.agent_id}")
                             pac.eat_prey(other_pac.get_life_points())
                             self._process_death(other.agent_id)
-                            self.zoo.stats["nb_eaten_preys"]+=1
+                            self.zoo.stats["nb_eaten_preys"][-1] += 1
 
 
                     else:
@@ -412,7 +412,7 @@ class EvoSimulation(Entity):
 
         self.zoo._remove_individual(pacman_index, verbose=verbose-1)
 
-        self.zoo.stats["nb_deads"] += 1
+        self.zoo.stats["nb_deads"][-1] += 1
 
     def on_destroy(self):
         # Shutdown logic when window closes
