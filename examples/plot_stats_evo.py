@@ -50,7 +50,8 @@ def plot_evo_stats(stats_path):
     ax = fig.add_subplot(1, 1, 1)
 
     ax.plot(df.index, df["nb_deads"], color = "blue")
-    ax.plot(df.index, df["nb_added_pacgums"], color = "red")
+    ax.plot(df.index, df["nb_eaten_pacgums"], color = "red")
+    ax.plot(df.index, df["nb_eaten_preys"], color = "green")
 
     ax.grid()
     plt.show()

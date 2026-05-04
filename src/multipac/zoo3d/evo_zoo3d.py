@@ -27,7 +27,7 @@ class EvoZoo3D():
         super().__init__()
 
 
-        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": [], "nb_added_pacgums": []}
+        self.stats = {"time": [] , "nb_predators": [], "nb_preys" : [], "mean_predator_fitness" : [], "mean_prey_fitness": [], "generation" : [], "nb_deads": [], "nb_eaten_pacgums": [], "nb_eaten_preys": []}
 
 
     def init_random_position3d(self, index):
@@ -218,7 +218,8 @@ class EvoZoo3D():
 
         self.stats["generation"].append(0)
         self.stats["nb_deads"].append(0)
-        self.stats["nb_added_pacgums"].append(0)
+        self.stats["nb_eaten_pacgums"].append(0)
+        self.stats["nb_eaten_preys"].append(0)
 
     def compute_all_stats(self, verbose=0):
 
@@ -257,7 +258,7 @@ class EvoZoo3D():
         nb_alive_indiv = len([pac for pac in self.population.individuals if pac])
         #
         # print(f" {nb_alive_indiv=} ")
-        # print(f" nb_preys={self.stats["nb_preys"][-1]} \n nb_predators={self.stats["nb_predators"][-1]} \n mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} \n mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} \n generation={self.stats["generation"][-1]} \n nb_deads={self.stats["nb_deads"][-1]} \n nb_added_pacgums={self.stats["nb_added_pacgums"][-1]}")
+        # print(f" nb_preys={self.stats["nb_preys"][-1]} \n nb_predators={self.stats["nb_predators"][-1]} \n mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} \n mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} \n generation={self.stats["generation"][-1]} \n nb_deads={self.stats["nb_deads"][-1]} \n nb_eaten_pacgums={self.stats["nb_eaten_pacgums"][-1]}")
         print(f"{self.stats["time"][-1]} {nb_alive_indiv=} mean_prey_fitness={self.stats["mean_prey_fitness"][-1]} mean_predator_fitness={self.stats["mean_predator_fitness"][-1]} generation={self.stats["generation"][-1]}")
 
         return nb_alive_indiv
