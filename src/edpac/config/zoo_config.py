@@ -43,14 +43,14 @@ class MultiPacmanConfig(BaseConfig):
     INITIAL_LIFE_POINTS: int = 10000
 
     #NB_LIFE_POINTS_PER_PREY: int = 100
-    NB_LIFE_POINTS_PER_PREDATOR_CONTACT: int = 100
-    NB_LIFE_POINTS_PER_PREY_BITE: int = 100
+    NB_LIFE_POINTS_PER_PREDATOR_CONTACT: int = 1000
+    NB_LIFE_POINTS_PER_PREY_BITE: int = 1000
 
     # Special 2 populations prey and predators
     NB_LIFE_POINTS_PER_PACGUM_PREY: int = 500
     NB_LIFE_POINTS_PER_PACGUM_PREDATOR: int = 0
 
-    MIN_LIFE_FOR_REPROD_PREY: int = 1000
+    MIN_LIFE_FOR_REPROD_PREY: int = 2000
     MIN_LIFE_FOR_REPROD_PREDATOR: int = 5000
 
     # random otherwise all bodies and heads are facing RIGHT
