@@ -203,7 +203,7 @@ class EvoSimulation(Entity):
                 if not hit_info.hit:
 
                     #if verbose > 0:
-                    print(f"[compute_movements] Worker {i} move forward (no obstacle)")
+                    print(f"[compute_movements] *** Worker {i} move forward (no obstacle)")
                     move_vec = agent.forward * self.ursina_config.URSINA_MOVE_SPEED * dt
                     agent.x += move_vec.x
                     agent.y = 1  # Force it to stay above the plane
@@ -214,34 +214,42 @@ class EvoSimulation(Entity):
 
                 else:
 
-                    other = hit_info.entity
+                    no_wall = True
 
-                    if isinstance(other, Agent):
+                    for other in hit_info.entities:
+
+                        if isinstance(other, Agent):
+
+                            ## other pac
+                            assert 0 <= other.agent_id and other.agent_id < len(self.zoo.population.individuals), f"*Error with {other.agent_id=}"
+                            other_pac = self.zoo.population.individuals[other.agent_id]
+
+                            assert other_pac != 0, f"*Error, find agent {other.agent_id=} but no {other_pac=}"
+
+                            if pac.get_nature == "-1" and other_pac.get_nature() == "1":
+
+                                print(f"[compute_movements] *** Worker {i} eating prey {other.agent_id}")
+                                pac.eat_prey(other_pac.get_life_points())
+                                self._process_death(other.agent_id)
+                                self.zoo.stats["nb_eaten_preys"][-1] += 1
+
+
+                        else:
+                            #if verbose > 0:
+                            print(f"*[compute_movements] Worker {i} hitting a wall, no move")
+                            no_wall = False
+
+                    if no_wall == True:
 
                         #if verbose > 0:
-                        print(f"[compute_movements] Worker {i} move forward to agent {other.agent_id}")
+                        print(f"[compute_movements] *** Worker {i} move forward")
                         move_vec = agent.forward * self.ursina_config.URSINA_MOVE_SPEED * dt
                         agent.x += move_vec.x
                         agent.y = 1  # Force it to stay above the plane
                         agent.z += move_vec.z
 
-                        ## other pac
-                        assert 0 <= other.agent_id and other.agent_id < len(self.zoo.population.individuals), f"*Error with {other.agent_id=}"
-                        other_pac = self.zoo.population.individuals[other.agent_id]
-
-                        assert other_pac != 0, f"*Error, find agent {other.agent_id=} but no {other_pac=}"
-
-                        if pac.get_nature == "-1" and other_pac.get_nature() == "1":
-
-                            print(f"[compute_movements] Worker {i} eating prey {other.agent_id}")
-                            pac.eat_prey(other_pac.get_life_points())
-                            self._process_death(other.agent_id)
-                            self.zoo.stats["nb_eaten_preys"][-1] += 1
-
-
-                    else:
-                        #if verbose > 0:
-                        print(f"*[compute_movements] Worker {i} hitting a wall, no move")
+                        pac.eat_pacgum()
+                        self.zoo.stats["nb_eaten_pacgums"][-1] += 1
 
             elif out[0] > zoo_config.MOTOR_THRESHOLD: # Rotate Left
 
