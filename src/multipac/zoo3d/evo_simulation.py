@@ -154,7 +154,7 @@ class EvoSimulation(Entity):
         self.time_step += 1
 
         if nb_alive_indiv==0:
-            on_destroy()
+            self.on_destroy()
             quit()
             return
 
