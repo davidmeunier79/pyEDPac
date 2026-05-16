@@ -54,6 +54,25 @@ class PixelVisualizer(QtWidgets.QMainWindow):
 
         dest[target_rows[valid], target_cols[valid]] = color
 
+
+    def set_color_pattern(self, base_y, base_x, pattern_arr, target_buffer=None, verbose =0):
+        """
+        Draws a color numpy pattern (H, W, 3) directly onto the buffer.
+        """
+
+        dest = self.buffer if target_buffer is None else target_buffer
+
+        # Get shape of pattern (last dimension is 3 for colors)
+        nb_rows, nb_cols, _ = pattern_arr.shape
+        if verbose>0:
+            print(base_y, (base_y+nb_cols),  base_x, (base_x+nb_rows))
+            print(f"{dest.shape}=")
+
+            print(dest[base_y:(base_y+nb_cols),  base_x:(base_x+nb_rows), :].shape)
+            print(f"{pattern_arr.shape}=")
+
+        dest[base_y:(base_y+nb_cols),  base_x:(base_x+nb_rows), :] = pattern_arr
+
     def draw_line(self, start_pos, end_pos, color, target_buffer=None, neuron_mask=np.ones(shape=(1,1))):
 
         dest = self.buffer if target_buffer is None else target_buffer

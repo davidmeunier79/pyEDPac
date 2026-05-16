@@ -25,7 +25,6 @@ from edpac.genetic_algorithm.chromosome import Chromosome
 from edpac.ed_network.evo_network import EvoNetwork
 from edpac.ed_network.ed_synapse import EDSynapse
 
-from edpac.config.constants import MINIMAL_TIME
 
 from edpac.config.ga_config import PopulationConfigTest, SelectionConfigTest
 from edpac.config.ga_config import PopulationConfig, PopulationConfigMulti, PopulationConfigMultiTest

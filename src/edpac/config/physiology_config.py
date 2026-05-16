@@ -40,7 +40,7 @@ class SynapseConfig(BaseConfig):
 
     INHIB_ALPHA: float = 0.1    # Coefficient apprentissage inhibiteur
 
-    #TEMPORAL_WAVE_LENGTH : int = 20 # integration of inputs in a wave
+    TEMPORAL_WAVE_LENGTH : int = 2 # integration of inputs in a wave
 
 @dataclass
 class NeuronConfig(BaseConfig):

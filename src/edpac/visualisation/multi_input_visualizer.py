@@ -18,19 +18,19 @@ class MultiInputVisualizer(InputVisualizer):
 
         print(self.nb_panels)
 
-        self.nb_input_patterns = NB_VISIO_INPUTS
+        self.nb_input_patterns = 1
         self.square_size = VISIO_SQRT_NB_NEURONS
         self.padding = 5
 
         # for each visualizer
         self.panel_height = (VISIO_SQRT_NB_NEURONS + 2*self.padding)
-        self.panel_width = (NB_VISIO_INPUTS * (VISIO_SQRT_NB_NEURONS + self.padding) + self.padding)
+        self.panel_width = (1 * (VISIO_SQRT_NB_NEURONS + self.padding) + self.padding)
 
         print(self.panel_height, self.panel_width)
 
 
-        height = self.panel_height * int(self.nb_panels // 2)
-        width = self.panel_width * 2
+        height = self.panel_height * int(self.nb_panels // 8 + 1)
+        width = self.panel_width * 8
 
         print(height, width)
 
@@ -42,33 +42,47 @@ class MultiInputVisualizer(InputVisualizer):
     #             self.input_visualizers = InputVisualizer(title = f"EDPac inputs {int(i //2)}, {i % 2} " ,scale=scale)
 
     def _return_root_coords(self, pacman_index):
-        root_x = int(pacman_index % 2)
-        root_y = int(pacman_index // 2)
+        root_x = int(pacman_index % 8)
+        root_y = int(pacman_index // 8)
         return root_x, root_y
 
-    def _draw_panel_background(self, pacman_index):
+    def _draw_panel_background(self, pacman_index, verbose=0):
 
         root_x, root_y = self._return_root_coords(pacman_index)
 
-        #print(f"Background {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+        if verbose > 0:
+            print(f"Background {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
 
         self.draw_background(root_x*self.panel_width, root_y*self.panel_height)
 
-    def _display_empty_inputs(self, pacman_index):
+    def _display_empty_inputs(self, pacman_index, verbose=0):
 
         root_x, root_y = self._return_root_coords(pacman_index)
 
-        #print(f"Background {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+        if verbose > 0:
+            print(f"Background {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
 
         self.draw_empty_inputs(root_x*self.panel_width, root_y*self.panel_height)
 
-    def _display_panel_inputs(self, sensor_values, pacman_index):
+    def _display_panel_inputs(self, sensor_values, pacman_index, verbose=0):
 
         root_x, root_y = self._return_root_coords(pacman_index)
 
-        #print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+        if verbose>0:
+            print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
 
         self.display_inputs(sensor_values, root_x*self.panel_width, root_y*self.panel_height)
+
+    def _display_color_panel_inputs(self, sensor_values, pacman_index, verbose=0):
+
+        root_x, root_y = self._return_root_coords(pacman_index)
+
+        if verbose>0:
+            print(f"Input {pacman_index}", root_x*self.panel_width, root_y*self.panel_height)
+            #print(f"{sensor_values=}")
+
+
+        self.display_color_inputs(sensor_values, root_x*self.panel_width, root_y*self.panel_height, verbose=verbose-1)
 
     def display_all_backgrounds(self):
 
@@ -85,8 +99,28 @@ class MultiInputVisualizer(InputVisualizer):
         assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
 
         for i, sensor_values in enumerate(all_sensor_values):
-            if sensor_values == -1 or sensor_values == 1 or sensor_values is None:
+
+            if sensor_values is not None:
                 ## empty sensor_values
                 self._display_empty_inputs(pacman_index = i)
             else:
                 self._display_panel_inputs(sensor_values, pacman_index = i)
+
+    def display_all_color_inputs(self, all_sensor_values, verbose=0):
+
+        self.refresh_from_background()
+
+        assert len(all_sensor_values) == self.nb_panels, f"Error with {len(all_sensor_values)=} != {self.nb_panels=}"
+
+        for i, sensor_values in enumerate(all_sensor_values):
+            if sensor_values is None:
+                # empty sensor_values
+                if verbose > 0:
+                    print(f"[display_all_color_inputs] Agent {i} _display_empty_inputs")
+                self._display_empty_inputs(pacman_index = i)
+
+            else:
+                # display_color_panel_inputs
+                if verbose > 0:
+                    print(f"[display_all_color_inputs] Agent {i}  _display_color_panel_inputs")
+                self._display_color_panel_inputs(sensor_values, pacman_index = i, verbose = verbose-1)

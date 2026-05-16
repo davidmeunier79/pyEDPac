@@ -1,33 +1,3 @@
-# import multiprocessing as mp
-# import numpy as np
-# import random
-#
-# import sys
-# sys.path.insert(0, '../src')
-#
-#
-# from edpac.config.constants import NB_VISIO_INPUTS, MINIMAL_TIME
-# from edpac.config.network_config import NetworkConfig
-# from edpac.config.ga_config import ParallelZooConfig
-#
-# from edpac.genetic_algorithm.population import ParallelZoo
-#
-# from multipac.parallel.parallel_network import worker_loop
-#
-# #from multipac.parallel.parallel_population import ParallelZoo
-#
-# from edpac.zoo.zoo import Zoo
-#
-# from edpac.zoo.chars import char_to_index, index_to_char
-#
-# # --- The Centralized ParallelZoo ---
-#
-#
-#
-
-
-
-
 
 
 import multiprocessing as mp
@@ -43,12 +13,12 @@ from edpac.config.ga_config import PopulationConfig
 
 #from edpac.genetic_algorithm.pacman_population import PacmanParallelZoo
 
-from edpac.zoo.evo_zoo import EvoZoo
+from multipac.zoo3d.evo_zoo3d import EvoZoo3D
 
 from multipac.parallel.parallel_network import worker_loop
 
 # --- The Centralized ParallelZoo ---
-class ParallelZoo(EvoZoo):
+class ParallelZoo3D(EvoZoo3D):
     def __init__(self, pop_config : PopulationConfig = None):
         self.pop_config = pop_config or PopulationConfig()
         super().__init__(self.pop_config)
@@ -61,7 +31,7 @@ class ParallelZoo(EvoZoo):
         print(f"[ParallelZoo] Deploying {self.num_agents} individuals...")
         for i in range(self.num_agents):
             parent_conn, child_conn = mp.Pipe()
-            p = mp.Process(target=worker_loop, args=(child_conn, i))
+            p = mp.Process(target=worker_loop, args=(child_conn, i, 0))
             p.start()
             self.pipes.append(parent_conn)
             self.processes.append(p)
@@ -132,38 +102,32 @@ class ParallelZoo(EvoZoo):
         pipe = self.pipes[pacman_index]
         pipe.send({'type': 'INIT_INPUTS'})
 
+    def _remove_individual(self, pacman_index, verbose=0):
 
-    def run_one_blocking_step(self, timeout=0.001, verbose=0):
-        """
-        Collects outputs from all workers without
-        locking the Master process.
-        """
+        assert 0 <= pacman_index and pacman_index < len(self.population.individuals), \
+            f"Error, wrong {pacman_index=} {len(self.population.individuals)=}"
 
-        if verbose > 0:
-            print("[ParallelZoo] All receive_poll_inputs")
+        if self.population.individuals[pacman_index] == 0:
+            if verbose > 0:
+                print(f"Pacman {pacman_index=} is already removed")
+            return
 
-        self._receive_poll_inputs(timeout=0.001, verbose=verbose-1)
+        #remove from list_indivuals
+        self.population.store_dead_individual(self.population.individuals[pacman_index])
+        self.population.individuals[pacman_index] = 0
 
-        if verbose > 0:
-            print("[ParallelZoo] All test_all_contacts")
+        #if verbose > 0:
+        print(f"Agent {pacman_index} has been removed from the population.")
 
-        self._test_all_contacts(verbose=verbose-1)
+        ## send signal to process
+        self._send_death_signal(pacman_index)
 
-        if verbose > 0:
-            print("[ParallelZoo] All send_all_outputs")
+        # increment nb_deads
+        self.stats["nb_deads"][-1] += 1
 
-        results = self._send_all_outputs(verbose=verbose-1)
 
-        if verbose > 0:
-            print("[ParallelZoo] All compute_all_stats")
-
-        self._compute_all_stats(verbose=verbose-1)
-
-        nb_added_pacgums = self.add_random_pacgums()
-        self.stats["nb_added_pacgums"][-1] += nb_added_pacgums
-
-        return results
-
+    def _process_death(self, pacman_index, verbose=0):
+        print("*Warning, _process_death should be implemented in inherited classes")
 
     def _receive_motor_outputs(self, timeout = 0.001, verbose=0):
 
@@ -202,16 +166,9 @@ class ParallelZoo(EvoZoo):
                         motor_outputs.append(pos)
                         continue
 
-                    if len(msg['data']):
-
-                        if verbose > 0:
-                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
-                        pos = msg['data']
-
-                    else:
-                        if verbose > 0:
-                            print(f"[ParallelZoo] Worker {i} process_death")
-                        self.process_death(i)
+                    if verbose > 0:
+                        print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
+                    pos = msg['data']
 
 
                 except EOFError:
@@ -220,95 +177,6 @@ class ParallelZoo(EvoZoo):
             motor_outputs.append(pos)
 
         return motor_outputs
-
-    def _receive_poll_inputs(self, timeout = 0.001, verbose=0):
-
-        for i, pipe in enumerate(self.pipes):
-            # poll(timeout) checks if data is waiting
-            # timeout=0 makes it an instantaneous check
-
-            pac = self.population.individuals[i]
-
-            if pac == 0:
-
-                if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} is empty, continue")
-                continue
-            #
-            # if verbose > 0:
-            #     print(f"[ParallelZoo] Worker {i} polling message")
-
-            if pipe.poll(timeout):
-
-                try:
-
-                    if verbose > 0:
-                        print(f"[ParallelZoo] Worker {i} receiving message")
-
-                    msg = pipe.recv()
-
-                    if verbose > 0:
-                        print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg=}")
-
-                    if msg['type'] != 'RESULT':
-                        continue
-
-                    if len(msg['data']):
-
-                        if verbose > 0:
-                            print(f"[ParallelZoo] Worker {i} integrate_motor_outputs {msg['data']=}")
-                        pos = pac.integrate_motor_outputs(msg['data'])
-
-                        if pos:
-                            if verbose > 0:
-                                print(f"[ParallelZoo] Worker {i} Move forward")
-                            self._move_forward(i)
-                    else:
-                        if verbose > 0:
-                            print(f"[ParallelZoo] Worker {i} process_death")
-                        self.process_death(i)
-                        continue
-
-                except EOFError:
-                    print(f"[ParallelZoo] Worker {i} pipe closed unexpectedly!")
-
-
-    def _send_all_outputs(self, verbose=0):
-
-        results = [None] * self.num_agents
-
-        for i, pipe in enumerate(self.pipes):
-            # poll(timeout) checks if data is waiting
-            # timeout=0 makes it an instantaneous check
-
-            pac = self.population.individuals[i]
-
-            if pac == 0:
-
-                if verbose > 0:
-                    print(f"[ParallelZoo] Worker {i} is empty, continue")
-                continue
-
-            if verbose > 0:
-                print(f"[ParallelZoo] Worker {i} integrate_visio_outputs")
-
-
-            input_percept = self.integrate_visio_outputs(pac)
-            #
-            # if verbose > 0:
-            #     print(f"[ParallelZoo] Worker {i} {input_percept=}")
-
-            if input_percept:
-                results[i] = input_percept
-
-                try:
-                    pipe.send({'type': 'TASK', 'data': input_percept})
-                except BrokenPipeError:
-                    print(f"{input_percept=}")
-
-
-
-        return results
 
     def shutdown(self):
         print("\n[ParallelZoo] Terminating simulation.")
